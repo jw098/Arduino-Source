@@ -264,16 +264,18 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
     BotBaseContext context(scope, console.botbase());
     VideoOverlaySet overlays(overlay);
 
-    VideoSnapshot screen = console.video().snapshot();
-    ItemPrinterJobsDetector detector(COLOR_RED);
-    cout << (int)detector.detect_jobs(logger, env.inference_dispatcher(), screen) << endl;
 
-
-#if 1
-    ItemPrinterMaterialDetector detector(COLOR_RED, LANGUAGE);
+#if 0
+    ItemPrinterMaterialDetector detector(COLOR_RED);
     detector.make_overlays(overlays);
     // detector.find_happiny_dust(env.inference_dispatcher(), console, context);
     cout << (int)detector.detect_material_quantity(env.inference_dispatcher(), console, context) << endl;
+#endif
+
+#if 0
+    VideoSnapshot screen = console.video().snapshot();
+    ItemPrinterJobsDetector detector(COLOR_RED);
+    cout << (int)detector.detect_jobs(logger, env.inference_dispatcher(), screen) << endl;
 #endif
 
 #if 0
