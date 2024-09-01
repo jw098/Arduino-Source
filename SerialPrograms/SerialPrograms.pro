@@ -717,9 +717,6 @@ SOURCES += \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.cpp \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOption.cpp \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionDatabase.cpp \
-    Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionReader.cpp \
-    Source/PokemonSV/Programs/AutoStory/PokemonSV_PokemonMovesReader.cpp \
-    Source/PokemonSV/Programs/AutoStory/PokemonSV_TutorialDetector.cpp \
     Source/PokemonSV/Programs/Battles/PokemonSV_BasicCatcher.cpp \
     Source/PokemonSV/Programs/Battles/PokemonSV_Battles.cpp \
     Source/PokemonSV/Programs/Battles/PokemonSV_SinglesBattler.cpp \
@@ -1807,9 +1804,6 @@ HEADERS += \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.h \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOption.h \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionDatabase.h \
-    Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionReader.h \
-    Source/PokemonSV/Programs/AutoStory/PokemonSV_PokemonMovesReader.h \
-    Source/PokemonSV/Programs/AutoStory/PokemonSV_TutorialDetector.h \
     Source/PokemonSV/Programs/Battles/PokemonSV_BasicCatcher.h \
     Source/PokemonSV/Programs/Battles/PokemonSV_Battles.h \
     Source/PokemonSV/Programs/Battles/PokemonSV_SinglesBattler.h \
