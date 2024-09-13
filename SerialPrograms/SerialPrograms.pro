@@ -715,6 +715,7 @@ SOURCES += \
     Source/PokemonSV/PokemonSV_Settings.cpp \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.cpp \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.cpp \
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.cpp \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOption.cpp \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionDatabase.cpp \
     Source/PokemonSV/Programs/Battles/PokemonSV_BasicCatcher.cpp \
@@ -1802,6 +1803,7 @@ HEADERS += \
     Source/PokemonSV/PokemonSV_Settings.h \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.h \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.h \
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.h \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOption.h \
     Source/PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionDatabase.h \
     Source/PokemonSV/Programs/Battles/PokemonSV_BasicCatcher.h \
