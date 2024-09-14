@@ -394,6 +394,9 @@ void overworld_navigation(
             break;
         default:
             console.log("overworld_navigation(): Timed out.");
+            if (stop_condition == NavigationStopCondition::STOP_TIME){
+                return;
+            }            
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
                 "overworld_navigation(): Timed out. Did not detect expected stop condition.",

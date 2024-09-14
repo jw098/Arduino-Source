@@ -599,12 +599,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
 
     // press_Bs_to_back_to_overworld(env.program_info(), env.console, context, 7);
     // walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10);
-
-    // realign_player_from_landmark(
-    //     env.program_info(), env.console, context, 
-    //     {ZoomChange::ZOOM_IN, 0, 128, 100},
-    //     {ZoomChange::KEEP_ZOOM, 255, 50, 100}
-    // );
+   
     // context.wait_for(Milliseconds(1000000));
 
     if (ENABLE_TEST_REALIGN){
@@ -616,9 +611,14 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
 
     if (ENABLE_TEST_OVERWORLD_MOVE){
         // walk_forward_while_clear_front_path(env.program_info(), env.console, context, FORWARD_TICKS);
+
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);
+
+        // overworld_navigation(env.program_info(), env.console, context, 
+        //     NavigationStopCondition::STOP_TIME, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+        //     128, 0, 25, 10, false);         
         context.wait_for(Milliseconds(1000000));
     }
 

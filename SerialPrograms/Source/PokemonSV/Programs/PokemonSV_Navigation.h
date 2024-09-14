@@ -117,6 +117,7 @@ void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseCont
 enum class NavigationStopCondition{
     STOP_DIALOG,
     STOP_MARKER,
+    STOP_TIME,
 };
 
 enum class NavigationMovementMode{

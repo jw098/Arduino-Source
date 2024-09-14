@@ -56,17 +56,17 @@ void checkpoint_26(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
 
-        // fly_to_overlapping_flypoint(env.program_info(), env.console, context);
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);
 
         // align for long stretch 1, part 1
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 80, 0, 70);
+            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 75, 0, 50);
         });
 
         overworld_navigation(env.program_info(), env.console, context, 
@@ -76,7 +76,25 @@ void checkpoint_26(
         // align for long stretch 1, part 2
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 120, 0, 55);
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 128, 255, 40},
+                {ZoomChange::KEEP_ZOOM, 80, 0, 75}
+            );            
+        });
+        
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 60, 10, false);            
+
+        // align for long stretch 1, part 3
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 128, 255, 60},
+                {ZoomChange::KEEP_ZOOM, 95, 0, 115}
+            );            
         });
         
         overworld_navigation(env.program_info(), env.console, context, 
@@ -86,8 +104,11 @@ void checkpoint_26(
         // align for long stretch 2
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 70, 255, 100);
-
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 128, 255, 100},
+                {ZoomChange::KEEP_ZOOM, 0, 105, 65}
+            );              
         });
 
         overworld_navigation(env.program_info(), env.console, context, 
@@ -97,7 +118,11 @@ void checkpoint_26(
         // align for long stretch 3, part 1
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 120, 0, 75);
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 255, 128, 65},
+                {ZoomChange::KEEP_ZOOM, 20, 0, 110}
+            ); 
 
         });
         
@@ -105,10 +130,24 @@ void checkpoint_26(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);
 
-        // align for long stretch 3, part 2. // todo: consider realign based on pokecenter.
+        // align for long stretch 3, part 2 
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            // realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 35, 0, 85);
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 110, 110},
+                {ZoomChange::KEEP_ZOOM, 255, 128, 115}
+            );
+
+        });
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 60, 10, false);                
+
+        // align for long stretch 3, part 3 
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
             realign_player_from_landmark(
                 env.program_info(), env.console, context, 
                 {ZoomChange::ZOOM_IN, 0, 128, 100},
@@ -124,15 +163,150 @@ void checkpoint_26(
         // align to cross bridge
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 105, 30);
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 128, 90},
+                {ZoomChange::KEEP_ZOOM, 255, 35, 67}
+            );
 
         });
 
+
+        // attempt to cross bridge. If fall into water, go back to start position (just before bridge) and try again
+        WallClock start_to_cross_bridge = current_time();
+        while (true){
+            if (current_time() - start_to_cross_bridge > std::chrono::minutes(3)){
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, env.console,
+                    "checkpoint_26(): Failed to cross bridge after 3 minutes.",
+                    true
+                );
+            }        
+
+            try {
+                overworld_navigation(env.program_info(), env.console, context, 
+                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+                    128, 0, 30, 30, false);         
+
+                break;
+
+            }catch (...){ // try again if fall into water
+                pbf_mash_button(context, BUTTON_A, 250);
+
+                // walk back to start position before bridge
+                do_action_and_monitor_for_battles(env, env.console, context,
+                [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+                    realign_player_from_landmark(
+                        env.program_info(), env.console, context, 
+                        {ZoomChange::ZOOM_IN, 255, 255, 180},
+                        {ZoomChange::KEEP_ZOOM, 30, 0, 175}
+                    );
+
+                });    
+
+                overworld_navigation(env.program_info(), env.console, context, 
+                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+                    128, 0, 30, 30, false);          
+
+
+                // align to cross bridge
+                do_action_and_monitor_for_battles(env, env.console, context,
+                [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+                    realign_player_from_landmark(
+                        env.program_info(), env.console, context, 
+                        {ZoomChange::ZOOM_IN, 0, 128, 90},
+                        {ZoomChange::KEEP_ZOOM, 255, 35, 67}
+                    );
+
+                });             
+
+            }
+        }
+
+        confirm_no_overlapping_flypoint(env.program_info(), env.console, context);
+
+        env.console.log("Successfully crossed the bridge.");
+
+        // align for post-bridge section 1
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 150, 60},
+                {ZoomChange::KEEP_ZOOM, 255, 60, 50} // {ZoomChange::KEEP_ZOOM, 255, 60, 50}
+            );
+
+        });    
+
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 30, false);    
+            128, 0, 30, 10, false);   
 
-                       
+        // align for post-bridge section 2
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 150, 60},
+                {ZoomChange::KEEP_ZOOM, 255, 105, 50}
+            );
+
+        });    
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 30, 10, false);        
+
+        // align for post-bridge section 3
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 128, 50},
+                {ZoomChange::KEEP_ZOOM, 255, 90, 40}
+            );
+
+        });          
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 30, 10, false);        
+
+        // align for post-bridge section 4
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 128, 50},
+                {ZoomChange::KEEP_ZOOM, 255, 65, 35}
+            );
+
+        });    
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 30, 10, false);     
+
+
+
+        // align for post-bridge section 5. set marker to pokecenter.
+        do_action_and_monitor_for_battles(env, env.console, context,
+        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 128, 50},
+                {ZoomChange::KEEP_ZOOM, 128, 128, 0}
+            );
+
+        });    
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 30, 10, false);    
+
+
+
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);
               
        
         break;

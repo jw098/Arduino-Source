@@ -17,7 +17,7 @@ namespace PokemonSV{
 
 
 // start: At Cortondo West Pokecenter.
-// end: 
+// end: At West Province Area One Central Pokecenter
 void checkpoint_26(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 // start: 
