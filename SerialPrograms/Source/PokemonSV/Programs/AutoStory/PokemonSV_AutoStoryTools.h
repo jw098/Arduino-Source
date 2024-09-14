@@ -146,7 +146,38 @@ void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& contex
 
 void checkpoint_save(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);
 
-  
+enum class ZoomChange{
+    ZOOM_IN,
+    ZOOM_IN_TWICE,
+    ZOOM_OUT,
+    ZOOM_OUT_TWICE,
+    KEEP_ZOOM,
+};
+
+struct MoveCursor{
+    ZoomChange zoom_change;
+    uint8_t move_x;
+    uint8_t move_y;
+    uint8_t move_duration;
+};
+
+// place a marker on the map, not relative to the current player position, but based on a fixed landmark, such as a pokecenter
+// How this works:
+//  - cursor is moved to a point near the landmark, as per `move_cursor_near_landmark`
+//  - move the cursor onto the landmark using `detect_closest_pokecenter_and_move_map_cursor_there`.
+//  - confirm that the pokecenter is centered within cursor. If not, close map app, and re-try.
+//  - cursor is moved to target location, as per `move_cursor_to_target`. A marker is placed down here.
+void realign_player_from_landmark(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context,
+    MoveCursor move_cursor_near_landmark,
+    MoveCursor move_cursor_to_target
+);
+
+// confirm that the cursor is centered on the pokecenter, within the map app
+// else throw exception
+void confirm_cursor_centered_on_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
 
 
 }

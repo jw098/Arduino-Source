@@ -29,6 +29,7 @@
 #include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
 #include "PokemonSV/Inference/PokemonSV_PokemonMovesReader.h"
 #include "PokemonSV/Inference/Map/PokemonSV_DestinationMarkerDetector.h"
+#include "PokemonSV/Inference/Map/PokemonSV_MapPokeCenterIconDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
 
 //#include <iostream>
@@ -678,8 +679,121 @@ void checkpoint_save(SingleSwitchProgramEnvironment& env, BotBaseContext& contex
 }
 
 
+void realign_player_from_landmark(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context,
+    MoveCursor move_cursor_near_landmark,
+    MoveCursor move_cursor_to_target
+){
+
+    console.log("Realigning player direction, using a landmark...");
+    WallClock start = current_time();
+
+    while (true){
+        if (current_time() - start > std::chrono::minutes(3)){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "realign_player_from_landmark(): Failed to realign player after 3 minutes.",
+                true
+            );
+        }
+
+        try {
+            open_map_from_overworld(info, console, context);
+
+            // move cursor near landmark (pokecenter)
+            switch(move_cursor_near_landmark.zoom_change){
+            case ZoomChange::ZOOM_IN:
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                break;
+            case ZoomChange::ZOOM_IN_TWICE:
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                break;                
+            case ZoomChange::ZOOM_OUT:
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                break;    
+            case ZoomChange::ZOOM_OUT_TWICE:
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                break;                  
+            case ZoomChange::KEEP_ZOOM:
+                break;
+            }
+            uint8_t move_x1 = move_cursor_near_landmark.move_x;
+            uint8_t move_y1 = move_cursor_near_landmark.move_y;
+            uint8_t move_duration1 = move_cursor_near_landmark.move_duration;
+            pbf_move_left_joystick(context, move_x1, move_y1, move_duration1, 1 * TICKS_PER_SECOND);
+
+            // move cursor to pokecenter
+            if (!detect_closest_pokecenter_and_move_map_cursor_there(info, console, context, 0.29)){
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "realign_player_from_landmark(): No visible pokecenter found on map.",
+                    true
+                );         
+            }
+
+            confirm_cursor_centered_on_pokecenter(info, console, context);
+
+            // move cursor from landmark to target
+            switch(move_cursor_to_target.zoom_change){
+            case ZoomChange::ZOOM_IN:
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                break;
+            case ZoomChange::ZOOM_IN_TWICE:
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                break;                
+            case ZoomChange::ZOOM_OUT:
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                break;    
+            case ZoomChange::ZOOM_OUT_TWICE:
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                break;                  
+            case ZoomChange::KEEP_ZOOM:
+                break;
+            }
+            uint8_t move_x2 = move_cursor_to_target.move_x;
+            uint8_t move_y2 = move_cursor_to_target.move_y;
+            uint8_t move_duration2 = move_cursor_to_target.move_duration;
+            pbf_move_left_joystick(context, move_x2, move_y2, move_duration2, 1 * TICKS_PER_SECOND);
+
+            // place down marker
+            pbf_press_button(context, BUTTON_A, 20, 105);
+            pbf_press_button(context, BUTTON_A, 20, 105);
+            leave_phone_to_overworld(info, console, context);     
+
+            return;      
+
+        }catch (...){
+            // reset to overworld if failed, and re-try
+            pbf_press_button(context, BUTTON_B, 20, 105);
+            press_Bs_to_back_to_overworld(info, console, context, 7);
+        }        
+    }
+    
+
+}
 
 
+void confirm_cursor_centered_on_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+    context.wait_for_all_requests();
+    context.wait_for(Milliseconds(500));
+    ImageFloatBox center_cursor{0.484, 0.472, 0.030, 0.053};
+    MapPokeCenterIconDetector pokecenter(COLOR_RED, center_cursor);
+    if (!pokecenter.detect(console.video().snapshot())){
+        throw OperationFailedException(
+            ErrorReport::SEND_ERROR_REPORT, console,
+            "confirm_cursor_centered_on_pokecenter(): Cursor is not centered on a pokecenter.",
+            true
+        );            
+    }
+
+    console.log("Confirmed that the cursor is centered on a pokecenter.");
+}
 
 
 }

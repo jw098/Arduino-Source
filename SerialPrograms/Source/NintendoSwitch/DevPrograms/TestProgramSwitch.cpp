@@ -125,6 +125,7 @@
 #include "PokemonSV/Programs/AutoStory/PokemonSV_MenuOptionDatabase.h"
 #include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
 #include "PokemonSV/Inference/PokemonSV_PokemonMovesReader.h"
+#include "PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.h"
 
 
 #include <QPixmap>
@@ -272,6 +273,10 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 //    PokemonLA::ButtonDetector detector(logger, PokemonLA::ButtonType::ButtonA,);
 
 #if 1
+    VideoSnapshot image = feed.snapshot();
+#endif
+
+#if 0
 
     VideoSnapshot image = feed.snapshot();
     DirectionDetector detector;

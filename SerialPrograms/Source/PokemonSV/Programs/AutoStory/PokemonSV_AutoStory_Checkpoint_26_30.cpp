@@ -108,7 +108,12 @@ void checkpoint_26(
         // align for long stretch 3, part 2. // todo: consider realign based on pokecenter.
         do_action_and_monitor_for_battles(env, env.console, context,
         [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 35, 0, 85);
+            // realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 35, 0, 85);
+            realign_player_from_landmark(
+                env.program_info(), env.console, context, 
+                {ZoomChange::ZOOM_IN, 0, 128, 100},
+                {ZoomChange::KEEP_ZOOM, 255, 70, 90}
+            );
 
         });
 
