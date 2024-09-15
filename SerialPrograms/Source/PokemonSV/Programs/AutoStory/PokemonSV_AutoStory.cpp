@@ -597,10 +597,6 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
     // Connect controller
     pbf_press_button(context, BUTTON_L, 20, 20);
 
-    // press_Bs_to_back_to_overworld(env.program_info(), env.console, context, 7);
-    // walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10);
-   
-    // context.wait_for(Milliseconds(1000000));
 
     if (ENABLE_TEST_REALIGN){
         // clear realign marker
@@ -631,6 +627,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
     if (CHANGE_SETTINGS){
         change_settings_prior_to_autostory(env, context, STARTPOINT, LANGUAGE);
     }
+
+
+
+    // context.wait_for(Milliseconds(1000000));
+
 
     if (ENABLE_TEST_CHECKPOINTS){
         // test individual checkpoints

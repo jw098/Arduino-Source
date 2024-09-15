@@ -66,7 +66,7 @@ void checkpoint_26(
         // align for long stretch 1, part 1
         do_action_and_monitor_for_battles(env.program_info(), env.console, context,
         [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 75, 0, 50);
+            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 70, 0, 60);
         });
 
         overworld_navigation(env.program_info(), env.console, context, 
@@ -111,7 +111,7 @@ void checkpoint_26(
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 255, 128, 65},
-            {ZoomChange::KEEP_ZOOM, 20, 0, 110}
+            {ZoomChange::KEEP_ZOOM, 0, 50, 87}
         ); 
 
         
@@ -119,10 +119,22 @@ void checkpoint_26(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);
 
-        // align for long stretch 3, part 2 
+        // align for long stretch 3, part 2
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
-            {ZoomChange::ZOOM_IN, 0, 110, 110},
+            {ZoomChange::ZOOM_IN, 255, 160, 65},
+            {ZoomChange::KEEP_ZOOM, 20, 0, 110}
+        ); 
+
+        
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            128, 0, 60, 10, false);            
+
+        // align for long stretch 3, part 3
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 60, 110},
             {ZoomChange::KEEP_ZOOM, 255, 128, 115}
         );
 
@@ -131,11 +143,11 @@ void checkpoint_26(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);                
 
-        // align for long stretch 3, part 3 
+        // align for long stretch 3, part 4
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 0, 128, 100},
-            {ZoomChange::KEEP_ZOOM, 255, 70, 90}
+            {ZoomChange::KEEP_ZOOM, 255, 67, 90} //{ZoomChange::KEEP_ZOOM, 255, 70, 90}
         );
 
 
@@ -177,7 +189,7 @@ void checkpoint_26(
                 realign_player_from_landmark(
                     env.program_info(), env.console, context, 
                     {ZoomChange::ZOOM_IN, 255, 255, 180},
-                    {ZoomChange::KEEP_ZOOM, 30, 0, 175}
+                    {ZoomChange::KEEP_ZOOM, 33, 0, 180}
                 );
 
                 overworld_navigation(env.program_info(), env.console, context, 
@@ -242,7 +254,7 @@ void checkpoint_26(
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 0, 128, 50},
-            {ZoomChange::KEEP_ZOOM, 255, 65, 35}
+            {ZoomChange::KEEP_ZOOM, 255, 55, 37}
         );
 
 

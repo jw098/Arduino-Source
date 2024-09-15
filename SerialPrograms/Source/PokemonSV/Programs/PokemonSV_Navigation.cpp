@@ -778,7 +778,7 @@ void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseCont
         leave_phone_to_overworld(info, console, context);
         break;
     case PlayerRealignMode::REALIGN_OLD_MARKER:
-        open_map_from_overworld(info, console, context);
+        open_map_from_overworld(info, console, context, false, true);
         leave_phone_to_overworld(info, console, context);
         pbf_press_button(context, BUTTON_L, 20, 105);
         break;

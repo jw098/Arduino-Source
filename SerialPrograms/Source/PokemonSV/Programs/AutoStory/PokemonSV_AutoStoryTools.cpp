@@ -696,7 +696,7 @@ void realign_player_from_landmark(
         }
 
         try {
-            open_map_from_overworld(info, console, context);
+            open_map_from_overworld(info, console, context, false, true);
 
             // move cursor near landmark (pokecenter)
             switch(move_cursor_near_landmark.zoom_change){
