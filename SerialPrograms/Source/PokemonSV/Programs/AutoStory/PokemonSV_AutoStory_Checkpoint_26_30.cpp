@@ -74,102 +74,82 @@ void checkpoint_26(
             128, 0, 60, 10, false);
 
         // align for long stretch 1, part 2
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 128, 255, 40},
-                {ZoomChange::KEEP_ZOOM, 80, 0, 75}
-            );            
-        });
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 128, 255, 40},
+            {ZoomChange::KEEP_ZOOM, 80, 0, 75}
+        );        
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);            
 
         // align for long stretch 1, part 3
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 128, 255, 60},
-                {ZoomChange::KEEP_ZOOM, 95, 0, 115}
-            );
-        });
+ 
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 128, 255, 60},
+            {ZoomChange::KEEP_ZOOM, 95, 0, 115}
+        );
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);
 
         // align for long stretch 2
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 128, 255, 100},
-                {ZoomChange::KEEP_ZOOM, 0, 105, 65}
-            );              
-        });
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 128, 255, 100},
+            {ZoomChange::KEEP_ZOOM, 0, 105, 65}
+        );              
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);
 
         // align for long stretch 3, part 1
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 255, 128, 65},
-                {ZoomChange::KEEP_ZOOM, 20, 0, 110}
-            ); 
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 128, 65},
+            {ZoomChange::KEEP_ZOOM, 20, 0, 110}
+        ); 
 
-        });
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);
 
         // align for long stretch 3, part 2 
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 110, 110},
-                {ZoomChange::KEEP_ZOOM, 255, 128, 115}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 110, 110},
+            {ZoomChange::KEEP_ZOOM, 255, 128, 115}
+        );
 
-        });
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);                
 
         // align for long stretch 3, part 3 
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 128, 100},
-                {ZoomChange::KEEP_ZOOM, 255, 70, 90}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 128, 100},
+            {ZoomChange::KEEP_ZOOM, 255, 70, 90}
+        );
 
-        });
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 60, 10, false);        
 
         // align to cross bridge
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 128, 90},
-                {ZoomChange::KEEP_ZOOM, 255, 35, 67}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 128, 90},
+            {ZoomChange::KEEP_ZOOM, 255, 35, 67}
+        );
 
-        });
 
 
         // attempt to cross bridge. If fall into water, go back to start position (just before bridge) and try again
@@ -194,15 +174,11 @@ void checkpoint_26(
                 pbf_mash_button(context, BUTTON_A, 250);
 
                 // walk back to start position before bridge
-                do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-                [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-                    realign_player_from_landmark(
-                        env.program_info(), env.console, context, 
-                        {ZoomChange::ZOOM_IN, 255, 255, 180},
-                        {ZoomChange::KEEP_ZOOM, 30, 0, 175}
-                    );
-
-                });    
+                realign_player_from_landmark(
+                    env.program_info(), env.console, context, 
+                    {ZoomChange::ZOOM_IN, 255, 255, 180},
+                    {ZoomChange::KEEP_ZOOM, 30, 0, 175}
+                );
 
                 overworld_navigation(env.program_info(), env.console, context, 
                     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
@@ -210,15 +186,12 @@ void checkpoint_26(
 
 
                 // align to cross bridge
-                do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-                [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-                    realign_player_from_landmark(
-                        env.program_info(), env.console, context, 
-                        {ZoomChange::ZOOM_IN, 0, 128, 90},
-                        {ZoomChange::KEEP_ZOOM, 255, 35, 67}
-                    );
+                realign_player_from_landmark(
+                    env.program_info(), env.console, context, 
+                    {ZoomChange::ZOOM_IN, 0, 128, 90},
+                    {ZoomChange::KEEP_ZOOM, 255, 35, 67}
+                );
 
-                });             
 
             }
         }
@@ -230,60 +203,48 @@ void checkpoint_26(
         env.console.log("Successfully crossed the bridge.");
 
         // align for post-bridge section 1
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 150, 60},
-                {ZoomChange::KEEP_ZOOM, 255, 60, 50} // {ZoomChange::KEEP_ZOOM, 255, 60, 50}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 150, 60},
+            {ZoomChange::KEEP_ZOOM, 255, 60, 50} // {ZoomChange::KEEP_ZOOM, 255, 60, 50}
+        );
 
-        });    
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 30, 10, false);   
 
         // align for post-bridge section 2
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 150, 60},
-                {ZoomChange::KEEP_ZOOM, 255, 105, 50}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 150, 60},
+            {ZoomChange::KEEP_ZOOM, 255, 105, 50}
+        );
 
-        });    
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 30, 10, false);        
 
         // align for post-bridge section 3
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 128, 50},
-                {ZoomChange::KEEP_ZOOM, 255, 90, 40}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 128, 50},
+            {ZoomChange::KEEP_ZOOM, 255, 90, 40}
+        );
 
-        });          
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
             128, 0, 30, 10, false);        
 
         // align for post-bridge section 4
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 128, 50},
-                {ZoomChange::KEEP_ZOOM, 255, 65, 35}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 128, 50},
+            {ZoomChange::KEEP_ZOOM, 255, 65, 35}
+        );
 
-        });    
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
@@ -292,15 +253,12 @@ void checkpoint_26(
 
 
         // align for post-bridge section 5. set marker to pokecenter.
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player_from_landmark(
-                env.program_info(), env.console, context, 
-                {ZoomChange::ZOOM_IN, 0, 128, 50},
-                {ZoomChange::KEEP_ZOOM, 128, 128, 0}
-            );
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 128, 50},
+            {ZoomChange::KEEP_ZOOM, 128, 128, 0}
+        );
 
-        });    
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
