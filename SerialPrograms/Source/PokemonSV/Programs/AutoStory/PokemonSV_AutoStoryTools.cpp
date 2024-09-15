@@ -291,6 +291,36 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
     }
 }
 
+bool confirm_marker_present(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context
+){
+    while (true){
+        DestinationMarkerWatcher marker(COLOR_RED, {0.815, 0.645, 0.180, 0.320}, true);
+        NormalBattleMenuWatcher battle(COLOR_BLUE);
+
+        int ret = wait_until(
+            console, context, 
+            std::chrono::seconds(5),
+            {marker, battle}
+        );
+        switch (ret){
+        case 0: // marker
+            console.log("Confirmed that marker is still present.");
+            return true;
+        case 1: // battle
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+            realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+            break;
+        default:
+            console.log("Destination marker not detected.");
+            return false;
+        }   
+    }
+
+}
+
 void overworld_navigation(
     const ProgramInfo& info, 
     ConsoleHandle& console, 

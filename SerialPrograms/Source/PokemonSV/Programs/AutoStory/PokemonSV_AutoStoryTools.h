@@ -113,6 +113,14 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
     std::vector<ClearDialogCallback> optional_callbacks = {}
 );
 
+
+// return true if the destination marker is present within the minimap area
+bool confirm_marker_present(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context
+);
+
 // move character with ssf left joystick, as per given x, y, until 
 // stop_condition is met (e.g. Dialog detected). 
 // throw exception if reaches timeout before detecting stop condition
