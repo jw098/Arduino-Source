@@ -59,14 +59,14 @@ void checkpoint_11(
         } 
 
         context.wait_for_all_requests();
-        do_action_and_monitor_for_battles(env, env.console, context,
-            [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){
-                realign_player(env.program_info(), console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 100, 210, 100);
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                realign_player(info, console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 100, 210, 100);
                 pbf_move_left_joystick(context, 128, 0, 187, 20);
                 pbf_move_left_joystick(context, 0, 128, 30, 8 * TICKS_PER_SECOND);
                 pbf_move_left_joystick(context, 128, 0, 1 * TICKS_PER_SECOND, 2 * TICKS_PER_SECOND);
 
-                realign_player(env.program_info(), console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 100, 60, 200);                
+                realign_player(info, console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 100, 60, 200);                
             }
         );     
 
@@ -107,8 +107,8 @@ void checkpoint_12(
     bool first_attempt = true;
     while (true){
     try{
-        do_action_and_monitor_for_battles(env, env.console, context,
-        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){        
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){        
         
             if (first_attempt){
                 checkpoint_save(env, context, notif_status_update);
@@ -117,33 +117,33 @@ void checkpoint_12(
 
             context.wait_for_all_requests();
             
-            fly_to_overlapping_flypoint(env.program_info(), env.console, context);
+            fly_to_overlapping_flypoint(info, env.console, context);
 
             // re-orient camera
             pbf_press_button(context, BUTTON_L, 20, 20);
 
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 35);
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 128, 0, 100);
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 500);
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 100, 0, 120);
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 2000);
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 0, 120);
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 1250);
+            walk_forward_while_clear_front_path(info, env.console, context, 35);
+            realign_player(info, env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 128, 0, 100);
+            walk_forward_while_clear_front_path(info, env.console, context, 500);
+            realign_player(info, env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 100, 0, 120);
+            walk_forward_while_clear_front_path(info, env.console, context, 2000);
+            realign_player(info, env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 0, 120);
+            walk_forward_while_clear_front_path(info, env.console, context, 1250);
             
             // check we're not still at the Los Platos Pokecenter.
-            confirm_no_overlapping_flypoint(env.program_info(), env.console, context);
+            confirm_no_overlapping_flypoint(info, env.console, context);
 
             // not stuck at Los Platos Pokecenter
             pbf_press_button(context, BUTTON_B, 20, 1 * TICKS_PER_SECOND);
             pbf_press_button(context, BUTTON_B, 20, 1 * TICKS_PER_SECOND);
-            press_Bs_to_back_to_overworld(env.program_info(), env.console, context, 7);
+            press_Bs_to_back_to_overworld(info, env.console, context, 7);
 
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 80, 0, 100);
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 1500);
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 30, 0, 50);
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 1000);
+            realign_player(info, env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 80, 0, 100);
+            walk_forward_while_clear_front_path(info, env.console, context, 1500);
+            realign_player(info, env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 30, 0, 50);
+            walk_forward_while_clear_front_path(info, env.console, context, 1000);
 
-            heal_at_pokecenter(env.program_info(), env.console, context);
+            heal_at_pokecenter(info, env.console, context);
    
         }  
         );
@@ -173,20 +173,20 @@ void checkpoint_13(
     bool first_attempt = true;
     while (true){
     try{
-        do_action_and_monitor_for_battles(env, env.console, context,
-        [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){        
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){        
         
             if (first_attempt){
                 checkpoint_save(env, context, notif_status_update);
                 first_attempt = false;
             } 
 
-            fly_to_overlapping_flypoint(env.program_info(), env.console, context);
+            fly_to_overlapping_flypoint(info, env.console, context);
 
             context.wait_for_all_requests();
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 80, 50);
-            walk_forward_while_clear_front_path(env.program_info(), env.console, context, 500);
-            walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 30);
+            realign_player(info, env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 80, 50);
+            walk_forward_while_clear_front_path(info, env.console, context, 500);
+            walk_forward_until_dialog(info, env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 30);
         });
 
         env.console.log("clear_dialog: Talk with Nemona at Mesagoza gate. Stop when detect battle.");

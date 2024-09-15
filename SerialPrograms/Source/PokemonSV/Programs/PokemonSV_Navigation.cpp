@@ -102,7 +102,8 @@ void open_map_from_overworld(
     const ProgramInfo& info,
     ConsoleHandle& console, 
     BotBaseContext& context,
-    bool clear_tutorial
+    bool clear_tutorial,
+    bool handle_battle
 ){
     {
         OverworldWatcher overworld(console, COLOR_CYAN);

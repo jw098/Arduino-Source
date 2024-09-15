@@ -111,11 +111,11 @@ void swap_starter_moves(const ProgramInfo& info, ConsoleHandle& console, BotBase
 
 // run the given `action`. if detect a battle, stop the action, and throw exception
 void do_action_and_monitor_for_battles(
-    SingleSwitchProgramEnvironment& env, 
+    const ProgramInfo& info, 
     ConsoleHandle& console,
     BotBaseContext& context,
     std::function<
-        void(SingleSwitchProgramEnvironment& env,
+        void(const ProgramInfo& info, 
         ConsoleHandle& console,
         BotBaseContext& context)
     >&& action

@@ -237,8 +237,8 @@ void checkpoint_08(
         context.wait_for_all_requests();
         env.console.log("Enter cave");
         env.console.overlay().add_log("Enter cave", COLOR_WHITE);
-        do_action_and_monitor_for_battles(env, env.console, context,
-            [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
                 pbf_move_left_joystick(context, 128, 20, 10 * TICKS_PER_SECOND, 20);
                 pbf_move_left_joystick(context, 150, 20, 1 * TICKS_PER_SECOND, 20);
                 pbf_move_left_joystick(context, 128, 20, 8 * TICKS_PER_SECOND, 20);
@@ -252,8 +252,8 @@ void checkpoint_08(
         env.console.log("clear_dialog: Talk to Nemona yelling down, while you're down in the cave.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 10, {ClearDialogCallback::PROMPT_DIALOG});
 
-        do_action_and_monitor_for_battles(env, env.console, context,
-            [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
                 // Legendary rock break
                 context.wait_for_all_requests();
                 console.log("Rock break");
@@ -364,8 +364,8 @@ void checkpoint_10(
         context.wait_for_all_requests();
         env.console.log("Lighthouse view");
         env.console.overlay().add_log("Lighthouse view", COLOR_WHITE);
-        do_action_and_monitor_for_battles(env, env.console, context,
-            [&](SingleSwitchProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context){
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
                 realign_player(env.program_info(), console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 230, 110, 100);
                 pbf_move_left_joystick(context, 128, 0, 6 * TICKS_PER_SECOND, 8 * TICKS_PER_SECOND);
                 pbf_move_left_joystick(context, 128, 0, 4 * TICKS_PER_SECOND, 20);

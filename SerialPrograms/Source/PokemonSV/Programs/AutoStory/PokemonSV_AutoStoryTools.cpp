@@ -549,11 +549,11 @@ void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& contex
 }
 
 void do_action_and_monitor_for_battles(
-    SingleSwitchProgramEnvironment& env,
+    const ProgramInfo& info, 
     ConsoleHandle& console, 
     BotBaseContext& context,
     std::function<
-        void(SingleSwitchProgramEnvironment& env,
+        void(const ProgramInfo& info, 
         ConsoleHandle& console,
         BotBaseContext& context)
     >&& action
@@ -563,7 +563,7 @@ void do_action_and_monitor_for_battles(
         console, context,
         [&](BotBaseContext& context){
             context.wait_for_all_requests();
-            action(env, console, context);
+            action(info, console, context);
         },
         {battle_menu}
     );
@@ -574,13 +574,6 @@ void do_action_and_monitor_for_battles(
             true
         );
 
-        // console.log("Detected battle. Now running away.", COLOR_PURPLE);
-        // console.overlay().add_log("Detected battle. Now running away.");
-        // try{
-        //     run_from_battle(env.program_info(), console, context);
-        // }catch (OperationFailedException& e){
-        //     throw FatalProgramException(std::move(e));
-        // }
     }
 }
 
@@ -767,7 +760,7 @@ void realign_player_from_landmark(
             // place down marker
             pbf_press_button(context, BUTTON_A, 20, 105);
             pbf_press_button(context, BUTTON_A, 20, 105);
-            leave_phone_to_overworld(info, console, context);     
+            leave_phone_to_overworld(info, console, context);
 
             return;      
 
