@@ -13,6 +13,7 @@
 #include <string>
 #include <functional>
 #include "PokemonSV/Inference/PokemonSV_MainMenuDetector.h"
+#include "PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.h"
 
 namespace PokemonAutomation{
     struct ProgramInfo;
@@ -89,11 +90,6 @@ void jump_off_wall_until_map_open(const ProgramInfo& info, ConsoleHandle& consol
 
 void reset_to_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
 
-enum class PlayerRealignMode{
-    REALIGN_NEW_MARKER,
-    REALIGN_OLD_MARKER,
-    REALIGN_NO_MARKER,
-};
 
 // align player orientation based on the alignment mode
 // if battle detected, propagates UnexpectedBattleException to the calling function
@@ -115,17 +111,6 @@ void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseCont
     uint8_t move_x = 0, uint8_t move_y = 0, uint8_t move_duration = 0
 );
 
-enum class NavigationStopCondition{
-    STOP_DIALOG,
-    STOP_MARKER,
-    STOP_TIME,
-};
-
-enum class NavigationMovementMode{
-    DIRECTIONAL_ONLY,
-    DIRECTIONAL_SPAM_A,
-    CLEAR_WITH_LETS_GO,
-};
 
 
 void walk_forward_until_dialog(

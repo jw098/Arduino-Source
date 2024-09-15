@@ -8,7 +8,9 @@
 #define PokemonAutomation_PokemonSV_AutoStoryTools_H
 
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
-#include "PokemonSV/Programs/PokemonSV_Navigation.h"
+#include "CommonFramework/Tools/StatsTracking.h"
+#include "CommonFramework/Language.h"
+// #include "PokemonSV/Programs/PokemonSV_Navigation.h"
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
@@ -70,6 +72,24 @@ enum class StarterChoice{
     SPRIGATITO,
     FUECOCO,
     QUAXLY,
+};
+
+enum class PlayerRealignMode{
+    REALIGN_NEW_MARKER,
+    REALIGN_OLD_MARKER,
+    REALIGN_NO_MARKER,
+};
+
+enum class NavigationStopCondition{
+    STOP_DIALOG,
+    STOP_MARKER,
+    STOP_TIME,
+};
+
+enum class NavigationMovementMode{
+    DIRECTIONAL_ONLY,
+    DIRECTIONAL_SPAM_A,
+    CLEAR_WITH_LETS_GO,
 };
 
 // spam A button to choose the first move
