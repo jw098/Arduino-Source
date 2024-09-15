@@ -71,7 +71,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);
+            128, 0, 20, 10, false);
 
         // align for long stretch 1, part 2
         realign_player_from_landmark(
@@ -82,7 +82,7 @@ void checkpoint_26(
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);            
+            128, 0, 10, 10, false);            
 
         // align for long stretch 1, part 3
  
@@ -94,7 +94,7 @@ void checkpoint_26(
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);
+            128, 0, 30, 10, false);
 
         // align for long stretch 2
         realign_player_from_landmark(
@@ -105,7 +105,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);
+            128, 0, 50, 10, false);
 
         // align for long stretch 3, part 1
         realign_player_from_landmark(
@@ -117,7 +117,7 @@ void checkpoint_26(
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);
+            128, 0, 20, 10, false);
 
         // align for long stretch 3, part 2
         realign_player_from_landmark(
@@ -129,7 +129,7 @@ void checkpoint_26(
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);            
+            128, 0, 30, 10, false);            
 
         // align for long stretch 3, part 3
         realign_player_from_landmark(
@@ -141,7 +141,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);                
+            128, 0, 30, 10, false);                
 
         // align for long stretch 3, part 4
         realign_player_from_landmark(
@@ -153,7 +153,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);        
+            128, 0, 40, 10, false);        
 
         // align to cross bridge
         realign_player_from_landmark(
@@ -178,7 +178,7 @@ void checkpoint_26(
             try {
                 overworld_navigation(env.program_info(), env.console, context, 
                     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-                    128, 0, 30, 30, false);         
+                    128, 0, 20, 20, false);         
 
                 break;
 
@@ -194,7 +194,7 @@ void checkpoint_26(
 
                 overworld_navigation(env.program_info(), env.console, context, 
                     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-                    128, 0, 30, 30, false);          
+                    128, 0, 20, 20, false);          
 
 
                 // align to cross bridge
@@ -224,7 +224,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 10, false);   
+            128, 0, 20, 10, false);   
 
         // align for post-bridge section 2
         realign_player_from_landmark(
@@ -236,9 +236,9 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 10, false);        
+            128, 0, 10, 10, false);        
 
-        // align for post-bridge section 3
+        // align for post-bridge section 3. move up towards tree
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 0, 128, 50},
@@ -248,7 +248,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 10, false);        
+            128, 0, 10, 10, false);        
 
         // align for post-bridge section 4
         realign_player_from_landmark(
@@ -260,7 +260,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 10, false);     
+            128, 0, 10, 10, false);     
 
 
 
