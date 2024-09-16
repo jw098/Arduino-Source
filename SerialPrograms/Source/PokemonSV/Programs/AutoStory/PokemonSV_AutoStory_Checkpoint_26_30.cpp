@@ -242,7 +242,7 @@ void checkpoint_26(
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 0, 128, 50},
-            {ZoomChange::KEEP_ZOOM, 255, 90, 40}
+            {ZoomChange::KEEP_ZOOM, 255, 90, 35}
         );
 
 
@@ -254,7 +254,7 @@ void checkpoint_26(
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 0, 128, 50},
-            {ZoomChange::KEEP_ZOOM, 255, 55, 37}
+            {ZoomChange::KEEP_ZOOM, 255, 55, 25}
         );
 
 

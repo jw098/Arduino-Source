@@ -761,7 +761,7 @@ void realign_player_from_landmark(
                 );         
             }
 
-            confirm_cursor_centered_on_pokecenter(info, console, context);
+            confirm_cursor_centered_on_pokecenter(info, console, context); // throws exception if fails
 
             // move cursor from landmark to target
             switch(move_cursor_to_target.zoom_change){
@@ -795,8 +795,8 @@ void realign_player_from_landmark(
             return;      
 
         }catch (...){
-            // reset to overworld if failed, and re-try
-            press_Bs_to_back_to_overworld(info, console, context, 6);
+            // reset to overworld if failed to center on the pokecenter, and re-try
+            leave_phone_to_overworld(info, console, context);
         }        
     }
     
