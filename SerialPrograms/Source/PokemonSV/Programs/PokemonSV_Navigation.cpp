@@ -896,7 +896,7 @@ bool attempt_fly_to_overlapping_flypoint(
     ConsoleHandle& console, 
     BotBaseContext& context
 ){
-    open_map_from_overworld(info, console, context);
+    open_map_from_overworld(info, console, context, false, true);
     context.wait_for_all_requests();
     pbf_press_button(context, BUTTON_ZL, 40, 100);
 

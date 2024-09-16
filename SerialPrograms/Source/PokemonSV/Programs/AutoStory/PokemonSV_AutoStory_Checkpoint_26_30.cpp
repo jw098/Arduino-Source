@@ -71,7 +71,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 20, 10, false);
+            128, 0, 30, 10, false);
 
         // align for long stretch 1, part 2
         realign_player_from_landmark(
@@ -82,7 +82,7 @@ void checkpoint_26(
         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 10, 10, false);            
+            128, 0, 12, 12, false);            
 
         // align for long stretch 1, part 3
  
