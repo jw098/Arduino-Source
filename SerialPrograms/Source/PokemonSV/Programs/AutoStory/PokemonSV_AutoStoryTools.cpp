@@ -796,8 +796,7 @@ void realign_player_from_landmark(
 
         }catch (...){
             // reset to overworld if failed, and re-try
-            pbf_press_button(context, BUTTON_B, 20, 105);
-            press_Bs_to_back_to_overworld(info, console, context, 7);
+            press_Bs_to_back_to_overworld(info, console, context, 6);
         }        
     }
     
