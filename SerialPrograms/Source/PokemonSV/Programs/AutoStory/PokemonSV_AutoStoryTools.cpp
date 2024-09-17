@@ -339,8 +339,8 @@ void overworld_navigation(
     uint16_t forward_ticks = seconds_realign * TICKS_PER_SECOND;
     // WallClock start = current_time();
 
-    if (movement_mode == NavigationMovementMode::CLEAR_WITH_LETS_GO){
-        context.wait_for(Milliseconds(3000)); // for some reason, the "Destination arrived" notification reappears when you re-assign the marker.
+    if (stop_condition == NavigationStopCondition::STOP_MARKER){
+        context.wait_for(Milliseconds(2000)); // the "Destination arrived" notification can sometimes reappear if you opened the map too quickly after you reached the previous marker.
     }
 
 

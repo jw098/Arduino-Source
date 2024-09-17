@@ -45,7 +45,6 @@ using namespace Pokemon;
 
 
 
-// todo: uncomment checkpoint_save and fly_to_overlapping_flypoint
 void checkpoint_26(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -70,8 +69,8 @@ void checkpoint_26(
         });
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 10, false);
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 30, 15, false);
 
         // align for long stretch 1, part 2
         realign_player_from_landmark(
@@ -81,7 +80,7 @@ void checkpoint_26(
         );        
         
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 12, 12, false);            
 
         // align for long stretch 1, part 3
@@ -93,8 +92,8 @@ void checkpoint_26(
         );
         
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 30, 10, false);
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 36, 12, false);
 
         // align for long stretch 2
         realign_player_from_landmark(
@@ -104,8 +103,8 @@ void checkpoint_26(
         );              
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 50, 10, false);
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 45, 15, false);
 
         // align for long stretch 3, part 1
         realign_player_from_landmark(
@@ -116,7 +115,7 @@ void checkpoint_26(
 
         
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 20, 10, false);
 
         // align for long stretch 3, part 2
@@ -128,7 +127,7 @@ void checkpoint_26(
 
         
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 30, 10, false);            
 
         // align for long stretch 3, part 3
@@ -140,7 +139,7 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 30, 10, false);                
 
         // align for long stretch 3, part 4
@@ -152,8 +151,8 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 40, 10, false);        
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 36, 12, false);        
 
         // align to cross bridge
         realign_player_from_landmark(
@@ -161,7 +160,6 @@ void checkpoint_26(
             {ZoomChange::ZOOM_IN, 0, 128, 90},
             {ZoomChange::KEEP_ZOOM, 255, 35, 67}
         );
-
 
 
         // attempt to cross bridge. If fall into water, go back to start position (just before bridge) and try again
@@ -213,7 +211,7 @@ void checkpoint_26(
         press_Bs_to_back_to_overworld(env.program_info(), env.console, context);
 
         env.console.log("Successfully crossed the bridge.");
-
+        
         // align for post-bridge section 1
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
@@ -223,7 +221,7 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 20, 10, false);   
 
         // align for post-bridge section 2
@@ -235,8 +233,8 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 10, 10, false);        
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);        
 
         // align for post-bridge section 3. move up towards tree
         realign_player_from_landmark(
@@ -247,8 +245,8 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 10, 10, false);        
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);        
 
         // align for post-bridge section 4
         realign_player_from_landmark(
@@ -259,8 +257,8 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 10, 10, false);     
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);     
 
 
 
@@ -273,19 +271,20 @@ void checkpoint_26(
 
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 30, 10, false);    
 
 
         // align for post-bridge section 6. set marker past pokecenter
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){    
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 180, 50);
-        });
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 128, 128, 0},
+            {ZoomChange::KEEP_ZOOM, 0, 180, 20}
+        );        
 
         overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_TIME, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 5, 5, false);    
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 12, 12, false);    
 
 
 
