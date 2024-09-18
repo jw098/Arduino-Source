@@ -102,8 +102,7 @@ void open_map_from_overworld(
     const ProgramInfo& info,
     ConsoleHandle& console, 
     BotBaseContext& context,
-    bool clear_tutorial,
-    bool handle_battle
+    bool clear_tutorial
 ){
     {
         OverworldWatcher overworld(console, COLOR_CYAN);
@@ -778,7 +777,7 @@ void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseCont
         leave_phone_to_overworld(info, console, context);
         break;
     case PlayerRealignMode::REALIGN_OLD_MARKER:
-        open_map_from_overworld(info, console, context, false, true);
+        open_map_from_overworld(info, console, context, false);
         leave_phone_to_overworld(info, console, context);
         pbf_press_button(context, BUTTON_L, 20, 105);
         break;
@@ -896,7 +895,7 @@ bool attempt_fly_to_overlapping_flypoint(
     ConsoleHandle& console, 
     BotBaseContext& context
 ){
-    open_map_from_overworld(info, console, context, false, true);
+    open_map_from_overworld(info, console, context, false);
     context.wait_for_all_requests();
     pbf_press_button(context, BUTTON_ZL, 40, 100);
 

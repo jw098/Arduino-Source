@@ -38,8 +38,7 @@ void open_map_from_overworld(
     const ProgramInfo& info,
     ConsoleHandle& console, 
     BotBaseContext& context,
-    bool clear_tutorial = false,
-    bool handle_battle = false
+    bool clear_tutorial = false
 );
 
 //  From map, press A to fly to a travel spot.

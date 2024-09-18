@@ -310,9 +310,11 @@ bool confirm_marker_present(
             console.log("Confirmed that marker is still present.");
             return true;
         case 1: // battle
-            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
-            realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            break;
+            throw UnexpectedBattleException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "confirm_marker_present(): Unexpectedly detected battle.",
+                true
+            );
         default:
             console.log("Destination marker not detected.");
             return false;
@@ -398,6 +400,12 @@ void overworld_navigation(
 
             try {
                 realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+
+                if (!confirm_marker_present(info, console, context)){  
+                    // if marker not present, don't keep walking forward.
+                    return;
+                }
+
                 break;
             }catch (UnexpectedBattleException e){
                 (void) e;
@@ -726,7 +734,7 @@ void realign_player_from_landmark(
         }
 
         try {
-            open_map_from_overworld(info, console, context, false, true);
+            open_map_from_overworld(info, console, context, false);
 
             // move cursor near landmark (pokecenter)
             switch(move_cursor_near_landmark.zoom_change){
