@@ -4,6 +4,7 @@
  */
 
 #include "CommonFramework/Exceptions/OperationFailedException.h"
+#include "CommonFramework/Exceptions/UnexpectedBattleException.h"
 #include "CommonFramework/InferenceInfra/InferenceRoutines.h"
 #include "NintendoSwitch/NintendoSwitch_Settings.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
@@ -71,6 +72,7 @@ void day_skip_from_overworld(ConsoleHandle& console, BotBaseContext& context){
 void press_Bs_to_back_to_overworld(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context, uint16_t seconds_between_b_presses){
     context.wait_for_all_requests();
     OverworldWatcher overworld(console, COLOR_RED);
+    NormalBattleMenuWatcher battle(COLOR_BLUE);
     int ret = run_until(
         console, context,
         [seconds_between_b_presses](BotBaseContext& context){
@@ -79,9 +81,15 @@ void press_Bs_to_back_to_overworld(const ProgramInfo& info, ConsoleHandle& conso
                 pbf_press_button(context, BUTTON_B, 20, seconds_between_b_presses * TICKS_PER_SECOND);
             }
         },
-        {overworld}
+        {overworld, battle}
     );
-    if (ret < 0){
+    if (ret == 1){
+        throw UnexpectedBattleException(
+            ErrorReport::SEND_ERROR_REPORT, console,
+            "press_Bs_to_back_to_overworld(): Unexpectedly detected battle.",
+            true
+        );         
+    }else if (ret < 0){
         throw OperationFailedException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "press_Bs_to_back_to_overworld(): Unable to detect overworld after 10 button B presses.",
@@ -98,16 +106,23 @@ void open_map_from_overworld(
 ){
     {
         OverworldWatcher overworld(console, COLOR_CYAN);
+        NormalBattleMenuWatcher battle(COLOR_RED);
         context.wait_for_all_requests();
         int ret = wait_until(
             console, context,
             std::chrono::seconds(10),
-            {overworld}
+            {overworld, battle}
         );
         context.wait_for(std::chrono::milliseconds(100));
         if (ret == 0){
             console.log("Detected overworld.");
             pbf_press_button(context, BUTTON_Y, 20, 105); // open map
+        }else if (ret == 1){
+            throw UnexpectedBattleException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "open_map_from_overworld(): Unexpectedly detected battle.",
+                true
+            );              
         }else{
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
@@ -119,10 +134,10 @@ void open_map_from_overworld(
 
     WallClock start = current_time();
     while (true){
-        if (current_time() - start > std::chrono::minutes(1)){
+        if (current_time() - start > std::chrono::minutes(2)){
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
-                "open_map_from_overworld(): Failed to open map after 1 minute.",
+                "open_map_from_overworld(): Failed to open map after 2 minutes.",
                 true
             );
         }
@@ -131,12 +146,13 @@ void open_map_from_overworld(
         AdvanceDialogWatcher advance_dialog(COLOR_YELLOW);
         PromptDialogWatcher prompt_dialog(COLOR_GREEN);
         MapWatcher map(COLOR_RED);
+        NormalBattleMenuWatcher battle(COLOR_RED);
 
         context.wait_for_all_requests();
         int ret = wait_until(
             console, context,
             std::chrono::seconds(30),
-            {overworld, advance_dialog, prompt_dialog, map}
+            {overworld, advance_dialog, prompt_dialog, map, battle}
         );
         context.wait_for(std::chrono::milliseconds(100));
         switch (ret){
@@ -166,6 +182,13 @@ void open_map_from_overworld(
                 pbf_press_button(context, BUTTON_RCLICK, 20, 105);
                 continue;
             }
+        case 4:
+            console.log("Detected battle.");
+            throw UnexpectedBattleException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "open_map_from_overworld(): Unexpectedly detected battle.",
+                true
+            ); 
         default:
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
@@ -495,6 +518,7 @@ void open_recently_battled_from_pokedex(const ProgramInfo& info, ConsoleHandle& 
 void leave_phone_to_overworld(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
     console.log("Exiting to overworld from Rotom Phone...");
     OverworldWatcher overworld(console, COLOR_CYAN);
+    NormalBattleMenuWatcher battle(COLOR_BLUE);
     context.wait_for_all_requests();
 
     int ret = run_until(
@@ -504,14 +528,20 @@ void leave_phone_to_overworld(const ProgramInfo& info, ConsoleHandle& console, B
                 pbf_press_button(context, BUTTON_Y, 20, 1000);
             }
         },
-        {overworld}
+        {overworld, battle}
     );
-    if (ret < 0){
+    if (ret == 1){
+        throw UnexpectedBattleException(
+            ErrorReport::SEND_ERROR_REPORT, console,
+            "leave_phone_to_overworld(): Unexpectedly detected battle.",
+            true
+        );         
+    }else if (ret < 0){
         throw OperationFailedException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "leave_phone_to_overworld(): Unknown state after 10 button Y presses.",
             true
-        );
+        );    
     }
 }
 
@@ -915,6 +945,7 @@ void enter_menu_from_overworld(const ProgramInfo& info, ConsoleHandle& console, 
 
         OverworldWatcher overworld(console, COLOR_CYAN);
         MainMenuWatcher main_menu(COLOR_RED);
+        NormalBattleMenuWatcher battle(COLOR_RED);
         context.wait_for_all_requests();
 
         int ret = run_until(
@@ -928,7 +959,7 @@ void enter_menu_from_overworld(const ProgramInfo& info, ConsoleHandle& console, 
                     }
                 }
             },
-            {overworld, main_menu}
+            {overworld, main_menu, battle}
         );
         context.wait_for(std::chrono::milliseconds(100));
 
@@ -953,6 +984,12 @@ void enter_menu_from_overworld(const ProgramInfo& info, ConsoleHandle& console, 
             }
             pbf_press_button(context, BUTTON_A, 20, 105);
             return;
+        case 2:
+            throw UnexpectedBattleException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "enter_menu_from_overworld(): Unexpectedly detected battle.",
+                true
+            );            
         default:
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
@@ -1103,7 +1140,7 @@ void heal_at_pokecenter(
         case 3: // tutorial
             console.log("heal_at_pokecenter: Detected tutorial.");
             pbf_press_button(context, BUTTON_A, 20, 105);
-            break;            
+            break;   
         default:
             console.log("heal_at_pokecenter: Timed out.");
             throw OperationFailedException(

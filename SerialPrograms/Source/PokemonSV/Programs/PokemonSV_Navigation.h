@@ -88,6 +88,7 @@ enum class PlayerRealignMode{
 };
 
 // align player orientation based on the alignment mode
+// if battle detected, propagates UnexpectedBattleException to the calling function
 // The direction is specified by (x, y):
 // x = 0 : left
 // x = 128 : neutral

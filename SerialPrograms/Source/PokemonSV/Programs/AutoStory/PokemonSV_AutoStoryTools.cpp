@@ -7,6 +7,7 @@
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/Exceptions/FatalProgramException.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
+#include "CommonFramework/Exceptions/UnexpectedBattleException.h"
 #include "CommonFramework/InferenceInfra/InferenceRoutines.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/Tools/StatsTracking.h"
@@ -342,7 +343,13 @@ void overworld_navigation(
                         }
                     }
                     if (should_realign){
-                        realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+                        try {
+                            realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+                        }catch (UnexpectedBattleException e){
+                            (void) e;
+                            pbf_wait(context, 30 * TICKS_PER_SECOND);  // catch exception to allow the battle callback to take over.
+                        }
+                        
                     }
                 }
             },
@@ -358,8 +365,13 @@ void overworld_navigation(
                 auto_heal_from_menu_or_overworld(info, console, context, 0, true);
             }
 
-            realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            break;
+            try {
+                realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+                break;
+            }catch (UnexpectedBattleException e){
+                (void) e;
+                break;
+            }
         case 1: // dialog
             console.log("overworld_navigation: Detected dialog.");
             if (stop_condition == NavigationStopCondition::STOP_DIALOG){
@@ -618,20 +630,29 @@ void press_A_until_dialog(const ProgramInfo& info, ConsoleHandle& console, BotBa
 }
 
 bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-    // open main menu
-    enter_menu_from_overworld(info, console, context, -1, MenuSide::NONE, true);
-    context.wait_for_all_requests();
-    ImageStats ride_indicator = image_stats(extract_box_reference(console.video().snapshot(), ImageFloatBox(0.05, 0.995, 0.25, 0.003)));
+    while (true){
+        try {
+            // open main menu
+            enter_menu_from_overworld(info, console, context, -1, MenuSide::NONE, true);
+            context.wait_for_all_requests();
+            ImageStats ride_indicator = image_stats(extract_box_reference(console.video().snapshot(), ImageFloatBox(0.05, 0.995, 0.25, 0.003)));
 
-    bool is_ride_active = !is_black(ride_indicator); // ride is active if the ride indicator isn't black.
-    pbf_press_button(context, BUTTON_B, 30, 100);
-    press_Bs_to_back_to_overworld(info, console, context, 7);
-    if (is_ride_active){
-        console.log("Ride is active.");
-    }else{
-        console.log("Ride is not active.");
+            bool is_ride_active = !is_black(ride_indicator); // ride is active if the ride indicator isn't black.
+            pbf_press_button(context, BUTTON_B, 30, 100);
+            press_Bs_to_back_to_overworld(info, console, context, 7);
+            if (is_ride_active){
+                console.log("Ride is active.");
+            }else{
+                console.log("Ride is not active.");
+            }
+            return is_ride_active;        
+
+        }catch(UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+        }
     }
-    return is_ride_active;
+
 }
 
 void get_on_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
