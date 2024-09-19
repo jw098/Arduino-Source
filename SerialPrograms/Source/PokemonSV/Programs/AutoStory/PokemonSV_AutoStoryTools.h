@@ -149,6 +149,18 @@ void do_action_and_monitor_for_battles(
     >&& action
 );
 
+// catch any UnexpectedBattle exceptions from `action`. then use run_battle_press_A until overworld, and re-try the `action`.
+void handle_unexpected_battles(
+    const ProgramInfo& info, 
+    ConsoleHandle& console,
+    BotBaseContext& context,
+    std::function<
+        void(const ProgramInfo& info, 
+        ConsoleHandle& console,
+        BotBaseContext& context)
+    >&& action
+);
+
 void wait_for_gradient_arrow(
     const ProgramInfo& info, 
     ConsoleHandle& console, 

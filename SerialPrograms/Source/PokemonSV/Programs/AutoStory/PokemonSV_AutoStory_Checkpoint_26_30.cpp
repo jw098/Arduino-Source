@@ -63,10 +63,8 @@ void checkpoint_26(
         fly_to_overlapping_flypoint(env.program_info(), env.console, context);
 
         // align for long stretch 1, part 1
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){     
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 70, 0, 60);
-        });
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 70, 0, 60);
+
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
@@ -276,12 +274,15 @@ void checkpoint_26(
 
 
         // align for post-bridge section 6. set marker past pokecenter
+        handle_unexpected_battles(env.program_info(), env.console, context,
+        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){                        
+            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 200, 30);
+        });
                 // realign_player_from_landmark(
                 //     env.program_info(), env.console, context, 
                 //     {ZoomChange::ZOOM_IN, 128, 128, 0},
                 //     {ZoomChange::KEEP_ZOOM, 0, 180, 20}
-                // );        
-        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 200, 30);
+                // );   
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 

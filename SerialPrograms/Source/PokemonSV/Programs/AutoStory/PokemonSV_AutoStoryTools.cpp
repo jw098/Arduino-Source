@@ -615,6 +615,28 @@ void do_action_and_monitor_for_battles(
     }
 }
 
+
+void handle_unexpected_battles(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context,
+    std::function<
+        void(const ProgramInfo& info, 
+        ConsoleHandle& console,
+        BotBaseContext& context)
+    >&& action
+){
+    while (true){
+        try {
+            context.wait_for_all_requests();
+            action(info, console, context);
+        }catch (UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+        }
+    }
+}
+
 void wait_for_gradient_arrow(
     const ProgramInfo& info, 
     ConsoleHandle& console, 
