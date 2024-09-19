@@ -773,27 +773,36 @@ void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseCont
     uint8_t move_x, uint8_t move_y, uint8_t move_duration
 ){
     console.log("Realigning player direction...");
+    while (true){
+        try {
+            switch (realign_mode){
+            case PlayerRealignMode::REALIGN_NEW_MARKER:
+                console.log("Setting new map marker...");
+                open_map_from_overworld(info, console, context);
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                pbf_move_left_joystick(context, move_x, move_y, move_duration, 1 * TICKS_PER_SECOND);
+                pbf_press_button(context, BUTTON_A, 20, 105);
+                pbf_press_button(context, BUTTON_A, 20, 105);
+                leave_phone_to_overworld(info, console, context);
+                return;     
+            case PlayerRealignMode::REALIGN_OLD_MARKER:
+                open_map_from_overworld(info, console, context, false);
+                leave_phone_to_overworld(info, console, context);
+                pbf_press_button(context, BUTTON_L, 20, 105);
+                return;
+            case PlayerRealignMode::REALIGN_NO_MARKER:
+                pbf_move_left_joystick(context, move_x, move_y, move_duration, 1 * TICKS_PER_SECOND);
+                pbf_press_button(context, BUTTON_L, 20, 105);
+                return;
+            }       
 
-    switch (realign_mode){
-    case PlayerRealignMode::REALIGN_NEW_MARKER:
-        console.log("Setting new map marker...");
-        open_map_from_overworld(info, console, context);
-        pbf_press_button(context, BUTTON_ZR, 20, 105);
-        pbf_move_left_joystick(context, move_x, move_y, move_duration, 1 * TICKS_PER_SECOND);
-        pbf_press_button(context, BUTTON_A, 20, 105);
-        pbf_press_button(context, BUTTON_A, 20, 105);
-        leave_phone_to_overworld(info, console, context);
-        break;
-    case PlayerRealignMode::REALIGN_OLD_MARKER:
-        open_map_from_overworld(info, console, context, false);
-        leave_phone_to_overworld(info, console, context);
-        pbf_press_button(context, BUTTON_L, 20, 105);
-        break;
-    case PlayerRealignMode::REALIGN_NO_MARKER:
-        pbf_move_left_joystick(context, move_x, move_y, move_duration, 1 * TICKS_PER_SECOND);
-        pbf_press_button(context, BUTTON_L, 20, 105);
-        break;
+
+        }catch (UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+        }
     }
+
 }
 
 
