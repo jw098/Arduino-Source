@@ -284,7 +284,7 @@ void checkpoint_26(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 12, 12, false);    
+            128, 15, 12, 12, false);    
 
 
 
@@ -292,9 +292,8 @@ void checkpoint_26(
               
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -320,14 +319,13 @@ void checkpoint_27(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
         env.update_stats();
-    }             
+    }              
     }
 
 }
@@ -348,14 +346,13 @@ void checkpoint_28(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
         env.update_stats();
-    }             
+    }           
     }
 
 }
@@ -376,9 +373,8 @@ void checkpoint_29(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -404,9 +400,8 @@ void checkpoint_30(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -432,9 +427,8 @@ void checkpoint_31(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -460,14 +454,13 @@ void checkpoint_32(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
         env.update_stats();
-    }             
+    }           
     }
 
 }
@@ -488,14 +481,13 @@ void checkpoint_33(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
         env.update_stats();
-    }             
+    }            
     }
 
 }
@@ -516,14 +508,13 @@ void checkpoint_34(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch (...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
         env.update_stats();
-    }             
+    }         
     }
 
 }

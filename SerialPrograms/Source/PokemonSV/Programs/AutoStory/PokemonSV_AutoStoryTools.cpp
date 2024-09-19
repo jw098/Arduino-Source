@@ -313,7 +313,7 @@ bool confirm_marker_present(
             throw UnexpectedBattleException(
                 ErrorReport::SEND_ERROR_REPORT, console,
                 "confirm_marker_present(): Unexpectedly detected battle.",
-                true
+                false
             );
         default:
             console.log("Destination marker not detected.");
@@ -725,10 +725,10 @@ void realign_player_from_landmark(
     WallClock start = current_time();
 
     while (true){
-        if (current_time() - start > std::chrono::minutes(3)){
+        if (current_time() - start > std::chrono::minutes(5)){
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
-                "realign_player_from_landmark(): Failed to realign player after 3 minutes.",
+                "realign_player_from_landmark(): Failed to realign player after 5 minutes.",
                 true
             );
         }
@@ -802,10 +802,14 @@ void realign_player_from_landmark(
 
             return;      
 
-        }catch (...){
+        }catch (OperationFailedException e){
+            (void) e;
             // reset to overworld if failed to center on the pokecenter, and re-try
             leave_phone_to_overworld(info, console, context);
-        }        
+        }catch (UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+        }
     }
     
 

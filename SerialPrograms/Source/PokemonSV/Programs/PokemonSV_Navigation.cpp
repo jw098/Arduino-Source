@@ -87,7 +87,7 @@ void press_Bs_to_back_to_overworld(const ProgramInfo& info, ConsoleHandle& conso
         throw UnexpectedBattleException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "press_Bs_to_back_to_overworld(): Unexpectedly detected battle.",
-            true
+            false
         );         
     }else if (ret < 0){
         throw OperationFailedException(
@@ -121,7 +121,7 @@ void open_map_from_overworld(
             throw UnexpectedBattleException(
                 ErrorReport::SEND_ERROR_REPORT, console,
                 "open_map_from_overworld(): Unexpectedly detected battle.",
-                true
+                false
             );              
         }else{
             throw OperationFailedException(
@@ -187,7 +187,7 @@ void open_map_from_overworld(
             throw UnexpectedBattleException(
                 ErrorReport::SEND_ERROR_REPORT, console,
                 "open_map_from_overworld(): Unexpectedly detected battle.",
-                true
+                false
             ); 
         default:
             throw OperationFailedException(
@@ -534,7 +534,7 @@ void leave_phone_to_overworld(const ProgramInfo& info, ConsoleHandle& console, B
         throw UnexpectedBattleException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "leave_phone_to_overworld(): Unexpectedly detected battle.",
-            true
+            false
         );         
     }else if (ret < 0){
         throw OperationFailedException(
@@ -756,8 +756,16 @@ void jump_off_wall_until_map_open(const ProgramInfo& info, ConsoleHandle& consol
 
 // Open map and teleport back to town pokecenter to reset the hunting path.
 void reset_to_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-    open_map_from_overworld(info, console, context);
-    fly_to_closest_pokecenter_on_map(info, console, context);
+    while (true){
+        try {
+            open_map_from_overworld(info, console, context);
+            fly_to_closest_pokecenter_on_map(info, console, context);
+        }catch (UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);            
+        }
+    }
+
 }
 
 void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context,
@@ -895,11 +903,20 @@ bool attempt_fly_to_overlapping_flypoint(
     ConsoleHandle& console, 
     BotBaseContext& context
 ){
-    open_map_from_overworld(info, console, context, false);
-    context.wait_for_all_requests();
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
+    while (true){
+        try {
+            open_map_from_overworld(info, console, context, false);
+            context.wait_for_all_requests();
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
 
-    return fly_to_overworld_from_map(info, console, context, true);
+            return fly_to_overworld_from_map(info, console, context, true);            
+
+        }catch (UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);            
+        }
+    }
+
 }
 
 void fly_to_overlapping_flypoint(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
@@ -988,7 +1005,7 @@ void enter_menu_from_overworld(const ProgramInfo& info, ConsoleHandle& console, 
             throw UnexpectedBattleException(
                 ErrorReport::SEND_ERROR_REPORT, console,
                 "enter_menu_from_overworld(): Unexpectedly detected battle.",
-                true
+                false
             );            
         default:
             throw OperationFailedException(
