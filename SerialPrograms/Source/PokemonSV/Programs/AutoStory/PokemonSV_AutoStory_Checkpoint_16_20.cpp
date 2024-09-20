@@ -86,9 +86,8 @@ void checkpoint_16(
         
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -141,9 +140,8 @@ void checkpoint_17(
         
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -188,9 +186,8 @@ void checkpoint_18(
             {ClearDialogCallback::OVERWORLD, ClearDialogCallback::PROMPT_DIALOG});
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -233,9 +230,8 @@ void checkpoint_19(
 
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -287,9 +283,8 @@ void checkpoint_20(
         mash_button_till_overworld(env.console, context, BUTTON_A, 360);
 
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;

@@ -60,9 +60,8 @@ void checkpoint_21(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -88,9 +87,8 @@ void checkpoint_22(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -116,9 +114,8 @@ void checkpoint_23(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -144,9 +141,8 @@ void checkpoint_24(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -172,9 +168,8 @@ void checkpoint_25(
         context.wait_for_all_requests();
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;

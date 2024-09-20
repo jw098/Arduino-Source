@@ -82,9 +82,8 @@ void checkpoint_11(
         env.console.overlay().add_log("Reached Los Platos", COLOR_WHITE);
 
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -151,9 +150,8 @@ void checkpoint_12(
         env.console.log("Reached Mesagoza (South) Pokecenter.");
         
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -202,9 +200,8 @@ void checkpoint_13(
         
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -261,9 +258,8 @@ void checkpoint_14(
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {ClearDialogCallback::OVERWORLD});
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -305,9 +301,8 @@ void checkpoint_15(
             {ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::OVERWORLD});
        
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;

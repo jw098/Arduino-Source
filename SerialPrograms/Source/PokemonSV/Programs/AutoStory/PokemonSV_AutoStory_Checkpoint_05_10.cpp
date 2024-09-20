@@ -70,9 +70,8 @@ void checkpoint_05(
         env.console.overlay().add_log("Get mom's sandwich", COLOR_WHITE);
         mash_button_till_overworld(env.console, context);
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -121,9 +120,8 @@ void checkpoint_06(
         env.console.overlay().add_log("Finished catch tutorial", COLOR_WHITE);
 
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -162,9 +160,8 @@ void checkpoint_07(
         env.console.overlay().add_log("Mystery cry", COLOR_WHITE);
         
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -295,9 +292,8 @@ void checkpoint_08(
         mash_button_till_overworld(env.console, context, BUTTON_A);
 
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -337,9 +333,8 @@ void checkpoint_09(
         env.console.overlay().add_log("Receive legendary ball", COLOR_WHITE);
 
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
@@ -381,9 +376,8 @@ void checkpoint_10(
         mash_button_till_overworld(env.console, context, BUTTON_A);
 
         break;
-    }catch(OperationFailedException& e){
+    }catch(...){
         context.wait_for_all_requests();
-        env.console.log(e.m_message, COLOR_RED);
         env.console.log("Resetting from checkpoint.");
         reset_game(env.program_info(), env.console, context);
         stats.m_reset++;
