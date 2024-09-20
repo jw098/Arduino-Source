@@ -302,7 +302,7 @@ bool confirm_marker_present(
 
         int ret = wait_until(
             console, context, 
-            std::chrono::seconds(5),
+            std::chrono::seconds(10),
             {marker, battle}
         );
         switch (ret){
