@@ -57,7 +57,47 @@ void checkpoint_21(
             checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);
+
         context.wait_for_all_requests();
+        pbf_press_button(context, BUTTON_L, 20, 20);
+        // move forward
+        pbf_move_left_joystick(context, 128, 0, 30, 100);
+        // get on ride
+        pbf_press_button(context, BUTTON_PLUS, 20, 20);
+        get_on_ride(env.program_info(), env.console, context);
+        // turn left
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NO_MARKER, 0, 128, 50);
+        // move forward
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 200, 70);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 128, 70);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
+
+        // turn towards wall
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 128, 0, 50);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        // run and jump over wall
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 100);
+
+        BlackScreenOverWatcher black_screen(COLOR_RED, { 0.2, 0.2, 0.6, 0.6 });
+        int ret = wait_until(
+            env.console, context,
+            std::chrono::seconds(30),
+            { black_screen }
+        );
+        if (ret < 0){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT, env.console,
+                "checkpoint_21(): Failed to jump the East Mesagoza wall.",
+                true
+            );
+        }
+        context.wait_for_all_requests();
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);
        
         break;
     }catch(...){
