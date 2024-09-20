@@ -630,6 +630,7 @@ void handle_unexpected_battles(
         try {
             context.wait_for_all_requests();
             action(info, console, context);
+            return;
         }catch (UnexpectedBattleException e){
             (void) e;
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
