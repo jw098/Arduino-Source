@@ -198,7 +198,7 @@ struct MoveCursor{
     ZoomChange zoom_change;
     uint8_t move_x;
     uint8_t move_y;
-    uint8_t move_duration;
+    uint16_t move_duration;
 };
 
 // place a marker on the map, not relative to the current player position, but based on a fixed landmark, such as a pokecenter

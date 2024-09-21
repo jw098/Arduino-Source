@@ -780,7 +780,7 @@ void realign_player_from_landmark(
             }
             uint8_t move_x1 = move_cursor_near_landmark.move_x;
             uint8_t move_y1 = move_cursor_near_landmark.move_y;
-            uint8_t move_duration1 = move_cursor_near_landmark.move_duration;
+            uint16_t move_duration1 = move_cursor_near_landmark.move_duration;
             pbf_move_left_joystick(context, move_x1, move_y1, move_duration1, 1 * TICKS_PER_SECOND);
 
             // move cursor to pokecenter
@@ -815,7 +815,7 @@ void realign_player_from_landmark(
             }
             uint8_t move_x2 = move_cursor_to_target.move_x;
             uint8_t move_y2 = move_cursor_to_target.move_y;
-            uint8_t move_duration2 = move_cursor_to_target.move_duration;
+            uint16_t move_duration2 = move_cursor_to_target.move_duration;
             pbf_move_left_joystick(context, move_x2, move_y2, move_duration2, 1 * TICKS_PER_SECOND);
 
             // place down marker

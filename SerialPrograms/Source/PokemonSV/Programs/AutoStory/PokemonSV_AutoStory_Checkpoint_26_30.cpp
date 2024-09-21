@@ -305,6 +305,7 @@ void checkpoint_26(
 
 }
 
+// todo: uncomment checkpoint_save
 void checkpoint_27(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -315,10 +316,50 @@ void checkpoint_27(
     while (true){
     try{
         if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
+            // checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+
+        // section 1
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 128, 17);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);    
+
+
+        // section 2
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 200, 200},
+            {ZoomChange::KEEP_ZOOM, 0, 65, 220}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);
+
+        // section 3
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 200, 200},
+            {ZoomChange::KEEP_ZOOM, 0, 80, 240}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);
+
+        // section 4
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 200, 200},
+            {ZoomChange::KEEP_ZOOM, 0, 60, 280}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);
+
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 30, {ClearDialogCallback::OVERWORLD, ClearDialogCallback::BLACK_DIALOG_BOX});
+
        
         break;
     }catch (...){
