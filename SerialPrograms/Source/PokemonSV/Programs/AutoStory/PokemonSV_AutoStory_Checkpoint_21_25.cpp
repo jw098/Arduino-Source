@@ -121,7 +121,7 @@ void checkpoint_22(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
@@ -192,6 +192,64 @@ void checkpoint_23(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+
+        // section 1
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 110, 0, 30);
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);
+
+        // section 2
+        realign_player_from_landmark(
+            env.program_info(), env.console, context,
+            {ZoomChange::ZOOM_IN, 0, 128, 80},
+            {ZoomChange::KEEP_ZOOM, 255, 95, 100}            
+        );         
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);       
+
+        // section 3
+        realign_player_from_landmark(
+            env.program_info(), env.console, context,
+            {ZoomChange::ZOOM_IN, 0, 128, 80},
+            {ZoomChange::KEEP_ZOOM, 255, 75, 65}            
+        );              
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);             
+
+        // section 4
+        realign_player_from_landmark(
+            env.program_info(), env.console, context,
+            {ZoomChange::ZOOM_IN, 0, 128, 50},
+            {ZoomChange::KEEP_ZOOM, 255, 180, 17}            
+        );              
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 10, false);    
+
+        // section 5. set marker to pokecenter
+        realign_player_from_landmark(
+            env.program_info(), env.console, context,
+            {ZoomChange::ZOOM_IN, 128, 128, 0},
+            {ZoomChange::KEEP_ZOOM, 128, 128, 0}            
+        );              
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);     
+
+        // section 6. set marker past pokecenter
+        handle_unexpected_battles(env.program_info(), env.console, context,
+        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){                        
+            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 110, 50);
+        });                     
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 15, 12, 12, false);         
+
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);             
        
         break;
     }catch(...){

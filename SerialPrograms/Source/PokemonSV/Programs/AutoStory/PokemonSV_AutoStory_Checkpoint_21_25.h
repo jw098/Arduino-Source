@@ -16,12 +16,12 @@ namespace PokemonSV{
 
 
 
-// start: (After the break, with level 100 Gardevoir. At Mesagoza West pokecenter.)
-// end: 
+// start: After the break, with level 100 Gardevoir. At Mesagoza West pokecenter.
+// end: At South Province Area Two Pokecenter.
 void checkpoint_21(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
-// start: (At South Province Area Two Pokecenter. )
-// end: 
+// start: At South Province Area Two Pokecenter.
+// end: At Cortondo East Pokecenter
 void checkpoint_22(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 // start: (At Cortondo East Pokecenter)
