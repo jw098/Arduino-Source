@@ -20,8 +20,8 @@ namespace PokemonSV{
 // end: At West Province Area One Central Pokecenter
 void checkpoint_26(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
-// start: 
-// end: 
+// start: At West Province Area One Central Pokecenter
+// end: Beat Bombirdier
 void checkpoint_27(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);    
 
 // start: 

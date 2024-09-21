@@ -319,7 +319,7 @@ void checkpoint_27(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
@@ -351,7 +351,7 @@ void checkpoint_27(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 20, 10, false);
 
-        // section 4
+        // section 4. walk until Arven dialog
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 255, 200, 200},
@@ -362,6 +362,99 @@ void checkpoint_27(
             128, 0, 20, 10, false);
 
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 30, {ClearDialogCallback::OVERWORLD, ClearDialogCallback::BLACK_DIALOG_BOX});
+
+        // after Arven dialog. section 5
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 18, 6, false);        
+
+        // section 6
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 0, 0},
+            {ZoomChange::KEEP_ZOOM, 0, 20, 65}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);
+
+        pbf_press_button(context, BUTTON_PLUS, 20, 20);
+        get_on_ride(env.program_info(), env.console, context);
+
+        // section 7. enter boulder field. until rock
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 0, 0},
+            {ZoomChange::KEEP_ZOOM, 0, 35, 95}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 18, 6, false); 
+
+        // section 7.1. move away from rock
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 128, 50);
+        pbf_move_left_joystick(context, 128, 0, 80, 100);
+
+        // section 8. go to middle-right of boulder field
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 255, 50},
+            {ZoomChange::KEEP_ZOOM, 0, 15, 110}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 5, false);  
+
+        // section 8.1. go to right edge of boulder field
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 140, 0, 50);        
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+
+        // section 9. walk up right edge until hit rock
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 15, 50);          
+
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            140, 0, 10, 5, false);        
+
+        // section 9.1. move away from rock.
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 80, 255, 50);  
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+
+        // section 10. go to middle-right of boulder field
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 255, 100},
+            {ZoomChange::KEEP_ZOOM, 0, 5, 150}
+        );      
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 5, false);  
+
+        // section 11. reach the top. battle Bombirdier
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 255, 100},
+            {ZoomChange::KEEP_ZOOM, 50, 0, 170}
+        );
+        try{
+            overworld_navigation(env.program_info(), env.console, context, 
+                NavigationStopCondition::STOP_BATTLE, NavigationMovementMode::DIRECTIONAL_ONLY, 
+                128, 0, 40, 5, false);   
+        }catch (OperationFailedException& e){ 
+            (void) e;
+            // likely attempted to open/close phone to realign, but failed
+            // likely already reached cutscene to battle Bombirdeier.
+
+            // keep waiting until battle detected.
+            overworld_navigation(env.program_info(), env.console, context, 
+                NavigationStopCondition::STOP_BATTLE, NavigationMovementMode::DIRECTIONAL_ONLY, 
+                128, 128, 30, 30, false);          
+
+        }       
+
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 30, {ClearDialogCallback::BATTLE});
 
        
         break;

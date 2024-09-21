@@ -281,6 +281,7 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
             break;
         case ClearDialogCallback::BLACK_DIALOG_BOX:    
             console.log("clear_dialog: Detected black dialog box.");
+            seen_dialog = true;
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;            
         default:
@@ -393,6 +394,10 @@ void overworld_navigation(
         switch (ret){
         case 0: // battle
             console.log("overworld_navigation: Detected start of battle.");
+            if (stop_condition == NavigationStopCondition::STOP_BATTLE){
+                return;
+            }
+
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);   
             if (auto_heal){
                 auto_heal_from_menu_or_overworld(info, console, context, 0, true);
@@ -422,7 +427,8 @@ void overworld_navigation(
                     "overworld_navigation(): Unexpectedly detected dialog.",
                     true
                 );
-            }            
+            }          
+            pbf_press_button(context, BUTTON_A, 20, 20);
             break;
         case 2: // marker
             console.log("overworld_navigation: Detected marker.");

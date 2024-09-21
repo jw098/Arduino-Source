@@ -84,6 +84,7 @@ enum class NavigationStopCondition{
     STOP_DIALOG,
     STOP_MARKER,
     STOP_TIME,
+    STOP_BATTLE,
 };
 
 enum class NavigationMovementMode{
