@@ -206,7 +206,10 @@ void checkpoint_26(
 
         confirm_no_overlapping_flypoint(env.program_info(), env.console, context);
         pbf_press_button(context, BUTTON_B, 20, 100);
-        press_Bs_to_back_to_overworld(env.program_info(), env.console, context);
+        handle_unexpected_battles(env.program_info(), env.console, context,
+        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+            press_Bs_to_back_to_overworld(env.program_info(), env.console, context);
+        });
 
         env.console.log("Successfully crossed the bridge.");
         

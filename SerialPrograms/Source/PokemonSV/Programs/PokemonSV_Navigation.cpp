@@ -519,6 +519,7 @@ void leave_phone_to_overworld(const ProgramInfo& info, ConsoleHandle& console, B
     console.log("Exiting to overworld from Rotom Phone...");
     OverworldWatcher overworld(console, COLOR_CYAN);
     NormalBattleMenuWatcher battle(COLOR_BLUE);
+    GradientArrowWatcher arrow(COLOR_RED, GradientArrowType::DOWN, {0.475, 0.465, 0.05, 0.085});
     context.wait_for_all_requests();
 
     int ret = run_until(
@@ -528,21 +529,33 @@ void leave_phone_to_overworld(const ProgramInfo& info, ConsoleHandle& console, B
                 pbf_press_button(context, BUTTON_Y, 20, 1000);
             }
         },
-        {overworld, battle}
+        {overworld, battle, arrow}
     );
-    if (ret == 1){
+    switch (ret){
+    case 0:
+        return;
+    case 1:
         throw UnexpectedBattleException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "leave_phone_to_overworld(): Unexpectedly detected battle.",
             false
-        );         
-    }else if (ret < 0){
+        );  
+    case 2:
+        console.log("Stuck in battle status screen.");
+        pbf_mash_button(context, BUTTON_B, 200);
+        throw UnexpectedBattleException(
+            ErrorReport::SEND_ERROR_REPORT, console,
+            "leave_phone_to_overworld(): Unexpectedly detected battle.",
+            false
+        ); 
+    default:
         throw OperationFailedException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "leave_phone_to_overworld(): Unknown state after 10 button Y presses.",
             true
-        );    
+        );         
     }
+
 }
 
 // While in the current map zoom level, detect pokecenter icons and move the map cursor there.
