@@ -345,7 +345,7 @@ void checkpoint_27(
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 255, 200, 200},
-            {ZoomChange::KEEP_ZOOM, 0, 80, 240}
+            {ZoomChange::KEEP_ZOOM, 0, 80, 235}
         );          
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
@@ -382,7 +382,17 @@ void checkpoint_27(
         pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
 
-        // section 7. enter boulder field. until rock
+        // section 7
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 0, 0, 0},
+            {ZoomChange::KEEP_ZOOM, 0, 30, 80}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);
+
+        // section 8. enter boulder field. until rock
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 0, 0, 0},
@@ -392,11 +402,11 @@ void checkpoint_27(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 18, 6, false); 
 
-        // section 7.1. move away from rock
+        // section 8.1. move away from rock
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 128, 50);
         pbf_move_left_joystick(context, 128, 0, 80, 100);
 
-        // section 8. go to middle-right of boulder field
+        // section 9. go to middle-right of boulder field
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 255, 255, 50},
@@ -406,22 +416,32 @@ void checkpoint_27(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 40, 5, false);  
 
-        // section 8.1. go to right edge of boulder field
+        // section 9.1. go to right edge of boulder field
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 140, 0, 50);        
         pbf_move_left_joystick(context, 128, 0, 200, 100);
 
-        // section 9. walk up right edge until hit rock
+        // section 10. walk up right edge
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 255, 80},
+            {ZoomChange::KEEP_ZOOM, 0, 12, 130}
+        );      
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 5, false);  
+
+        // section 10.1 walk up right edge. until hit rock
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 15, 50);          
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
             140, 0, 10, 5, false);        
 
-        // section 9.1. move away from rock.
+        // section 10.2. move away from rock.
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 80, 255, 50);  
         pbf_move_left_joystick(context, 128, 0, 200, 100);
 
-        // section 10. go to middle-right of boulder field
+        // section 11
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 255, 255, 100},
@@ -431,7 +451,7 @@ void checkpoint_27(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 40, 5, false);  
 
-        // section 11. reach the top. battle Bombirdier
+        // section 12. reach the top. battle Bombirdier
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::ZOOM_IN, 255, 255, 100},
