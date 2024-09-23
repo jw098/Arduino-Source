@@ -93,6 +93,23 @@ enum class NavigationMovementMode{
     CLEAR_WITH_LETS_GO,
 };
 
+struct AutoStoryOptions{
+    Language language;
+    StarterChoice starter_choice;
+    EventNotificationOption& notif_status_update;
+};
+
+class AutoStory_Segment {
+public:
+    virtual std::string name() const = 0;
+    virtual std::string start_text() const = 0;
+    virtual std::string end_text() const = 0;
+    virtual void run_segment(
+        SingleSwitchProgramEnvironment& env, 
+        BotBaseContext& context,
+        AutoStoryOptions options) const = 0;
+};
+
 // spam A button to choose the first move
 // throw exception if wipeout.
 void run_battle_press_A(

@@ -11,6 +11,7 @@
 #include "Common/Cpp/Options/EnumDropdownOption.h"
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
 #include "CommonFramework/Options/LanguageOCROption.h"
+#include "CommonFramework/Options/StringSelectOption.h"
 #include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
 #include "Common/NintendoSwitch/NintendoSwitch_ControllerDefs.h"
 #include "PokemonSV/Programs/PokemonSV_Navigation.h"
@@ -19,6 +20,15 @@
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
+
+class SegmentSelectOption : public StringSelectOption{
+public:
+    SegmentSelectOption(
+        std::string label,
+        LockMode lock_while_running,
+        const std::string& default_slug = ""
+    );
+};
 
 
 class AutoStory_Descriptor : public SingleSwitchProgramDescriptor{
@@ -57,6 +67,8 @@ private:
 private:
     OCR::LanguageOCROption LANGUAGE;
     EnumDropdownOption<StartPoint> STARTPOINT;
+    SegmentSelectOption STARTPOINT2;
+    // SegmentSelectOption ENDPOINT2;
 
     enum class EndPoint{
         INTRO_CUTSCENE,

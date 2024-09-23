@@ -1440,6 +1440,10 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Checkpoint_21_25.h
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Checkpoint_26_30.cpp
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Checkpoint_26_30.h       
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_00.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_00.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_01.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_01.h
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.cpp
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.h
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.cpp

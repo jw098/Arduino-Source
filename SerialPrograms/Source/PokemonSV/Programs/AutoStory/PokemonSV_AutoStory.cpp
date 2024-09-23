@@ -21,6 +21,8 @@
 #include "PokemonSV_AutoStory_Checkpoint_16_20.h"
 #include "PokemonSV_AutoStory_Checkpoint_21_25.h"
 #include "PokemonSV_AutoStory_Checkpoint_26_30.h"
+#include "PokemonSV_AutoStory_Segment_00.h"
+#include "PokemonSV_AutoStory_Segment_01.h"
 #include "PokemonSV_AutoStory.h"
 
 //#include <iostream>
@@ -64,6 +66,11 @@ AutoStory::AutoStory()
         PokemonSwSh::IV_READER().languages(),
         LockMode::UNLOCK_WHILE_RUNNING,
         true
+    )
+    , STARTPOINT2(
+        "<b>Start Point2:</b><br>Program will start with this segment.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        "0"
     )
     , STARTPOINT(
         "<b>Start Point:</b><br>Program will start with this segment.",
@@ -224,6 +231,7 @@ AutoStory::AutoStory()
     )             
 {
     PA_ADD_OPTION(LANGUAGE);
+    PA_ADD_OPTION(STARTPOINT2);
     PA_ADD_OPTION(STARTPOINT);
     PA_ADD_OPTION(START_DESCRIPTION);
     PA_ADD_OPTION(ENDPOINT);
@@ -323,6 +331,50 @@ void AutoStory::value_changed(void* object){
 
 
 }
+
+
+std::vector<std::unique_ptr<AutoStory_Segment>> make_autoStory_segment_list(){
+    std::vector<std::unique_ptr<AutoStory_Segment>> segment_list;
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_00>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_01>());
+
+    return segment_list;
+};
+
+const std::vector<std::unique_ptr<AutoStory_Segment>>& ALL_AUTO_STORY_SEGMENT_LIST(){
+    static std::vector<std::unique_ptr<AutoStory_Segment>> segment_list = make_autoStory_segment_list();
+    return segment_list;
+}
+
+
+StringSelectDatabase make_all_segments_database(){
+    StringSelectDatabase ret;
+    int index_num = 0;
+    for (const auto& segment : ALL_AUTO_STORY_SEGMENT_LIST()){
+        ret.add_entry(StringSelectEntry(std::to_string(index_num), segment->name()));
+        index_num++;
+    }
+    return ret;
+}
+const StringSelectDatabase& ALL_SEGMENTS_SELECT_DATABASE(){
+    static StringSelectDatabase database = make_all_segments_database();
+    return database;
+}
+
+SegmentSelectOption::SegmentSelectOption(
+    std::string label,
+    LockMode lock_while_running,
+    const std::string& default_slug
+)  : StringSelectOption(
+        std::move(label),
+        ALL_SEGMENTS_SELECT_DATABASE(),
+        lock_while_running,
+        default_slug
+    )
+{}
+
+
+
 
 std::string AutoStory::start_segment_description(){
     switch(STARTPOINT){
@@ -447,6 +499,19 @@ void AutoStory::test_checkpoints(
 
 void AutoStory::run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    AutoStoryOptions options{
+        LANGUAGE,
+        STARTERCHOICE,
+        NOTIFICATION_STATUS_UPDATE
+    };    
+
+    size_t start = STARTPOINT2.index();
+    size_t end = 0;
+    for (size_t segment_index = start; segment_index <= end; segment_index++){
+        ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->run_segment(env, context, options);
+    }
+
+
     switch (STARTPOINT){
     case StartPoint::INTRO_CUTSCENE:
         context.wait_for_all_requests();
