@@ -41,11 +41,11 @@ std::string AutoStory_Segment_01::name() const{
 
 
 std::string AutoStory_Segment_01::start_text() const{
-    return "Start: Intro cutscene.";
+    return "Start: Finished cutscene.";
 }
 
 std::string AutoStory_Segment_01::end_text() const{
-    return "End: Finished cutscene. Adjusted settings. Standing in left side of room.";
+    return "End: Picked the starter.";
 }
 
 void AutoStory_Segment_01::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{

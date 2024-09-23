@@ -15,13 +15,7 @@ namespace NintendoSwitch{
 namespace PokemonSV{
 
 
-// start: Talked to Nemona at the Lighthouse.
-// end: Arrived at Los Platos pokecenter. Cleared Let's go tutorial.
-void checkpoint_11(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);
 
-// start: Arrived at Los Platos pokecenter. Cleared Let's go tutorial.
-// end: Arrived at Mesagoza (South) Pokecenter
-void checkpoint_12(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);
 
 // start: Arrived at Mesagoza (South) Pokecenter
 // end: Battled Nemona at Mesagoza gate. Entered Mesagoza.

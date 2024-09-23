@@ -1444,6 +1444,26 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_00.h
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_01.cpp
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_01.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_02.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_02.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_03.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_03.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_04.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_04.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_05.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_05.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_06.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_06.h
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_07.cpp
+    Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_07.h
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_08.cpp
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_08.h
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_09.cpp
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_09.h
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_10.cpp
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_10.h
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_11.cpp
+    # Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory_Segment_11.h
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.cpp
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStory.h
     Source/PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.cpp

@@ -196,7 +196,7 @@ void get_on_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext
 
 // change the settings prior to Autostory
 // Assumes that `current_segment` represents where we currently are in the story.
-void change_settings_prior_to_autostory(SingleSwitchProgramEnvironment& env, BotBaseContext& context, StartPoint current_segment, Language language);
+void change_settings_prior_to_autostory(SingleSwitchProgramEnvironment& env, BotBaseContext& context, size_t current_segment_num, Language language);
 
 // from within the Settings/Options menu, change the settings
 void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& context, Language language, bool use_inference = true);

@@ -18,9 +18,6 @@ namespace PokemonSV{
 
 
 
-// start: Received starter pokemon and changed move order. Cleared autoheal tutorial.
-// end: Battled Nemona on the beach.
-void checkpoint_04(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);
 
 }
 }

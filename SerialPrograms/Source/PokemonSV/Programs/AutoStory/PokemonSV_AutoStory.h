@@ -46,6 +46,8 @@ public:
 
     virtual void program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) override;
 
+    void test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
+
     // test the checkpoints from start to end, inclusive
     // test each checkpoints "loop" number of times
     void test_checkpoints(
@@ -61,14 +63,10 @@ public:
 private:
     virtual void value_changed(void* object) override;
 
-    std::string start_segment_description();
-    std::string end_segment_description();
-
 private:
     OCR::LanguageOCROption LANGUAGE;
-    EnumDropdownOption<StartPoint> STARTPOINT;
-    SegmentSelectOption STARTPOINT2;
-    // SegmentSelectOption ENDPOINT2;
+    SegmentSelectOption STARTPOINT;
+    SegmentSelectOption ENDPOINT;
 
     enum class EndPoint{
         INTRO_CUTSCENE,
@@ -80,7 +78,6 @@ private:
         LOS_PLATOS,
         MESAGOZA_SOUTH,
     };
-    EnumDropdownOption<EndPoint> ENDPOINT;
 
     StaticTextOption START_DESCRIPTION;
     StaticTextOption END_DESCRIPTION;
