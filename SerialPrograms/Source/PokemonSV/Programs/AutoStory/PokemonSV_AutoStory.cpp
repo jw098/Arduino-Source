@@ -461,7 +461,7 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
     if (ENABLE_TEST_CHECKPOINTS){
         // test individual checkpoints
         test_checkpoints(env, env.console, context, START_CHECKPOINT, END_CHECKPOINT, LOOP_CHECKPOINT, START_LOOP, END_LOOP);
-        context.wait_for(Milliseconds(1000000));
+        return;
     }
     
 
@@ -469,7 +469,7 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         // clear realign marker
         // realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 128, 128, 0);
         realign_player(env.program_info(), env.console, context, REALIGN_MODE, X_REALIGN, Y_REALIGN, REALIGN_DURATION);
-        context.wait_for(Milliseconds(1000000));
+        return;
     }
 
     if (ENABLE_TEST_OVERWORLD_MOVE){
@@ -482,12 +482,12 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         // overworld_navigation(env.program_info(), env.console, context, 
         //     NavigationStopCondition::STOP_TIME, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
         //     128, 0, 25, 10, false);         
-        context.wait_for(Milliseconds(1000000));
+        return;
     }
 
     if (TEST_PBF_LEFT_JOYSTICK){
         pbf_move_left_joystick(context, X_MOVE, Y_MOVE, HOLD_TICKS, RELEASE_TICKS);
-        context.wait_for(Milliseconds(1000000));
+        return;
     }        
 
     // context.wait_for(Milliseconds(1000000));
@@ -502,7 +502,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
     // Connect controller
     pbf_press_button(context, BUTTON_L, 20, 20);
 
-    test_code(env, context);
+    // test code
+    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_TEST_OVERWORLD_MOVE || TEST_PBF_LEFT_JOYSTICK){
+        test_code(env, context);
+        return;
+    }
 
     // Set settings. to ensure autosave is off.
     if (CHANGE_SETTINGS){
