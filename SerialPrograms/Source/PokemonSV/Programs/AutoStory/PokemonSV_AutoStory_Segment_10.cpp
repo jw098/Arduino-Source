@@ -1,4 +1,4 @@
-/*  AutoStoryTools
+/*  AutoStory
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
@@ -10,25 +10,16 @@
 #include "CommonFramework/InferenceInfra/InferenceRoutines.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/Tools/StatsTracking.h"
-#include "CommonFramework/ImageTools/SolidColorTest.h"
+#include "CommonFramework/Tools/VideoResolutionCheck.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
-#include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
-#include "NintendoSwitch/Programs/NintendoSwitch_SnapshotDumper.h"
+#include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
-#include "PokemonSV/Inference/Battles/PokemonSV_NormalBattleMenus.h"
-#include "PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
-#include "PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
-#include "PokemonSV/Inference/PokemonSV_MainMenuDetector.h"
-#include "PokemonSV/Inference/Map/PokemonSV_MapMenuDetector.h"
-#include "PokemonSV/Programs/PokemonSV_Navigation.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
-#include "PokemonSV/Programs/Battles/PokemonSV_Battles.h"
-#include "PokemonSV/Programs/AutoStory/PokemonSV_MenuOption.h"
 #include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
-#include "PokemonSV/Inference/PokemonSV_PokemonMovesReader.h"
-#include "PokemonSV/Inference/Map/PokemonSV_DestinationMarkerDetector.h"
+#include "CommonFramework/Inference/BlackScreenDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
+#include "PokemonSV_AutoStory_Segment_10.h"
 
 //#include <iostream>
 //using std::cout;
@@ -43,6 +34,36 @@ namespace PokemonSV{
 using namespace Pokemon;
 
 
+
+
+std::string AutoStory_Segment_10::name() const{
+    return "10.1: Cortondo Gym - Go to Cortondo city";
+}
+
+std::string AutoStory_Segment_10::start_text() const{
+    return "Start: After the break, with level 100 Gardevoir. At Mesagoza West pokecenter.";
+}
+
+std::string AutoStory_Segment_10::end_text() const{
+    return "End: At Cortondo East Pokecenter.";
+}
+
+void AutoStory_Segment_10::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+
+    context.wait_for_all_requests();
+    env.console.overlay().add_log("Start Segment 10.1: Cortondo Gym - Go to Cortondo city", COLOR_ORANGE);
+
+    checkpoint_21(env, context, options.notif_status_update);
+    checkpoint_22(env, context, options.notif_status_update);
+    checkpoint_23(env, context, options.notif_status_update);
+
+    context.wait_for_all_requests();
+    env.console.log("End Segment 10.1: Cortondo Gym - Go to Cortondo city", COLOR_GREEN);
+    stats.m_segment++;
+    env.update_stats();
+
+}
 
 void checkpoint_21(
     SingleSwitchProgramEnvironment& env, 
@@ -178,6 +199,8 @@ void checkpoint_22(
 
 }
 
+
+
 void checkpoint_23(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -250,60 +273,6 @@ void checkpoint_23(
             128, 15, 12, 12, false);         
 
         fly_to_overlapping_flypoint(env.program_info(), env.console, context);             
-       
-        break;
-    }catch(...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }             
-    }
-
-}
-
-void checkpoint_24(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch(...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }             
-    }
-
-}
-
-void checkpoint_25(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
        
         break;
     }catch(...){

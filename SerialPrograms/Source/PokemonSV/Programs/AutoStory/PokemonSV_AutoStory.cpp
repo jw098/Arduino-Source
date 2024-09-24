@@ -15,12 +15,6 @@
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
-#include "PokemonSV_AutoStory_Checkpoint_00_04.h"
-#include "PokemonSV_AutoStory_Checkpoint_05_10.h"
-#include "PokemonSV_AutoStory_Checkpoint_11_15.h"
-#include "PokemonSV_AutoStory_Checkpoint_16_20.h"
-#include "PokemonSV_AutoStory_Checkpoint_21_25.h"
-#include "PokemonSV_AutoStory_Checkpoint_26_30.h"
 #include "PokemonSV_AutoStory_Segment_00.h"
 #include "PokemonSV_AutoStory_Segment_01.h"
 #include "PokemonSV_AutoStory_Segment_02.h"
@@ -29,6 +23,14 @@
 #include "PokemonSV_AutoStory_Segment_05.h"
 #include "PokemonSV_AutoStory_Segment_06.h"
 #include "PokemonSV_AutoStory_Segment_07.h"
+#include "PokemonSV_AutoStory_Segment_08.h"
+#include "PokemonSV_AutoStory_Segment_09.h"
+#include "PokemonSV_AutoStory_Segment_10.h"
+#include "PokemonSV_AutoStory_Segment_11.h"
+#include "PokemonSV_AutoStory_Segment_12.h"
+#include "PokemonSV_AutoStory_Segment_13.h"
+#include "PokemonSV_AutoStory_Segment_14.h"
+#include "PokemonSV_AutoStory_Segment_15.h"
 #include "PokemonSV_AutoStory.h"
 
 //#include <iostream>
@@ -54,6 +56,13 @@ std::vector<std::unique_ptr<AutoStory_Segment>> make_autoStory_segment_list(){
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_05>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_06>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_07>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_08>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_09>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_10>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_11>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_12>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_13>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_14>());
 
     return segment_list;
 };
@@ -110,8 +119,8 @@ std::unique_ptr<StatsTracker> AutoStory_Descriptor::make_stats() const{
 
 
 AutoStory::~AutoStory(){
-    STARTPOINT.remove_listener(*this);
-    ENDPOINT.remove_listener(*this);
+    STARTPOINT_TUTORIAL.remove_listener(*this);
+    ENDPOINT_TUTORIAL.remove_listener(*this);
 }
 
 AutoStory::AutoStory()
@@ -121,15 +130,24 @@ AutoStory::AutoStory()
         LockMode::UNLOCK_WHILE_RUNNING,
         true
     )
-    , STARTPOINT(
+    , STORY_SECTION(
+        "<b>Story Section:",
+        {
+            {StorySection::TUTORIAL,         "tutorial",           "Tutorial"},
+            {StorySection::MAIN_STORY,            "main-story",              "Main Story"},
+        },
+        LockMode::LOCK_WHILE_RUNNING,
+        StorySection::TUTORIAL
+    )    
+    , STARTPOINT_TUTORIAL(
         "<b>Start Point:</b><br>Program will start with this segment.",
         LockMode::UNLOCK_WHILE_RUNNING,
         "0"
     )
-    , ENDPOINT(
+    , ENDPOINT_TUTORIAL(
         "<b>End Point:</b><br>Program will stop after completing this segment.",
         LockMode::UNLOCK_WHILE_RUNNING,
-        "0"
+        "9"
     )    
     , START_DESCRIPTION(
         ""
@@ -261,9 +279,10 @@ AutoStory::AutoStory()
     )             
 {
     PA_ADD_OPTION(LANGUAGE);
-    PA_ADD_OPTION(STARTPOINT);
+    PA_ADD_OPTION(STORY_SECTION);
+    PA_ADD_OPTION(STARTPOINT_TUTORIAL);
     PA_ADD_OPTION(START_DESCRIPTION);
-    PA_ADD_OPTION(ENDPOINT);
+    PA_ADD_OPTION(ENDPOINT_TUTORIAL);
     PA_ADD_OPTION(END_DESCRIPTION);
     PA_ADD_OPTION(STARTERCHOICE);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
@@ -297,8 +316,8 @@ AutoStory::AutoStory()
 
     AutoStory::value_changed(this);
 
-    STARTPOINT.add_listener(*this);
-    ENDPOINT.add_listener(*this);
+    STARTPOINT_TUTORIAL.add_listener(*this);
+    ENDPOINT_TUTORIAL.add_listener(*this);
     ENABLE_TEST_CHECKPOINTS.add_listener(*this);
     ENABLE_TEST_REALIGN.add_listener(*this);
     ENABLE_TEST_OVERWORLD_MOVE.add_listener(*this);
@@ -306,13 +325,13 @@ AutoStory::AutoStory()
 }
 
 void AutoStory::value_changed(void* object){
-    ConfigOptionState state = (STARTPOINT.index() <= 1)
+    ConfigOptionState state = (STARTPOINT_TUTORIAL.index() <= 1)
         ? ConfigOptionState::ENABLED
         : ConfigOptionState::HIDDEN;
     STARTERCHOICE.set_visibility(state);
 
-    START_DESCRIPTION.set_text(ALL_AUTO_STORY_SEGMENT_LIST()[STARTPOINT.index()]->start_text());
-    END_DESCRIPTION.set_text(ALL_AUTO_STORY_SEGMENT_LIST()[ENDPOINT.index()]->end_text());
+    START_DESCRIPTION.set_text(ALL_AUTO_STORY_SEGMENT_LIST()[STARTPOINT_TUTORIAL.index()]->start_text());
+    END_DESCRIPTION.set_text(ALL_AUTO_STORY_SEGMENT_LIST()[ENDPOINT_TUTORIAL.index()]->end_text());
 
     if (ENABLE_TEST_CHECKPOINTS){
         START_CHECKPOINT.set_visibility(ConfigOptionState::ENABLED);
@@ -449,8 +468,8 @@ void AutoStory::run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContex
         NOTIFICATION_STATUS_UPDATE
     };    
 
-    size_t start = STARTPOINT.index();
-    size_t end = ENDPOINT.index();
+    size_t start = STARTPOINT_TUTORIAL.index();
+    size_t end = ENDPOINT_TUTORIAL.index();
     for (size_t segment_index = start; segment_index <= end; segment_index++){
         ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->run_segment(env, context, options);
     }
@@ -510,7 +529,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
 
     // Set settings. to ensure autosave is off.
     if (CHANGE_SETTINGS){
-        change_settings_prior_to_autostory(env, context, STARTPOINT.index(), LANGUAGE);
+        change_settings_prior_to_autostory(env, context, STARTPOINT_TUTORIAL.index(), LANGUAGE);
     }
 
     run_autostory(env, context);

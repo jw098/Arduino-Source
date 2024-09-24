@@ -1,32 +1,37 @@
-/*  AutostoryTools
+/*  Autostory
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
  */
 
-#ifndef PokemonAutomation_PokemonSV_AutoStory_Checkpoint_26_30_H
-#define PokemonAutomation_PokemonSV_AutoStory_Checkpoint_26_30_H
+#ifndef PokemonAutomation_PokemonSV_AutoStory_Segment_15_H
+#define PokemonAutomation_PokemonSV_AutoStory_Segment_15_H
 
-#include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
+#include <functional>
+#include "Common/Cpp/Options/EnumDropdownOption.h"
+#include "CommonFramework/Notifications/EventNotificationsTable.h"
+#include "CommonFramework/Options/LanguageOCROption.h"
+#include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
+#include "Common/NintendoSwitch/NintendoSwitch_ControllerDefs.h"
+#include "PokemonSV/Programs/PokemonSV_Navigation.h"
 #include "PokemonSV_AutoStoryTools.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
 
+class AutoStory_Segment_15 : public AutoStory_Segment{
+public:
+    virtual std::string name() const override;
+    virtual std::string start_text() const override;
+    virtual std::string end_text() const override;
+    virtual void run_segment(
+        SingleSwitchProgramEnvironment& env, 
+        BotBaseContext& context,
+        AutoStoryOptions options) const override;
+};
 
 
-// start: At Cortondo West Pokecenter.
-// end: At West Province Area One Central Pokecenter
-void checkpoint_26(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
-
-// start: At West Province Area One Central Pokecenter
-// end: Beat Bombirdier
-void checkpoint_27(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);    
-
-// start: 
-// end: 
-void checkpoint_28(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 // start: 
 // end: 
@@ -51,7 +56,6 @@ void checkpoint_33(SingleSwitchProgramEnvironment& env, BotBaseContext& context,
 // start: 
 // end: 
 void checkpoint_34(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
-
 
 
 

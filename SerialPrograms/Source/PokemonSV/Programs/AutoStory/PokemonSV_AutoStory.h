@@ -65,19 +65,16 @@ private:
 
 private:
     OCR::LanguageOCROption LANGUAGE;
-    SegmentSelectOption STARTPOINT;
-    SegmentSelectOption ENDPOINT;
-
-    enum class EndPoint{
-        INTRO_CUTSCENE,
-        PICK_STARTER,
-        NEMONA_FIRST_BATTLE,
-        CATCH_TUTORIAL,
-        LEGENDARY_RESCUE,
-        ARVEN_FIRST_BATTLE,
-        LOS_PLATOS,
-        MESAGOZA_SOUTH,
+    
+    enum class StorySection{
+        TUTORIAL,
+        MAIN_STORY,
     };
+
+    EnumDropdownOption<StorySection> STORY_SECTION;
+
+    SegmentSelectOption STARTPOINT_TUTORIAL;
+    SegmentSelectOption ENDPOINT_TUTORIAL;
 
     StaticTextOption START_DESCRIPTION;
     StaticTextOption END_DESCRIPTION;

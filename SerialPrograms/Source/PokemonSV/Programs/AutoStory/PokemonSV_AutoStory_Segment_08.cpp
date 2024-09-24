@@ -1,4 +1,4 @@
-/*  AutoStoryTools
+/*  AutoStory
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
@@ -10,25 +10,15 @@
 #include "CommonFramework/InferenceInfra/InferenceRoutines.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/Tools/StatsTracking.h"
-#include "CommonFramework/ImageTools/SolidColorTest.h"
+#include "CommonFramework/Tools/VideoResolutionCheck.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
-#include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
-#include "NintendoSwitch/Programs/NintendoSwitch_SnapshotDumper.h"
+#include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
-#include "PokemonSV/Inference/Battles/PokemonSV_NormalBattleMenus.h"
-#include "PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
-#include "PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
-#include "PokemonSV/Inference/PokemonSV_MainMenuDetector.h"
-#include "PokemonSV/Inference/Map/PokemonSV_MapMenuDetector.h"
-#include "PokemonSV/Programs/PokemonSV_Navigation.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
-#include "PokemonSV/Programs/Battles/PokemonSV_Battles.h"
-#include "PokemonSV/Programs/AutoStory/PokemonSV_MenuOption.h"
 #include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
-#include "PokemonSV/Inference/PokemonSV_PokemonMovesReader.h"
-#include "PokemonSV/Inference/Map/PokemonSV_DestinationMarkerDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
+#include "PokemonSV_AutoStory_Segment_08.h"
 
 //#include <iostream>
 //using std::cout;
@@ -43,6 +33,37 @@ namespace PokemonSV{
 using namespace Pokemon;
 
 
+
+
+std::string AutoStory_Segment_08::name() const{
+    return "08: Beat Team Star and arrive at School";
+}
+
+std::string AutoStory_Segment_08::start_text() const{
+    return "Start: At Mesagoza South Pokecenter.";
+}
+
+std::string AutoStory_Segment_08::end_text() const{
+    return "End: Battled Team Star, talked to Jacq, standing in classroom.";
+}
+
+void AutoStory_Segment_08::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+
+    context.wait_for_all_requests();
+    env.console.log("Start Segment 08: Beat Team Star and arrive at School", COLOR_ORANGE);
+
+    checkpoint_13(env, context, options.notif_status_update);
+    checkpoint_14(env, context, options.notif_status_update);
+    checkpoint_15(env, context, options.notif_status_update);
+    
+
+    context.wait_for_all_requests();
+    env.console.log("End Segment 08: Beat Team Star and arrive at School", COLOR_GREEN);
+    stats.m_segment++;
+    env.update_stats();
+
+}
 
 
 void checkpoint_13(
@@ -195,6 +216,7 @@ void checkpoint_15(
     }
 
 }
+
 
 
 }
