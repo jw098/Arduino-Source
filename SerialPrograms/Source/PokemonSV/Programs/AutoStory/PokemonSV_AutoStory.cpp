@@ -87,17 +87,39 @@ const StringSelectDatabase& ALL_SEGMENTS_SELECT_DATABASE(){
     return database;
 }
 
-SegmentSelectOption::SegmentSelectOption(
-    std::string label,
-    LockMode lock_while_running,
-    const std::string& default_slug
-)  : StringSelectOption(
-        std::move(label),
-        ALL_SEGMENTS_SELECT_DATABASE(),
-        lock_while_running,
-        default_slug
-    )
-{}
+StringSelectDatabase make_tutorial_segments_database(){
+    StringSelectDatabase ret;
+    const StringSelectDatabase& all_segments = ALL_SEGMENTS_SELECT_DATABASE();
+    size_t start = 0;
+    size_t end = 10; // all_segments.case_list().size();
+    for (size_t i = start; i < end; i++){
+        const auto& segment = all_segments[i];
+        ret.add_entry(segment);
+    }
+    return ret;
+}
+
+const StringSelectDatabase& TUTORIAL_SEGMENTS_SELECT_DATABASE(){
+    static StringSelectDatabase database = make_tutorial_segments_database();
+    return database;
+}
+
+StringSelectDatabase make_mainstory_segments_database(){
+    StringSelectDatabase ret;
+    const StringSelectDatabase& all_segments = ALL_SEGMENTS_SELECT_DATABASE();
+    size_t start = 10;
+    size_t end = all_segments.case_list().size();
+    for (size_t i = start; i < end; i++){
+        const auto& segment = all_segments[i];
+        ret.add_entry(segment);
+    }
+    return ret;
+}
+
+const StringSelectDatabase& MAINSTORY_SEGMENTS_SELECT_DATABASE(){
+    static StringSelectDatabase database = make_mainstory_segments_database();
+    return database;
+}
 
 
 AutoStory_Descriptor::AutoStory_Descriptor()
@@ -141,14 +163,32 @@ AutoStory::AutoStory()
     )    
     , STARTPOINT_TUTORIAL(
         "<b>Start Point:</b><br>Program will start with this segment.",
+        TUTORIAL_SEGMENTS_SELECT_DATABASE(),
         LockMode::UNLOCK_WHILE_RUNNING,
         "0"
     )
     , ENDPOINT_TUTORIAL(
         "<b>End Point:</b><br>Program will stop after completing this segment.",
+        TUTORIAL_SEGMENTS_SELECT_DATABASE(),
         LockMode::UNLOCK_WHILE_RUNNING,
         "9"
-    )    
+    )   
+    , STARTPOINT_MAINSTORY(
+        "<b>Start Point:</b><br>Program will start with this segment.",
+        MAINSTORY_SEGMENTS_SELECT_DATABASE(),
+        LockMode::UNLOCK_WHILE_RUNNING,
+        "10"
+    )
+    , ENDPOINT_MAINSTORY(
+        "<b>End Point:</b><br>Program will stop after completing this segment.",
+        MAINSTORY_SEGMENTS_SELECT_DATABASE(),
+        LockMode::UNLOCK_WHILE_RUNNING,
+        "10"
+    )       
+    , MAINSTORY_NOTE{
+        "Ensure you have a level 100 Gardevoir with the moves in the following order: Moonblast, Dazzling Gleam, Psychic, Mystical Fire.<br>"
+        "Refer to the documentation on github for more details."
+    }
     , START_DESCRIPTION(
         ""
     )
@@ -281,8 +321,11 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(LANGUAGE);
     PA_ADD_OPTION(STORY_SECTION);
     PA_ADD_OPTION(STARTPOINT_TUTORIAL);
+    PA_ADD_OPTION(MAINSTORY_NOTE);
+    PA_ADD_OPTION(STARTPOINT_MAINSTORY);
     PA_ADD_OPTION(START_DESCRIPTION);
     PA_ADD_OPTION(ENDPOINT_TUTORIAL);
+    PA_ADD_OPTION(ENDPOINT_MAINSTORY);
     PA_ADD_OPTION(END_DESCRIPTION);
     PA_ADD_OPTION(STARTERCHOICE);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
@@ -316,8 +359,11 @@ AutoStory::AutoStory()
 
     AutoStory::value_changed(this);
 
+    STORY_SECTION.add_listener(*this);
     STARTPOINT_TUTORIAL.add_listener(*this);
     ENDPOINT_TUTORIAL.add_listener(*this);
+    STARTPOINT_MAINSTORY.add_listener(*this);
+    ENDPOINT_MAINSTORY.add_listener(*this);    
     ENABLE_TEST_CHECKPOINTS.add_listener(*this);
     ENABLE_TEST_REALIGN.add_listener(*this);
     ENABLE_TEST_OVERWORLD_MOVE.add_listener(*this);
@@ -330,8 +376,23 @@ void AutoStory::value_changed(void* object){
         : ConfigOptionState::HIDDEN;
     STARTERCHOICE.set_visibility(state);
 
-    START_DESCRIPTION.set_text(ALL_AUTO_STORY_SEGMENT_LIST()[STARTPOINT_TUTORIAL.index()]->start_text());
-    END_DESCRIPTION.set_text(ALL_AUTO_STORY_SEGMENT_LIST()[ENDPOINT_TUTORIAL.index()]->end_text());
+    if (STORY_SECTION == StorySection::TUTORIAL){
+        STARTPOINT_TUTORIAL.set_visibility(ConfigOptionState::ENABLED);
+        ENDPOINT_TUTORIAL.set_visibility(ConfigOptionState::ENABLED);
+
+        STARTPOINT_MAINSTORY.set_visibility(ConfigOptionState::HIDDEN);
+        ENDPOINT_MAINSTORY.set_visibility(ConfigOptionState::HIDDEN);
+    }else if (STORY_SECTION == StorySection::MAIN_STORY){
+        STARTPOINT_TUTORIAL.set_visibility(ConfigOptionState::HIDDEN);
+        ENDPOINT_TUTORIAL.set_visibility(ConfigOptionState::HIDDEN);
+
+        STARTPOINT_MAINSTORY.set_visibility(ConfigOptionState::ENABLED);
+        ENDPOINT_MAINSTORY.set_visibility(ConfigOptionState::ENABLED);        
+    }
+
+    MAINSTORY_NOTE.set_visibility(STORY_SECTION == StorySection::TUTORIAL ? ConfigOptionState::HIDDEN : ConfigOptionState::ENABLED);
+    START_DESCRIPTION.set_text(start_segment_description());
+    END_DESCRIPTION.set_text(end_segment_description());
 
     if (ENABLE_TEST_CHECKPOINTS){
         START_CHECKPOINT.set_visibility(ConfigOptionState::ENABLED);
@@ -460,6 +521,27 @@ void AutoStory::test_checkpoints(
     }
     
 }
+
+std::string AutoStory::start_segment_description(){
+    size_t segment_index = 0;
+    if (STORY_SECTION == StorySection::TUTORIAL){
+        segment_index = STARTPOINT_TUTORIAL.index();
+    }else if (STORY_SECTION == StorySection::MAIN_STORY){
+        segment_index = STARTPOINT_MAINSTORY.index() + 10;
+    }
+    return ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->start_text();
+}
+
+std::string AutoStory::end_segment_description(){
+    size_t segment_index = 0;
+    if (STORY_SECTION == StorySection::TUTORIAL){
+        segment_index = ENDPOINT_TUTORIAL.index();
+    }else if (STORY_SECTION == StorySection::MAIN_STORY){
+        segment_index = ENDPOINT_MAINSTORY.index() + 10;
+    }    
+    return ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->end_text();
+}
+
 
 void AutoStory::run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
     AutoStoryOptions options{

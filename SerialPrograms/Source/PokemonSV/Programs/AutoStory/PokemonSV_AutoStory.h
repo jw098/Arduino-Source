@@ -21,14 +21,6 @@ namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
 
-class SegmentSelectOption : public StringSelectOption{
-public:
-    SegmentSelectOption(
-        std::string label,
-        LockMode lock_while_running,
-        const std::string& default_slug = ""
-    );
-};
 
 
 class AutoStory_Descriptor : public SingleSwitchProgramDescriptor{
@@ -60,6 +52,10 @@ public:
 
     void run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
 
+    std::string start_segment_description();
+
+    std::string end_segment_description();
+
 private:
     virtual void value_changed(void* object) override;
 
@@ -73,8 +69,13 @@ private:
 
     EnumDropdownOption<StorySection> STORY_SECTION;
 
-    SegmentSelectOption STARTPOINT_TUTORIAL;
-    SegmentSelectOption ENDPOINT_TUTORIAL;
+    StringSelectOption STARTPOINT_TUTORIAL;
+    StringSelectOption ENDPOINT_TUTORIAL;
+
+    StringSelectOption STARTPOINT_MAINSTORY;
+    StringSelectOption ENDPOINT_MAINSTORY;
+
+    StaticTextOption MAINSTORY_NOTE;
 
     StaticTextOption START_DESCRIPTION;
     StaticTextOption END_DESCRIPTION;
