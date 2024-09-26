@@ -231,6 +231,10 @@ void checkpoint_27(
 
         run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
         clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 30, {ClearDialogCallback::BATTLE});
+        // round 2 of battle 
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, true);
+        // get ride upgrade
+        mash_button_till_overworld(env.console, context, BUTTON_A);
 
        
         break;

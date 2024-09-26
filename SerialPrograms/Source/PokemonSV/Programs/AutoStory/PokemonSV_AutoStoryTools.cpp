@@ -50,7 +50,8 @@ using namespace Pokemon;
 void run_battle_press_A(
     ConsoleHandle& console, 
     BotBaseContext& context,
-    BattleStopCondition stop_condition
+    BattleStopCondition stop_condition,
+    bool detect_dialog_arrow
 ){
     int16_t num_times_seen_overworld = 0;
     while (true){
@@ -58,12 +59,17 @@ void run_battle_press_A(
         // SwapMenuWatcher         fainted(COLOR_PURPLE);
         OverworldWatcher        overworld(console, COLOR_CYAN);
         AdvanceDialogWatcher    dialog(COLOR_RED);
+        DialogArrowWatcher dialog_arrow(COLOR_RED, console.overlay(), {0.850, 0.820, 0.020, 0.050}, 0.8365, 0.846);
+        std::vector<PeriodicInferenceCallback> callbacks = {battle, overworld, dialog};
         context.wait_for_all_requests();
+        if (detect_dialog_arrow){
+            callbacks.emplace_back(dialog_arrow);
+        }
 
         int ret = wait_until(
             console, context,
             std::chrono::seconds(90),
-            {battle, overworld, dialog}
+            callbacks
         );
         context.wait_for(std::chrono::milliseconds(100));
 
@@ -105,6 +111,10 @@ void run_battle_press_A(
             if (stop_condition == BattleStopCondition::STOP_DIALOG){
                 return;
             }
+            pbf_press_button(context, BUTTON_A, 20, 105);
+            break;
+        case 3:  // dialog arrow
+            console.log("run_battle_press_A: Detected dialog arrow.");
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
         default: // timeout

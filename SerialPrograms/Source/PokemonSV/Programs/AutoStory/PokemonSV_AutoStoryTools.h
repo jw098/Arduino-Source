@@ -101,6 +101,7 @@ struct AutoStoryOptions{
 
 class AutoStory_Segment {
 public:
+    virtual ~AutoStory_Segment() = default;
     virtual std::string name() const = 0;
     virtual std::string start_text() const = 0;
     virtual std::string end_text() const = 0;
@@ -115,7 +116,8 @@ public:
 void run_battle_press_A(
     ConsoleHandle& console, 
     BotBaseContext& context,
-    BattleStopCondition stop_condition
+    BattleStopCondition stop_condition,
+    bool detect_dialog_arrow = false
 );
 
 // press A to clear tutorial screens
