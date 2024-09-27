@@ -264,6 +264,44 @@ void checkpoint_28(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+        // section 1. fall down the mountain
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 80, 180},
+            {ZoomChange::KEEP_ZOOM, 0, 170, 120}
+        );        
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 50, 10, false); 
+        // section 2
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 80, 100},
+            {ZoomChange::KEEP_ZOOM, 0, 255, 55}
+        );  
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 10, false);         
+        // section 3. align to pokecenter
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 255, 0, 40},
+            {ZoomChange::KEEP_ZOOM, 0, 0, 0}
+        );  
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 10, false);      
+
+        // section 4. set marker past pokecenter
+        handle_unexpected_battles(env.program_info(), env.console, context,
+        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){                        
+            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 60, 40);
+        });
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 15, 12, 12, false);   
+
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);
        
         break;
     }catch (...){
