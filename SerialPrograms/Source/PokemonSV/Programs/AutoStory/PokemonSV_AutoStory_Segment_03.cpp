@@ -128,7 +128,7 @@ void checkpoint_06(
         context.wait_for_all_requests();
         env.console.log("clear_dialog: Talk with Nemona to start catch tutorial. Stop when detect battle.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, 
-            {ClearDialogCallback::WHITE_A_BUTTON, ClearDialogCallback::TUTORIAL, ClearDialogCallback::BATTLE});
+            {CallbackEnum::WHITE_A_BUTTON, CallbackEnum::TUTORIAL, CallbackEnum::BATTLE});
         
         // can die in catch tutorial, and the story will continue
         env.console.log("run_battle_press_A: Battle Lechonk in catch tutorial. Stop when detect dialog.");
@@ -136,7 +136,7 @@ void checkpoint_06(
 
         env.console.log("clear_dialog: Talk with Nemona to finish catch tutorial. Stop when detect overworld.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, 
-            {ClearDialogCallback::TUTORIAL, ClearDialogCallback::OVERWORLD});
+            {CallbackEnum::TUTORIAL, CallbackEnum::OVERWORLD});
 
         context.wait_for_all_requests();
         env.console.log("Finished catch tutorial");
@@ -176,7 +176,7 @@ void checkpoint_07(
         overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 116, 0, 72, 24);
 
         env.console.log("clear_dialog: Talk to Nemona at the cliff. Stop when detect overworld.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {ClearDialogCallback::OVERWORLD});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD});
 
         context.wait_for_all_requests();
         env.console.log("Mystery cry");

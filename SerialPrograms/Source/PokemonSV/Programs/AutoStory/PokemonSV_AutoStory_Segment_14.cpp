@@ -117,7 +117,7 @@ void checkpoint_27(
             NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 20, 10, false);
 
-        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 30, {ClearDialogCallback::OVERWORLD, ClearDialogCallback::BLACK_DIALOG_BOX});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 30, {CallbackEnum::OVERWORLD, CallbackEnum::BLACK_DIALOG_BOX});
 
         // after Arven dialog. section 5
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
@@ -230,9 +230,9 @@ void checkpoint_27(
         }       
 
         run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
-        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 30, {ClearDialogCallback::BATTLE});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 30, {CallbackEnum::BATTLE});
         // round 2 of battle 
-        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, true);
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, {CallbackEnum::DIALOG_ARROW});
         // get ride upgrade
         mash_button_till_overworld(env.console, context, BUTTON_A);
 

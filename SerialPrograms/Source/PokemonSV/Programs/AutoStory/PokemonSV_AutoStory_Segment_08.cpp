@@ -94,14 +94,14 @@ void checkpoint_13(
 
         env.console.log("clear_dialog: Talk with Nemona at Mesagoza gate. Stop when detect battle.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60,
-            {ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::DIALOG_ARROW, ClearDialogCallback::BATTLE});
+            {CallbackEnum::PROMPT_DIALOG, CallbackEnum::DIALOG_ARROW, CallbackEnum::BATTLE});
         
         env.console.log("run_battle_press_A: Battle with Nemona at Mesagoza gate. Stop when detect dialog.");
         run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
         
         env.console.log("clear_dialog: Talk with Nemona within Mesagoza. Stop when detect overworld.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, 
-            {ClearDialogCallback::OVERWORLD, ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::WHITE_A_BUTTON});
+            {CallbackEnum::OVERWORLD, CallbackEnum::PROMPT_DIALOG, CallbackEnum::WHITE_A_BUTTON});
         
        
         break;
@@ -148,19 +148,19 @@ void checkpoint_14(
         walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 60);
         // clear dialog until battle. with prompt, battle
         env.console.log("clear_dialog: Talk with Team Star at the top of the stairs. Stop when detect battle.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::BATTLE, ClearDialogCallback::DIALOG_ARROW});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::PROMPT_DIALOG, CallbackEnum::BATTLE, CallbackEnum::DIALOG_ARROW});
         // run battle until dialog
         env.console.log("run_battle_press_A: Battle with Team Star grunt 1. Stop when detect dialog.");
         run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
         // clear dialog until battle, with prompt, white button, tutorial, battle
         env.console.log("clear_dialog: Talk with Team Star and Nemona. Receive Tera orb. Stop when detect battle.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, 
-            {ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::WHITE_A_BUTTON, ClearDialogCallback::TUTORIAL, ClearDialogCallback::BATTLE, ClearDialogCallback::DIALOG_ARROW});
+            {CallbackEnum::PROMPT_DIALOG, CallbackEnum::WHITE_A_BUTTON, CallbackEnum::TUTORIAL, CallbackEnum::BATTLE, CallbackEnum::DIALOG_ARROW});
         // run battle until dialog
         env.console.log("run_battle_press_A: Battle with Team Star grunt 2. Stop when detect dialog.");
         run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
         // clear dialog until overworld
-        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {ClearDialogCallback::OVERWORLD});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD});
        
         break;
     }catch(...){
@@ -203,7 +203,7 @@ void checkpoint_15(
 
         env.console.log("clear_dialog: Talk with Nemona, Clavell, and Jacq inside the school. Stop when detect overworld.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, 
-            {ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::OVERWORLD});
+            {CallbackEnum::PROMPT_DIALOG, CallbackEnum::OVERWORLD});
        
         break;
     }catch(...){

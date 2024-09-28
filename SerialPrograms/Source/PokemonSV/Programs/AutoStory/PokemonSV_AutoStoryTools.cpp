@@ -51,7 +51,7 @@ void run_battle_press_A(
     ConsoleHandle& console, 
     BotBaseContext& context,
     BattleStopCondition stop_condition,
-    bool detect_dialog_arrow
+    std::vector<CallbackEnum> enum_optional_callbacks
 ){
     int16_t num_times_seen_overworld = 0;
     while (true){
@@ -60,11 +60,33 @@ void run_battle_press_A(
         OverworldWatcher        overworld(console, COLOR_CYAN);
         AdvanceDialogWatcher    dialog(COLOR_RED);
         DialogArrowWatcher dialog_arrow(COLOR_RED, console.overlay(), {0.850, 0.820, 0.020, 0.050}, 0.8365, 0.846);
-        std::vector<PeriodicInferenceCallback> callbacks = {battle, overworld, dialog};
+        GradientArrowWatcher next_pokemon(COLOR_BLUE, GradientArrowType::RIGHT, {0.50, 0.51, 0.30, 0.10});
+
+        std::vector<PeriodicInferenceCallback> callbacks; 
+        std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::BATTLE, CallbackEnum::OVERWORLD, CallbackEnum::ADVANCE_DIALOG}; // mandatory callbacks
+        enum_all_callbacks.insert(enum_all_callbacks.end(), enum_optional_callbacks.begin(), enum_optional_callbacks.end()); // append the mandatory and optional callback vectors together
+        for (const CallbackEnum& enum_callback : enum_all_callbacks){
+            switch(enum_callback){
+            case CallbackEnum::ADVANCE_DIALOG:
+                callbacks.emplace_back(dialog);
+                break;                
+            case CallbackEnum::OVERWORLD:
+                callbacks.emplace_back(overworld);
+                break;
+            case CallbackEnum::DIALOG_ARROW:
+                callbacks.emplace_back(dialog_arrow);
+                break;
+            case CallbackEnum::BATTLE:
+                callbacks.emplace_back(battle);
+                break;
+            case CallbackEnum::GRADIENT_ARROW:
+                callbacks.emplace_back(next_pokemon);
+                break;
+            default:
+                throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "run_battle_press_A: Unknown callback requested.");
+            }
+        }        
         context.wait_for_all_requests();
-        if (detect_dialog_arrow){
-            callbacks.emplace_back(dialog_arrow);
-        }
 
         int ret = wait_until(
             console, context,
@@ -72,13 +94,21 @@ void run_battle_press_A(
             callbacks
         );
         context.wait_for(std::chrono::milliseconds(100));
+        if (ret < 0){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "run_battle_press_A(): Timed out. Did not detect expected stop condition.",
+                true
+            );
+        }        
 
-        switch (ret){
-        case 0: // battle
+        CallbackEnum enum_callback = enum_all_callbacks[ret];
+        switch (enum_callback){
+        case CallbackEnum::BATTLE: // battle
             console.log("Detected battle menu, spam first move.");
             pbf_mash_button(context, BUTTON_A, 3 * TICKS_PER_SECOND);
             break;
-        case 1: // overworld
+        case CallbackEnum::OVERWORLD: // overworld
             console.log("Detected overworld, battle over.");
             num_times_seen_overworld++;
             if (stop_condition == BattleStopCondition::STOP_OVERWORLD){
@@ -92,7 +122,7 @@ void run_battle_press_A(
                 );  
             }            
             break;
-        case 2: // advance dialog
+        case CallbackEnum::ADVANCE_DIALOG: // advance dialog
             console.log("Detected dialog.");
             {
                 context.wait_for_all_requests();
@@ -113,16 +143,17 @@ void run_battle_press_A(
             }
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
-        case 3:  // dialog arrow
+        case CallbackEnum::DIALOG_ARROW:  // dialog arrow
             console.log("run_battle_press_A: Detected dialog arrow.");
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
+        case CallbackEnum::GRADIENT_ARROW:
+            console.log("run_battle_press_A: Detected prompt for bringing in next pokemon. Keep current pokemon.");
+            pbf_mash_button(context, BUTTON_B, 100);
+            break;
         default: // timeout
-            throw OperationFailedException(
-                ErrorReport::SEND_ERROR_REPORT, console,
-                "run_battle_press_A(): Timed out. Did not detect expected stop condition.",
-                true
-            );             
+            throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "run_battle_press_A: Unknown callback triggered.");
+          
         }
     }
 }
@@ -162,7 +193,7 @@ void clear_tutorial(ConsoleHandle& console, BotBaseContext& context, uint16_t se
 
 void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
     ClearDialogMode mode, uint16_t seconds_timeout,
-    std::vector<ClearDialogCallback> enum_optional_callbacks
+    std::vector<CallbackEnum> enum_optional_callbacks
 ){
     bool seen_dialog = false;
     WallClock start = current_time();
@@ -186,32 +217,32 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
         context.wait_for_all_requests();
 
         std::vector<PeriodicInferenceCallback> callbacks; 
-        std::vector<ClearDialogCallback> enum_all_callbacks{ClearDialogCallback::ADVANCE_DIALOG}; // mandatory callbacks
+        std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::ADVANCE_DIALOG}; // mandatory callbacks
         enum_all_callbacks.insert(enum_all_callbacks.end(), enum_optional_callbacks.begin(), enum_optional_callbacks.end()); // append the mandatory and optional callback vectors together
-        for (const ClearDialogCallback& enum_callback : enum_all_callbacks){
+        for (const CallbackEnum& enum_callback : enum_all_callbacks){
             switch(enum_callback){
-            case ClearDialogCallback::ADVANCE_DIALOG:
+            case CallbackEnum::ADVANCE_DIALOG:
                 callbacks.emplace_back(advance_dialog);
                 break;                
-            case ClearDialogCallback::OVERWORLD:
+            case CallbackEnum::OVERWORLD:
                 callbacks.emplace_back(overworld);
                 break;
-            case ClearDialogCallback::PROMPT_DIALOG:
+            case CallbackEnum::PROMPT_DIALOG:
                 callbacks.emplace_back(prompt);
                 break;
-            case ClearDialogCallback::WHITE_A_BUTTON:
+            case CallbackEnum::WHITE_A_BUTTON:
                 callbacks.emplace_back(whitebutton);
                 break;
-            case ClearDialogCallback::DIALOG_ARROW:
+            case CallbackEnum::DIALOG_ARROW:
                 callbacks.emplace_back(dialog_arrow);
                 break;
-            case ClearDialogCallback::BATTLE:
+            case CallbackEnum::BATTLE:
                 callbacks.emplace_back(battle);
                 break;
-            case ClearDialogCallback::TUTORIAL:
+            case CallbackEnum::TUTORIAL:
                 callbacks.emplace_back(tutorial);
                 break;          
-            case ClearDialogCallback::BLACK_DIALOG_BOX:
+            case CallbackEnum::BLACK_DIALOG_BOX:
                 callbacks.emplace_back(black_dialog_box);
                 break;              
             }
@@ -245,20 +276,20 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
             );
         }
 
-        ClearDialogCallback enum_callback = enum_all_callbacks[ret];
+        CallbackEnum enum_callback = enum_all_callbacks[ret];
         switch(enum_callback){
-        case ClearDialogCallback::ADVANCE_DIALOG:
+        case CallbackEnum::ADVANCE_DIALOG:
             console.log("clear_dialog: Detected advance dialog.");
             seen_dialog = true;
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;            
-        case ClearDialogCallback::OVERWORLD:
+        case CallbackEnum::OVERWORLD:
             console.log("clear_dialog: Detected overworld.");
             if (seen_dialog && mode == ClearDialogMode::STOP_OVERWORLD){
                 return;
             }
             break;
-        case ClearDialogCallback::PROMPT_DIALOG:
+        case CallbackEnum::PROMPT_DIALOG:
             console.log("clear_dialog: Detected prompt.");
             seen_dialog = true;
             if (mode == ClearDialogMode::STOP_PROMPT){
@@ -266,7 +297,7 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
             }
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
-        case ClearDialogCallback::WHITE_A_BUTTON:
+        case CallbackEnum::WHITE_A_BUTTON:
             console.log("clear_dialog: Detected white A button.");
             seen_dialog = true;
             if (mode == ClearDialogMode::STOP_WHITEBUTTON){
@@ -274,22 +305,22 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
             }
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
-        case ClearDialogCallback::DIALOG_ARROW:
+        case CallbackEnum::DIALOG_ARROW:
             console.log("clear_dialog: Detected dialog arrow.");
             seen_dialog = true;
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
-        case ClearDialogCallback::BATTLE:
+        case CallbackEnum::BATTLE:
             console.log("clear_dialog: Detected battle.");
             if (mode == ClearDialogMode::STOP_BATTLE){
                 return;
             }
             break;
-        case ClearDialogCallback::TUTORIAL:    
+        case CallbackEnum::TUTORIAL:    
             console.log("clear_dialog: Detected tutorial.");
             pbf_press_button(context, BUTTON_A, 20, 105);
             break;
-        case ClearDialogCallback::BLACK_DIALOG_BOX:    
+        case CallbackEnum::BLACK_DIALOG_BOX:    
             console.log("clear_dialog: Detected black dialog box.");
             seen_dialog = true;
             pbf_press_button(context, BUTTON_A, 20, 105);
@@ -591,7 +622,7 @@ void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& contex
     }
 
     pbf_mash_button(context, BUTTON_A, 1 * TICKS_PER_SECOND);
-    clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 5, {ClearDialogCallback::PROMPT_DIALOG});
+    clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 5, {CallbackEnum::PROMPT_DIALOG});
     
 }
 

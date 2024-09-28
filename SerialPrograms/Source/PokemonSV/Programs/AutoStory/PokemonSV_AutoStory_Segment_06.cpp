@@ -96,7 +96,7 @@ void checkpoint_11(
         overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0, 75);
 
         env.console.log("clear_dialog: Talk with Nemona at Los Platos. Clear Let's go tutorial. Stop when detect overworld.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {ClearDialogCallback::TUTORIAL, ClearDialogCallback::OVERWORLD});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::TUTORIAL, CallbackEnum::OVERWORLD});
 
         context.wait_for_all_requests();
 

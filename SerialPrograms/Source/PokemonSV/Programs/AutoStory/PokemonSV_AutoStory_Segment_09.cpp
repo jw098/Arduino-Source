@@ -160,7 +160,7 @@ void checkpoint_17(
 
         env.console.log("clear_dialog: See Geeta. Talk to Nemona. Receive Gym/Elite Four questline (Victory Road).");
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, 
-            {ClearDialogCallback::OVERWORLD, ClearDialogCallback::PROMPT_DIALOG});
+            {CallbackEnum::OVERWORLD, CallbackEnum::PROMPT_DIALOG});
 
         
        
@@ -204,11 +204,11 @@ void checkpoint_18(
 
         env.console.log("Talk to Clavell in his office, and the professor.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 25, 
-            {ClearDialogCallback::PROMPT_DIALOG});  // max time between dialog: 17s. set timeout to 25 seconds for buffer.
+            {CallbackEnum::PROMPT_DIALOG});  // max time between dialog: 17s. set timeout to 25 seconds for buffer.
         // mash A to get through the Random A press that you need. when the professor shows you area zero.
         pbf_mash_button(context, BUTTON_A, 3 * TICKS_PER_SECOND);
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, 
-            {ClearDialogCallback::OVERWORLD, ClearDialogCallback::PROMPT_DIALOG});
+            {CallbackEnum::OVERWORLD, CallbackEnum::PROMPT_DIALOG});
        
         break;
     }catch(...){
@@ -294,13 +294,13 @@ void checkpoint_20(
 
         env.console.log("Talk to Nemona, Arven, Cassiopeia.");
         clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 16, 
-            {ClearDialogCallback::PROMPT_DIALOG, ClearDialogCallback::BLACK_DIALOG_BOX}); // max time between dialog: 11
+            {CallbackEnum::PROMPT_DIALOG, CallbackEnum::BLACK_DIALOG_BOX}); // max time between dialog: 11
         
         // mash A to get through the Random A press that you need. when the Nemona shows you a Poke Gym.
         pbf_mash_button(context, BUTTON_A, 250);
 
         clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 10, 
-            {ClearDialogCallback::TUTORIAL}); // max time between dialog: 3
+            {CallbackEnum::TUTORIAL}); // max time between dialog: 3
         
         env.console.log("Get on ride.");
         pbf_mash_button(context, BUTTON_PLUS, 1 * TICKS_PER_SECOND);

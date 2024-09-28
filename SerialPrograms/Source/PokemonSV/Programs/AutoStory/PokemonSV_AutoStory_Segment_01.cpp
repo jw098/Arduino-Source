@@ -177,7 +177,7 @@ void checkpoint_02(
         overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 245, 230);
 
         env.console.log("clear_dialog: Talk with Clavell outside. Receive Rotom phone. Stop when detect overworld.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {ClearDialogCallback::OVERWORLD, ClearDialogCallback::WHITE_A_BUTTON});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD, CallbackEnum::WHITE_A_BUTTON});
 
         context.wait_for_all_requests();
         env.console.log("Bump into power of science NPC");
@@ -245,15 +245,15 @@ void checkpoint_03(
         }
         pbf_press_button(context, BUTTON_A, 20, 105); // choose the starter
         env.console.log("clear_dialog: Choose starter. Stop when detect prompt to receive starter.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_PROMPT, 20, {ClearDialogCallback::PROMPT_DIALOG});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_PROMPT, 20, {CallbackEnum::PROMPT_DIALOG});
 
         pbf_press_button(context, BUTTON_A, 20, 105); // accept the pokemon
         env.console.log("clear_dialog: Stop when detect prompt to give nickname to starter.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_PROMPT, 20, {ClearDialogCallback::PROMPT_DIALOG});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_PROMPT, 20, {CallbackEnum::PROMPT_DIALOG});
 
         pbf_mash_button(context, BUTTON_B, 100);  // Don't give a nickname
         env.console.log("clear_dialog: Talk to Nemona and Clavell. Stop when detect overworld.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 20, {ClearDialogCallback::OVERWORLD});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 20, {CallbackEnum::OVERWORLD});
         
         context.wait_for_all_requests();
         env.console.log("Clear auto heal tutorial.");

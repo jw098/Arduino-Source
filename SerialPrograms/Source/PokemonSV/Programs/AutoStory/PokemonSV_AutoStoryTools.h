@@ -46,7 +46,7 @@ enum class ClearDialogMode{
 };
 
 
-enum class ClearDialogCallback{
+enum class CallbackEnum{
     ADVANCE_DIALOG,
     OVERWORLD,
     PROMPT_DIALOG,
@@ -54,7 +54,8 @@ enum class ClearDialogCallback{
     DIALOG_ARROW,
     BATTLE,
     TUTORIAL,
-    BLACK_DIALOG_BOX
+    BLACK_DIALOG_BOX,
+    GRADIENT_ARROW,
 };
 
 enum class StartPoint{
@@ -117,7 +118,7 @@ void run_battle_press_A(
     ConsoleHandle& console, 
     BotBaseContext& context,
     BattleStopCondition stop_condition,
-    bool detect_dialog_arrow = false
+    std::vector<CallbackEnum> optional_callbacks = {}
 );
 
 // press A to clear tutorial screens
@@ -130,7 +131,7 @@ void clear_tutorial(ConsoleHandle& console, BotBaseContext& context, uint16_t se
 // also throw exception if dialog is never detected.
 void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
     ClearDialogMode mode, uint16_t seconds_timeout = 60,
-    std::vector<ClearDialogCallback> optional_callbacks = {}
+    std::vector<CallbackEnum> optional_callbacks = {}
 );
 
 

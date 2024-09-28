@@ -141,7 +141,7 @@ void checkpoint_08(
         overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 20, 10);
 
         env.console.log("clear_dialog: Talk to Nemona yelling down, while you're down in the cave.");
-        clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 10, {ClearDialogCallback::PROMPT_DIALOG});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 10, {CallbackEnum::PROMPT_DIALOG});
 
         do_action_and_monitor_for_battles(env.program_info(), env.console, context,
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
