@@ -17,6 +17,8 @@
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
 #include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
+#include "PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
 #include "PokemonSV_AutoStory_Segment_15.h"
 
@@ -36,7 +38,7 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_15::name() const{
-    return "12.1: Team Star Dark: Go to base";
+    return "12.1: Team Star (Dark)";
 }
 
 std::string AutoStory_Segment_15::start_text() const{
@@ -44,7 +46,7 @@ std::string AutoStory_Segment_15::start_text() const{
 }
 
 std::string AutoStory_Segment_15::end_text() const{
-    return "End: Beat Team Star Dark.";
+    return "End: Beat Team Star (Dark).";
 }
 
 void AutoStory_Segment_15::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
@@ -156,7 +158,106 @@ void checkpoint_30(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
-       
+
+        // enter the base
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 255, 50);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_SPAM_A, 
+            128, 0, 20, 20, false);       
+
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD, CallbackEnum::PROMPT_DIALOG, CallbackEnum::TUTORIAL});
+        AdvanceDialogWatcher    dialog(COLOR_RED);
+        int ret = run_until(
+            env.console, context,
+            [&](BotBaseContext& context){
+
+                DirectionDetector direction;
+                int seconds_wait = 6;
+
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                direction.change_direction(env.console, context, 3);
+                pbf_move_left_joystick(context, 128, 0, 10, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                direction.change_direction(env.console, context, 4.1);
+                pbf_move_left_joystick(context, 128, 0, 750, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                direction.change_direction(env.console, context, 5.04);
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                pbf_move_left_joystick(context, 128, 0, 500, 100);
+                direction.change_direction(env.console, context, 5.39);
+                pbf_move_left_joystick(context, 128, 0, 10, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                direction.change_direction(env.console, context, 5.076);
+                pbf_move_left_joystick(context, 128, 0, 500, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                direction.change_direction(env.console, context, 4.800);
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                pbf_move_left_joystick(context, 128, 0, 500, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);
+
+                direction.change_direction(env.console, context, 5.32);
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);                
+
+                direction.change_direction(env.console, context, 6.16);
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);   
+
+
+                direction.change_direction(env.console, context, 0.541);
+                pbf_move_left_joystick(context, 128, 0, 500, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);    
+
+                direction.change_direction(env.console, context, 1.41);
+                pbf_move_left_joystick(context, 128, 0, 350, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);         
+
+                direction.change_direction(env.console, context, 2.34);
+                pbf_move_left_joystick(context, 128, 0, 250, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);     
+
+                direction.change_direction(env.console, context, 1.556);
+                pbf_move_left_joystick(context, 128, 0, 500, 100);
+                pbf_press_button(context, BUTTON_R, 20, 20);
+                pbf_wait(context, seconds_wait * TICKS_PER_SECOND);   
+                
+            },
+            {dialog}
+        );
+        context.wait_for(std::chrono::milliseconds(100));
+        if (ret < 0){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT, env.console,
+                "checkpoint_30(): Failed to kill 30 pokemon with Let's go.",
+                true
+            );            
+        }
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::BATTLE, CallbackEnum::DIALOG_ARROW});
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
+        mash_button_till_overworld(env.console, context, BUTTON_A, 360);
+
+
         break;
     }catch (...){
         context.wait_for_all_requests();

@@ -112,6 +112,9 @@ private:
     SimpleIntegerOption<uint16_t> Y_MOVE;
     SimpleIntegerOption<uint16_t> HOLD_TICKS;
     SimpleIntegerOption<uint16_t> RELEASE_TICKS;
+
+    BooleanCheckBoxOption TEST_DIRECTION_CHANGE;
+    FloatingPointOption DIR_RADIANS;
 };
 
 

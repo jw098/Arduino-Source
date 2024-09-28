@@ -15,6 +15,7 @@
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
 #include "PokemonSV_AutoStory_Segment_00.h"
 #include "PokemonSV_AutoStory_Segment_01.h"
 #include "PokemonSV_AutoStory_Segment_02.h"
@@ -316,7 +317,17 @@ AutoStory::AutoStory()
         "--RELEASE_TICKS:",
         LockMode::UNLOCK_WHILE_RUNNING,
         0
-    )             
+    )
+    , TEST_DIRECTION_CHANGE(
+        "<b>TEST: change_direction():</b>",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        false
+    )     
+    , DIR_RADIANS(
+        "direction in radians",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        0
+    )           
 {
     PA_ADD_OPTION(LANGUAGE);
     PA_ADD_OPTION(STORY_SECTION);
@@ -341,14 +352,17 @@ AutoStory::AutoStory()
         PA_ADD_OPTION(START_LOOP);
         PA_ADD_OPTION(END_LOOP);
 
-        PA_ADD_OPTION(ENABLE_TEST_REALIGN);
-        PA_ADD_OPTION(REALIGN_MODE);
-        PA_ADD_OPTION(X_REALIGN);
-        PA_ADD_OPTION(Y_REALIGN);
-        PA_ADD_OPTION(REALIGN_DURATION);
+        // PA_ADD_OPTION(ENABLE_TEST_REALIGN);
+        // PA_ADD_OPTION(REALIGN_MODE);
+        // PA_ADD_OPTION(X_REALIGN);
+        // PA_ADD_OPTION(Y_REALIGN);
+        // PA_ADD_OPTION(REALIGN_DURATION);
 
         PA_ADD_OPTION(ENABLE_TEST_OVERWORLD_MOVE);
         PA_ADD_OPTION(FORWARD_TICKS);
+
+        PA_ADD_OPTION(TEST_DIRECTION_CHANGE);
+        PA_ADD_OPTION(DIR_RADIANS);    
 
         PA_ADD_OPTION(TEST_PBF_LEFT_JOYSTICK);
         PA_ADD_OPTION(X_MOVE);
@@ -368,6 +382,7 @@ AutoStory::AutoStory()
     ENABLE_TEST_REALIGN.add_listener(*this);
     ENABLE_TEST_OVERWORLD_MOVE.add_listener(*this);
     TEST_PBF_LEFT_JOYSTICK.add_listener(*this);
+    TEST_DIRECTION_CHANGE.add_listener(*this);
 }
 
 void AutoStory::value_changed(void* object){
@@ -437,6 +452,13 @@ void AutoStory::value_changed(void* object){
         HOLD_TICKS.set_visibility(ConfigOptionState::DISABLED);
         RELEASE_TICKS.set_visibility(ConfigOptionState::DISABLED);      
     }    
+
+
+    if (TEST_DIRECTION_CHANGE){
+        DIR_RADIANS.set_visibility(ConfigOptionState::ENABLED);
+    }else{
+        DIR_RADIANS.set_visibility(ConfigOptionState::DISABLED);  
+    }        
 
 
 }
@@ -576,20 +598,27 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
     if (ENABLE_TEST_OVERWORLD_MOVE){
         // walk_forward_while_clear_front_path(env.program_info(), env.console, context, FORWARD_TICKS);
 
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-            128, 0, 60, 10, false);
-
         // overworld_navigation(env.program_info(), env.console, context, 
-        //     NavigationStopCondition::STOP_TIME, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
-        //     128, 0, 25, 10, false);         
+        //     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
+        //     128, 0, 60, 10, false);
+
+                                                                                    
+       
         return;
     }
+
+    if (TEST_DIRECTION_CHANGE){
+        DirectionDetector direction;
+        // direction.change_direction(env.console, context, DIR_RADIANS);
+        VideoSnapshot snapshot = env.console.video().snapshot();
+        env.console.log("current direction: " + std::to_string(direction.current_direction(env.console, snapshot)));
+        return;
+    }    
 
     if (TEST_PBF_LEFT_JOYSTICK){
         pbf_move_left_joystick(context, X_MOVE, Y_MOVE, HOLD_TICKS, RELEASE_TICKS);
         return;
-    }        
+    }       
 
     // context.wait_for(Milliseconds(1000000));
 
@@ -600,14 +629,15 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
     assert_16_9_720p_min(env.logger(), env.console);
     // AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
-    // Connect controller
-    pbf_press_button(context, BUTTON_L, 20, 20);
 
     // test code
-    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_TEST_OVERWORLD_MOVE || TEST_PBF_LEFT_JOYSTICK){
+    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_TEST_OVERWORLD_MOVE || TEST_PBF_LEFT_JOYSTICK || TEST_DIRECTION_CHANGE){
         test_code(env, context);
         return;
     }
+
+    // Connect controller
+    pbf_press_button(context, BUTTON_L, 20, 20);
 
     // Set settings. to ensure autosave is off.
     if (CHANGE_SETTINGS){
