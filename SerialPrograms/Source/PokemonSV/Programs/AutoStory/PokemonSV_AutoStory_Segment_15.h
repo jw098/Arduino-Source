@@ -33,8 +33,8 @@ public:
 
 
 
-// start: 
-// end: 
+// start: At West Province Area One North Pokecenter
+// end: Defeated Team star dark grunts at base entrance
 void checkpoint_29(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 // start: 

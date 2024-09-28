@@ -36,27 +36,29 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_15::name() const{
-    return "";
+    return "12.1: Team Star Dark: Go to base";
 }
 
 std::string AutoStory_Segment_15::start_text() const{
-    return "";
+    return "Start: Defeated Bombirder. At West Province Area One North Pokecenter";
 }
 
 std::string AutoStory_Segment_15::end_text() const{
-    return "";
+    return "End: Beat Team Star Dark.";
 }
 
 void AutoStory_Segment_15::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
-    env.console.overlay().add_log("Start Segment 0", COLOR_ORANGE);
+    env.console.overlay().add_log("Start Segment 12.1: Team Star Dark: Go to base", COLOR_ORANGE);
 
+    checkpoint_29(env, context, options.notif_status_update);
+    checkpoint_30(env, context, options.notif_status_update);
    
 
     context.wait_for_all_requests();
-    env.console.log("End Segment 0", COLOR_GREEN);
+    env.console.log("End Segment 12.1: Team Star Dark: Go to base", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
 
@@ -78,6 +80,55 @@ void checkpoint_29(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+        // section 1
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 50, 0, 25);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);           
+
+        // section 2
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 255, 0, 80},
+            {ZoomChange::ZOOM_IN, 5, 230, 145}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);        
+
+        // section 3
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 255, 0, 60},
+            {ZoomChange::ZOOM_IN, 5, 205, 100}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false); 
+
+        // section 4
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::ZOOM_IN, 128, 255, 40},
+            {ZoomChange::KEEP_ZOOM, 255, 0, 110}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);        
+
+        mash_button_till_overworld(env.console, context, BUTTON_A, 360);
+
+        // section 5
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 255, 50);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 30, 30, false);       
+
+        // battle team star grunts
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::BATTLE, CallbackEnum::PROMPT_DIALOG, CallbackEnum::DIALOG_ARROW});
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD, CallbackEnum::BLACK_DIALOG_BOX});
+
        
         break;
     }catch (...){

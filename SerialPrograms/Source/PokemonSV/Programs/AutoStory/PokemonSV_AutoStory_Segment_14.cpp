@@ -44,7 +44,7 @@ std::string AutoStory_Segment_14::start_text() const{
 }
 
 std::string AutoStory_Segment_14::end_text() const{
-    return "End: (to be decided)";
+    return "End: Defeated Bombirder. At West Province Area One North Pokecenter";
 }
 
 void AutoStory_Segment_14::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
