@@ -895,6 +895,73 @@ void confirm_cursor_centered_on_pokecenter(const ProgramInfo& info, ConsoleHandl
     console.log("Confirmed that the cursor is centered on a pokecenter.");
 }
 
+void move_cursor_towards_flypoint_and_go_there(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context,
+    MoveCursor move_cursor_near_flypoint
+){
+    WallClock start = current_time();
+
+    while (true){
+        if (current_time() - start > std::chrono::minutes(5)){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "move_cursor_towards_flypoint_and_go_there(): Failed to fly after 5 minutes.",
+                true
+            );
+        }
+
+        try {
+            open_map_from_overworld(info, console, context, false);
+
+            // move cursor near landmark (pokecenter)
+            switch(move_cursor_near_flypoint.zoom_change){
+            case ZoomChange::ZOOM_IN:
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                break;
+            case ZoomChange::ZOOM_IN_TWICE:
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                pbf_press_button(context, BUTTON_ZR, 20, 105);
+                break;                
+            case ZoomChange::ZOOM_OUT:
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                break;    
+            case ZoomChange::ZOOM_OUT_TWICE:
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                pbf_press_button(context, BUTTON_ZL, 20, 105);
+                break;                  
+            case ZoomChange::KEEP_ZOOM:
+                break;
+            }
+            uint8_t move_x1 = move_cursor_near_flypoint.move_x;
+            uint8_t move_y1 = move_cursor_near_flypoint.move_y;
+            uint16_t move_duration1 = move_cursor_near_flypoint.move_duration;
+            pbf_move_left_joystick(context, move_x1, move_y1, move_duration1, 1 * TICKS_PER_SECOND);
+
+            if (!fly_to_visible_closest_pokecenter_cur_zoom_level(info, console, context)){
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "move_cursor_towards_flypoint_and_go_there(): No visible pokecenter found on map.",
+                    true
+                );                  
+            }
+
+            return;      
+
+        }catch (OperationFailedException e){
+            (void) e;
+            // reset to overworld if failed to center on the pokecenter, and re-try
+            leave_phone_to_overworld(info, console, context);
+        }catch (UnexpectedBattleException e){
+            (void) e;
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+        }
+    }
+    
+
+}
+
 
 }
 }

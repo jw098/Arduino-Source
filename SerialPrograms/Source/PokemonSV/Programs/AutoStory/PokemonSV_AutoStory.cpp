@@ -607,7 +607,8 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         //     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
         //     128, 0, 60, 10, false);
 
-                                                                                    
+
+                                                                         
        
         return;
     }

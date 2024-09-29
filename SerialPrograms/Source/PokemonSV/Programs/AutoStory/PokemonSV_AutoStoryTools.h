@@ -240,6 +240,14 @@ void realign_player_from_landmark(
 // else throw exception
 void confirm_cursor_centered_on_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
 
+// open map, then move cursor to a point near a flypoint as per `move_cursor_near_flypoint`
+// then fly to the closest pokecenter near the cursor
+void move_cursor_towards_flypoint_and_go_there(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context,
+    MoveCursor move_cursor_near_flypoint
+);
 
 }
 }

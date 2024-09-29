@@ -783,7 +783,7 @@ void reset_to_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBas
 
 void realign_player(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context,
     PlayerRealignMode realign_mode,
-    uint8_t move_x, uint8_t move_y, uint8_t move_duration
+    uint8_t move_x, uint8_t move_y, uint16_t move_duration
 ){
     console.log("Realigning player direction...");
     switch (realign_mode){
@@ -890,6 +890,7 @@ void mash_button_till_overworld(
     uint16_t button, uint16_t seconds_run
 ){
     OverworldWatcher overworld(console, COLOR_CYAN);
+    NormalBattleMenuWatcher battle(COLOR_BLUE);
     context.wait_for_all_requests();
 
     int ret = run_until(
@@ -898,10 +899,12 @@ void mash_button_till_overworld(
             ssf_mash1_button(context, button, seconds_run * TICKS_PER_SECOND);
             pbf_wait(context, seconds_run * TICKS_PER_SECOND);
         },
-        {overworld}
+        {overworld, battle}
     );
 
-    if (ret < 0){
+    if (ret == 1){
+        run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+    }else if (ret < 0){
         throw OperationFailedException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "mash_button_till_overworld(): Timed out, no recognized state found.",

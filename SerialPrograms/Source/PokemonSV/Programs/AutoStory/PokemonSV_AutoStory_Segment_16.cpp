@@ -54,6 +54,7 @@ void AutoStory_Segment_16::run_segment(SingleSwitchProgramEnvironment& env, BotB
     env.console.overlay().add_log("Start Segment 0", COLOR_ORANGE);
 
     checkpoint_32(env, context, options.notif_status_update);
+    checkpoint_33(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 0", COLOR_GREEN);
@@ -141,6 +142,56 @@ void checkpoint_33(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+        move_cursor_towards_flypoint_and_go_there(env.program_info(), env.console, context, {ZoomChange::ZOOM_IN, 100, 0, 80});
+
+        // section 1
+        // warning: can't reliably set the marker when in Cascarrafa, possibly due to too many NPCs. worse when sandstorm is up.
+        // what happens is that the program doesn't reliably push the cursor as much as it should
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 135, 410);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 60, 20, false);
+        // talk to Arven over phone
+        mash_button_till_overworld(env.console, context, BUTTON_A, 360);
+
+        // section 2
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 0, 0, 80},
+            {ZoomChange::ZOOM_IN, 255, 255, 110}
+        );
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 60, 20, false);
+
+        // section 3
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 0, 0, 40},
+            {ZoomChange::ZOOM_IN, 255, 90, 30}
+        );
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 30, 10, false);        
+        mash_button_till_overworld(env.console, context, BUTTON_A, 360);            
+
+        // section 4. set marker to pokecenter
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 0, 0, 0},
+            {ZoomChange::ZOOM_IN, 0, 0, 0}
+        );      
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);   
+
+        // section 5. set marker past pokecenter
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 100, 30);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 15, 12, 12, false);     
+
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);           
        
         break;
     }catch (...){
