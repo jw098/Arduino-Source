@@ -51,13 +51,13 @@ void AutoStory_Segment_16::run_segment(SingleSwitchProgramEnvironment& env, BotB
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
-    env.console.overlay().add_log("Start Segment 0", COLOR_ORANGE);
+    env.console.overlay().add_log("Start Segment 13.1: Cascarrafa Gym (Water): Get Kofu's wallet", COLOR_ORANGE);
 
     checkpoint_32(env, context, options.notif_status_update);
     checkpoint_33(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
-    env.console.log("End Segment 0", COLOR_GREEN);
+    env.console.log("End Segment 13.1: Cascarrafa Gym (Water): Get Kofu's wallet", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
 

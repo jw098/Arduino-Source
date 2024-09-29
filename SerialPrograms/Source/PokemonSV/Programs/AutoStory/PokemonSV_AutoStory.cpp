@@ -16,6 +16,7 @@
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
 #include "PokemonSV_AutoStory_Segment_00.h"
 #include "PokemonSV_AutoStory_Segment_01.h"
 #include "PokemonSV_AutoStory_Segment_02.h"
@@ -69,6 +70,7 @@ std::vector<std::unique_ptr<AutoStory_Segment>> make_autoStory_segment_list(){
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_14>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_15>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_16>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_17>());
 
     return segment_list;
 };
@@ -519,6 +521,9 @@ void AutoStory::test_checkpoints(
     checkpoint_list.push_back([&](){checkpoint_32(env, context, notif_status_update);});
     checkpoint_list.push_back([&](){checkpoint_33(env, context, notif_status_update);});
     checkpoint_list.push_back([&](){checkpoint_34(env, context, notif_status_update);});
+    checkpoint_list.push_back([&](){checkpoint_35(env, context, notif_status_update);});
+    checkpoint_list.push_back([&](){checkpoint_36(env, context, notif_status_update);});
+    checkpoint_list.push_back([&](){checkpoint_37(env, context, notif_status_update);});
 
     for (int checkpoint = start; checkpoint <= end; checkpoint++){
         if (checkpoint == 0){
@@ -607,6 +612,11 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         //     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
         //     128, 0, 60, 10, false);
 
+DirectionDetector direction;
+        pbf_move_left_joystick(context, 128, 0, 120, 100); 
+        direction.change_direction(env.console, context, 5.11);  
+        pbf_move_left_joystick(context, 128, 0, 1600, 100); 
+        direction.change_direction(env.console, context, 3.2245);  
 
                                                                          
        

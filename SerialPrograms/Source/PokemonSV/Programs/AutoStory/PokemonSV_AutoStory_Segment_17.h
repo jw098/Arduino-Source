@@ -33,11 +33,11 @@ public:
 
 
 // start: At Porto Marinada Pokecenter.
-// end: 
+// end: Won auction at Porto Marinada, passed Gym challenge.
 void checkpoint_34(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
-// start: 
-// end: 
+// start: Won auction at Porto Marinada, passed Gym challenge.
+// end: Defeat Cascarrafa Gym
 void checkpoint_35(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 // start: 

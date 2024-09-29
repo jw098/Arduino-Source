@@ -816,6 +816,7 @@ void walk_forward_until_dialog(
     BotBaseContext& context,
     NavigationMovementMode movement_mode,
     uint16_t seconds_timeout,
+    uint8_t x,
     uint8_t y
 ){
 
