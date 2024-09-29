@@ -284,6 +284,43 @@ void checkpoint_31(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+        // section 1
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 0, 128, 40},
+            {ZoomChange::ZOOM_IN, 230, 0, 100}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 10, false);   
+        
+        // section 2
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 255, 100, 30},
+            {ZoomChange::ZOOM_IN, 0, 240, 40}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);        
+
+        // section 3. set marker to pokecenter
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 0, 0, 0},
+            {ZoomChange::ZOOM_IN, 0, 0, 0}
+        );          
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);    
+
+        // section 4. set marker past pokecenter
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 40, 100);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 15, 12, 12, false);     
+
+        fly_to_overlapping_flypoint(env.program_info(), env.console, context);
        
         break;
     }catch (...){
