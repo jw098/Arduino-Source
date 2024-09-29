@@ -4,8 +4,8 @@
  *
  */
 
-#ifndef PokemonAutomation_PokemonSV_AutoStory_Segment_15_H
-#define PokemonAutomation_PokemonSV_AutoStory_Segment_15_H
+#ifndef PokemonAutomation_PokemonSV_AutoStory_Segment_18_H
+#define PokemonAutomation_PokemonSV_AutoStory_Segment_18_H
 
 #include <functional>
 #include "Common/Cpp/Options/EnumDropdownOption.h"
@@ -20,7 +20,7 @@ namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
 
-class AutoStory_Segment_15 : public AutoStory_Segment{
+class AutoStory_Segment_18 : public AutoStory_Segment{
 public:
     virtual std::string name() const override;
     virtual std::string start_text() const override;
@@ -33,17 +33,6 @@ public:
 
 
 
-// start: At West Province Area One North Pokecenter
-// end: Defeated Team Star (Dark) grunts at base entrance
-void checkpoint_29(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
-
-// start: Defeated Team star dark grunts at base entrance
-// end: Defeated Team Star (Dark) boss
-void checkpoint_30(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
-
-// start: Defeated Team Star (Dark) boss
-// end: At Cascarrafa (West) Pokecenter.
-void checkpoint_31(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 

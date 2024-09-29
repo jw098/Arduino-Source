@@ -32,6 +32,19 @@ public:
 };
 
 
+// start: 
+// end: 
+void checkpoint_32(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
+
+// start: 
+// end: 
+void checkpoint_33(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);             
+
+// start: 
+// end: 
+void checkpoint_34(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+
 
 
 

@@ -38,29 +38,30 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_15::name() const{
-    return "12.1: Team Star (Dark)";
+    return "12: Team Star (Dark)";
 }
 
 std::string AutoStory_Segment_15::start_text() const{
-    return "Start: Defeated Bombirder. At West Province Area One North Pokecenter";
+    return "Start: Defeated Bombirder. At West Province Area One North Pokecenter.";
 }
 
 std::string AutoStory_Segment_15::end_text() const{
-    return "End: Beat Team Star (Dark).";
+    return "End: Defeated Team Star (Dark). At Cascarrafa (West) Pokecenter.";
 }
 
 void AutoStory_Segment_15::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
-    env.console.overlay().add_log("Start Segment 12.1: Team Star Dark: Go to base", COLOR_ORANGE);
+    env.console.overlay().add_log("Start Segment 12: Team Star (Dark)", COLOR_ORANGE);
 
     checkpoint_29(env, context, options.notif_status_update);
     checkpoint_30(env, context, options.notif_status_update);
+    checkpoint_31(env, context, options.notif_status_update);
    
 
     context.wait_for_all_requests();
-    env.console.log("End Segment 12.1: Team Star Dark: Go to base", COLOR_GREEN);
+    env.console.log("End Segment 12: Team Star (Dark)", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
 
@@ -334,86 +335,6 @@ void checkpoint_31(
 
 }
 
-void checkpoint_32(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }           
-    }
-
-}
-
-void checkpoint_33(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }            
-    }
-
-}
-
-void checkpoint_34(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }         
-    }
-
-}
 
 
 

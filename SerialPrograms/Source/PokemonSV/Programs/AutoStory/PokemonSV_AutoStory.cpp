@@ -32,6 +32,9 @@
 #include "PokemonSV_AutoStory_Segment_13.h"
 #include "PokemonSV_AutoStory_Segment_14.h"
 #include "PokemonSV_AutoStory_Segment_15.h"
+#include "PokemonSV_AutoStory_Segment_16.h"
+#include "PokemonSV_AutoStory_Segment_17.h"
+#include "PokemonSV_AutoStory_Segment_18.h"
 #include "PokemonSV_AutoStory.h"
 
 //#include <iostream>
@@ -64,6 +67,8 @@ std::vector<std::unique_ptr<AutoStory_Segment>> make_autoStory_segment_list(){
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_12>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_13>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_14>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_15>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_16>());
 
     return segment_list;
 };
