@@ -32,8 +32,8 @@ public:
 };
 
 
-// start: 
-// end: 
+// start: At Cascarrafa (West) Pokecenter.
+// end: At Cascarrafa Gym. Received Kofu's wallet.
 void checkpoint_32(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 // start: 
