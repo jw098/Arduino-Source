@@ -32,7 +32,21 @@ public:
 };
 
 
+// start: At Porto Marinada Pokecenter.
+// end: 
+void checkpoint_34(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
+// start: 
+// end: 
+void checkpoint_35(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_36(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_37(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 

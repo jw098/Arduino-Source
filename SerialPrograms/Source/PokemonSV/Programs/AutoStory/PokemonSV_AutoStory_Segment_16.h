@@ -36,14 +36,9 @@ public:
 // end: At Cascarrafa Gym. Received Kofu's wallet.
 void checkpoint_32(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
-// start: 
-// end: 
+// start: At Cascarrafa Gym. Received Kofu's wallet.
+// end: At Porto Marinada Pokecenter.
 void checkpoint_33(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);             
-
-// start: 
-// end: 
-void checkpoint_34(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
-
 
 
 
