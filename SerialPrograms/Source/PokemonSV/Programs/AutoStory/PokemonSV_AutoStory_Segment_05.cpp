@@ -83,7 +83,7 @@ void checkpoint_09(
 
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 230, 120, 100);
         env.console.log("overworld_navigation: Go to Arven at the tower.");
-        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0);
+        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0, true, true);
             
         context.wait_for_all_requests();
         env.console.log("Found Arven");
@@ -133,7 +133,7 @@ void checkpoint_10(
         );
 
         env.console.log("overworld_navigation: Go to Nemona on the lighthouse.");
-        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_SPAM_A, 128, 0, 20);
+        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_SPAM_A, 128, 0, 20, true, true);
 
         mash_button_till_overworld(env.console, context, BUTTON_A);
 

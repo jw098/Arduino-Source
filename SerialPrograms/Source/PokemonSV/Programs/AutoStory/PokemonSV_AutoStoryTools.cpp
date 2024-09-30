@@ -51,19 +51,20 @@ void run_battle_press_A(
     ConsoleHandle& console, 
     BotBaseContext& context,
     BattleStopCondition stop_condition,
-    std::vector<CallbackEnum> enum_optional_callbacks
+    std::vector<CallbackEnum> enum_optional_callbacks,
+    bool detect_wipeout
 ){
     int16_t num_times_seen_overworld = 0;
     while (true){
         NormalBattleMenuWatcher battle(COLOR_BLUE);
-        // SwapMenuWatcher         fainted(COLOR_PURPLE);
+        SwapMenuWatcher         fainted(COLOR_PURPLE);
         OverworldWatcher        overworld(console, COLOR_CYAN);
         AdvanceDialogWatcher    dialog(COLOR_RED);
         DialogArrowWatcher dialog_arrow(COLOR_RED, console.overlay(), {0.850, 0.820, 0.020, 0.050}, 0.8365, 0.846);
         GradientArrowWatcher next_pokemon(COLOR_BLUE, GradientArrowType::RIGHT, {0.50, 0.51, 0.30, 0.10});
 
         std::vector<PeriodicInferenceCallback> callbacks; 
-        std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::BATTLE, CallbackEnum::OVERWORLD, CallbackEnum::ADVANCE_DIALOG}; // mandatory callbacks
+        std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::BATTLE, CallbackEnum::OVERWORLD, CallbackEnum::ADVANCE_DIALOG, CallbackEnum::SWAP_MENU}; // mandatory callbacks
         enum_all_callbacks.insert(enum_all_callbacks.end(), enum_optional_callbacks.begin(), enum_optional_callbacks.end()); // append the mandatory and optional callback vectors together
         for (const CallbackEnum& enum_callback : enum_all_callbacks){
             switch(enum_callback){
@@ -82,6 +83,9 @@ void run_battle_press_A(
             case CallbackEnum::GRADIENT_ARROW:
                 callbacks.emplace_back(next_pokemon);
                 break;
+            case CallbackEnum::SWAP_MENU:  
+                callbacks.emplace_back(fainted);
+                break;                          
             default:
                 throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "run_battle_press_A: Unknown callback requested.");
             }
@@ -124,7 +128,8 @@ void run_battle_press_A(
             break;
         case CallbackEnum::ADVANCE_DIALOG: // advance dialog
             console.log("Detected dialog.");
-            {
+
+            if (detect_wipeout){
                 context.wait_for_all_requests();
                 WipeoutDetector wipeout;
                 VideoSnapshot screen = console.video().snapshot();
@@ -151,6 +156,12 @@ void run_battle_press_A(
             console.log("run_battle_press_A: Detected prompt for bringing in next pokemon. Keep current pokemon.");
             pbf_mash_button(context, BUTTON_B, 100);
             break;
+        case CallbackEnum::SWAP_MENU:
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT, console,
+                "run_battle_press_A(): Lead pokemon fainted.",
+                true
+            );        
         default: // timeout
             throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "run_battle_press_A: Unknown callback triggered.");
           
@@ -373,7 +384,8 @@ void overworld_navigation(
     NavigationMovementMode movement_mode,
     uint8_t x, uint8_t y,
     uint16_t seconds_timeout, uint16_t seconds_realign, 
-    bool auto_heal
+    bool auto_heal,
+    bool detect_wipeout
 ){
     bool should_realign = true;
     if (seconds_timeout <= seconds_realign){
@@ -439,7 +451,7 @@ void overworld_navigation(
                 return;
             }
 
-            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);   
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD, {}, detect_wipeout);   
             if (auto_heal){
                 auto_heal_from_menu_or_overworld(info, console, context, 0, true);
             }

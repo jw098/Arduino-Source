@@ -154,7 +154,7 @@ void checkpoint_22(
         );
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 40, 20, false);
+            128, 0, 40, 20);
 
         // section 2
         realign_player_from_landmark(
@@ -164,7 +164,7 @@ void checkpoint_22(
         );        
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 30, 15, false);
+            128, 0, 30, 15);
         
         // section 3. set marker to pokecenter
         realign_player_from_landmark(
@@ -174,7 +174,7 @@ void checkpoint_22(
         );         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 30, 15, false);
+            128, 0, 30, 15);
 
         // section 3. set marker past pokecenter
         handle_unexpected_battles(env.program_info(), env.console, context,
@@ -183,7 +183,7 @@ void checkpoint_22(
         });            
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 20, 12, 12, false);        
+            128, 20, 12, 12);        
 
         fly_to_overlapping_flypoint(env.program_info(), env.console, context);
        
@@ -221,7 +221,7 @@ void checkpoint_23(
 
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);
+            128, 0, 20, 10);
 
         // section 2
         realign_player_from_landmark(
@@ -231,7 +231,7 @@ void checkpoint_23(
         );         
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);       
+            128, 0, 20, 10);       
 
         // section 3
         realign_player_from_landmark(
@@ -241,7 +241,7 @@ void checkpoint_23(
         );              
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);             
+            128, 0, 20, 10);             
 
         // section 4
         realign_player_from_landmark(
@@ -251,7 +251,7 @@ void checkpoint_23(
         );              
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 40, 10, false);    
+            128, 0, 40, 10);    
 
         // section 5. set marker to pokecenter
         realign_player_from_landmark(
@@ -261,7 +261,7 @@ void checkpoint_23(
         );              
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);     
+            128, 0, 20, 10);     
 
         // section 6. set marker past pokecenter
         handle_unexpected_battles(env.program_info(), env.console, context,
@@ -270,7 +270,7 @@ void checkpoint_23(
         });                     
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 15, 12, 12, false);         
+            128, 15, 12, 12);         
 
         fly_to_overlapping_flypoint(env.program_info(), env.console, context);             
        

@@ -56,6 +56,7 @@ enum class CallbackEnum{
     TUTORIAL,
     BLACK_DIALOG_BOX,
     GRADIENT_ARROW,
+    SWAP_MENU,
 };
 
 enum class StartPoint{
@@ -118,7 +119,8 @@ void run_battle_press_A(
     ConsoleHandle& console, 
     BotBaseContext& context,
     BattleStopCondition stop_condition,
-    std::vector<CallbackEnum> optional_callbacks = {}
+    std::vector<CallbackEnum> optional_callbacks = {},
+    bool detect_wipeout = false
 );
 
 // press A to clear tutorial screens
@@ -150,7 +152,8 @@ void overworld_navigation(const ProgramInfo& info, ConsoleHandle& console, BotBa
     NavigationMovementMode movement_mode,
     uint8_t x, uint8_t y,
     uint16_t seconds_timeout = 60, uint16_t seconds_realign = 60,
-    bool auto_heal = true
+    bool auto_heal = false,
+    bool detect_wipeout = false
 );
 
 void config_option(BotBaseContext& context, int change_option_value);
