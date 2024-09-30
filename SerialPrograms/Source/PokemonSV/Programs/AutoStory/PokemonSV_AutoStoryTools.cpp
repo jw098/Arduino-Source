@@ -66,6 +66,7 @@ void run_battle_press_A(
         MoveSelectWatcher move_select_menu(COLOR_YELLOW);
 
         std::vector<PeriodicInferenceCallback> callbacks; 
+        //  mandatory callbacks: Battle, Overworld, Advance Dialog, Swap menu, Move select
         std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::BATTLE, CallbackEnum::OVERWORLD, CallbackEnum::ADVANCE_DIALOG, CallbackEnum::SWAP_MENU, CallbackEnum::MOVE_SELECT}; // mandatory callbacks
         enum_all_callbacks.insert(enum_all_callbacks.end(), enum_optional_callbacks.begin(), enum_optional_callbacks.end()); // append the mandatory and optional callback vectors together
         for (const CallbackEnum& enum_callback : enum_all_callbacks){

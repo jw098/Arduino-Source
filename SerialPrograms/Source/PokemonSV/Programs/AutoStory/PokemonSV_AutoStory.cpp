@@ -618,65 +618,7 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
 
 
 
-        while (true){
 
-        // 150, 255, 135       6:00 
-        std::cout << "6:00" << std::endl;
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
-            {ZoomChange::ZOOM_IN, 150, 255, 135}
-        );           
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);      
-
-        std::cout << "2:00" << std::endl;
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
-            {ZoomChange::ZOOM_IN, 180, 255, 120}
-        );           
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);                 
-
-
-        std::cout << "1:00" << std::endl;
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
-            {ZoomChange::ZOOM_IN, 160, 255, 90}
-        );           
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);  
-
-        // 135, 255, 90  12:00
-        std::cout << "12:00" << std::endl;
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
-            {ZoomChange::ZOOM_IN, 135, 255, 90}
-        );           
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);       
-
-        // 120, 255, 120  7:00
-        std::cout << "7:00" << std::endl;
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
-            {ZoomChange::ZOOM_IN, 115, 255, 130}
-        );           
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 20, 10, false);            
-
-          
-
-        }
         return;
     }
 
