@@ -21,7 +21,7 @@
 #include "PokemonSV_AutoStoryTools.h"
 #include "PokemonSV_AutoStory_Segment_18.h"
 
-#include <iostream>
+// #include <iostream>
 //using std::cout;
 //using std::endl;
 //#include <unordered_map>
@@ -54,7 +54,8 @@ void AutoStory_Segment_18::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 14: Great Tusk/Iron Treads titan", COLOR_ORANGE);
 
-   checkpoint_36(env, context, options.notif_status_update);
+    checkpoint_36(env, context, options.notif_status_update);
+    checkpoint_37(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 14: Great Tusk/Iron Treads titan", COLOR_GREEN);
@@ -119,14 +120,14 @@ void checkpoint_36(
         int ret = run_until(
             env.console, context,
             [&](BotBaseContext& context){
-                // run around in circles until you run into the elephant
+                // run around in circles until you run into the titan
                 WallClock start = current_time();
 
                 while (true){
                     if (current_time() - start > std::chrono::minutes(30)){
                         break;
                     }
-                    std::cout << "1:00" << std::endl;
+                    // std::cout << "1:00" << std::endl;
                     realign_player_from_landmark(
                         env.program_info(), env.console, context, 
                         {ZoomChange::KEEP_ZOOM, 128, 0, 50},
@@ -137,7 +138,7 @@ void checkpoint_36(
                         128, 0, 36, 12, false);  
 
 
-                    std::cout << "11:00" << std::endl;
+                    // std::cout << "11:00" << std::endl;
                     realign_player_from_landmark(
                         env.program_info(), env.console, context, 
                         {ZoomChange::KEEP_ZOOM, 128, 0, 50},
@@ -148,7 +149,7 @@ void checkpoint_36(
                         128, 0, 30, 10, false);       
 
 
-                    std::cout << "10:00" << std::endl;
+                    // std::cout << "10:00" << std::endl;
                     realign_player_from_landmark(
                         env.program_info(), env.console, context, 
                         {ZoomChange::KEEP_ZOOM, 128, 0, 50},
@@ -158,7 +159,7 @@ void checkpoint_36(
                         NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
                         128, 0, 30, 10, false);            
 
-                    std::cout << "7:00" << std::endl;
+                    // std::cout << "7:00" << std::endl;
                     realign_player_from_landmark(
                         env.program_info(), env.console, context, 
                         {ZoomChange::KEEP_ZOOM, 128, 0, 50},
@@ -168,8 +169,7 @@ void checkpoint_36(
                         NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
                         128, 0, 48, 12, false);            
 
-                    // 150, 255, 135       6:00 
-                    std::cout << "6:00" << std::endl;
+                    // std::cout << "6:00" << std::endl;
                     realign_player_from_landmark(
                         env.program_info(), env.console, context, 
                         {ZoomChange::KEEP_ZOOM, 128, 0, 50},
@@ -179,7 +179,7 @@ void checkpoint_36(
                         NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
                         128, 0, 30, 10, false);    
 
-                    std::cout << "2:00" << std::endl;
+                    // std::cout << "2:00" << std::endl;
                     realign_player_from_landmark(
                         env.program_info(), env.console, context, 
                         {ZoomChange::KEEP_ZOOM, 128, 0, 50},
@@ -257,6 +257,7 @@ void checkpoint_37(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+        move_cursor_towards_flypoint_and_go_there(env.program_info(), env.console, context, {ZoomChange::KEEP_ZOOM, 128, 0, 90});
        
         break;
     }catch (...){
@@ -269,7 +270,6 @@ void checkpoint_37(
     }
 
 }
-
 
 
 
