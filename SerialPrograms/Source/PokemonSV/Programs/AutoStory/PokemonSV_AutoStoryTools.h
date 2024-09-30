@@ -190,6 +190,13 @@ void wait_for_gradient_arrow(
     uint16_t seconds_timeout
 );
 
+void wait_for_overworld(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context, 
+    uint16_t seconds_timeout = 30
+);
+
 void press_A_until_dialog(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context, uint16_t seconds_between_button_presses);
 
 bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);

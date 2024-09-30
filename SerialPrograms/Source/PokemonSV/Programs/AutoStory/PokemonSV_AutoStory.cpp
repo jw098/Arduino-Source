@@ -36,11 +36,13 @@
 #include "PokemonSV_AutoStory_Segment_16.h"
 #include "PokemonSV_AutoStory_Segment_17.h"
 #include "PokemonSV_AutoStory_Segment_18.h"
+#include "PokemonSV_AutoStory_Segment_19.h"
+#include "PokemonSV_AutoStory_Segment_20.h"
 #include "PokemonSV_AutoStory.h"
 
-//#include <iostream>
-//using std::cout;
-//using std::endl;
+#include <iostream>
+using std::cout;
+using std::endl;
 //#include <unordered_map>
 //#include <algorithm>
 
@@ -71,6 +73,7 @@ std::vector<std::unique_ptr<AutoStory_Segment>> make_autoStory_segment_list(){
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_15>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_16>());
     segment_list.emplace_back(std::make_unique<AutoStory_Segment_17>());
+    segment_list.emplace_back(std::make_unique<AutoStory_Segment_18>());
 
     return segment_list;
 };
@@ -612,14 +615,68 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         //     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
         //     128, 0, 60, 10, false);
 
-DirectionDetector direction;
-        pbf_move_left_joystick(context, 128, 0, 120, 100); 
-        direction.change_direction(env.console, context, 5.11);  
-        pbf_move_left_joystick(context, 128, 0, 1600, 100); 
-        direction.change_direction(env.console, context, 3.2245);  
 
-                                                                         
-       
+
+
+        while (true){
+
+        // 150, 255, 135       6:00 
+        std::cout << "6:00" << std::endl;
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
+            {ZoomChange::ZOOM_IN, 150, 255, 135}
+        );           
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);      
+
+        std::cout << "2:00" << std::endl;
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
+            {ZoomChange::ZOOM_IN, 180, 255, 120}
+        );           
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);                 
+
+
+        std::cout << "1:00" << std::endl;
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
+            {ZoomChange::ZOOM_IN, 160, 255, 90}
+        );           
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);  
+
+        // 135, 255, 90  12:00
+        std::cout << "12:00" << std::endl;
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
+            {ZoomChange::ZOOM_IN, 135, 255, 90}
+        );           
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);       
+
+        // 120, 255, 120  7:00
+        std::cout << "7:00" << std::endl;
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 128, 0, 50},
+            {ZoomChange::ZOOM_IN, 115, 255, 130}
+        );           
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 20, 10, false);            
+
+          
+
+        }
         return;
     }
 

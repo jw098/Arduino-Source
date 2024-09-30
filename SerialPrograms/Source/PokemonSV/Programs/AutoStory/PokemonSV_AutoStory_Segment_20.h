@@ -4,8 +4,8 @@
  *
  */
 
-#ifndef PokemonAutomation_PokemonSV_AutoStory_Segment_17_H
-#define PokemonAutomation_PokemonSV_AutoStory_Segment_17_H
+#ifndef PokemonAutomation_PokemonSV_AutoStory_Segment_20_H
+#define PokemonAutomation_PokemonSV_AutoStory_Segment_20_H
 
 #include <functional>
 #include "Common/Cpp/Options/EnumDropdownOption.h"
@@ -20,7 +20,7 @@ namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
 
-class AutoStory_Segment_17 : public AutoStory_Segment{
+class AutoStory_Segment_20 : public AutoStory_Segment{
 public:
     virtual std::string name() const override;
     virtual std::string start_text() const override;
@@ -32,13 +32,7 @@ public:
 };
 
 
-// start: At Porto Marinada Pokecenter.
-// end: Won auction at Porto Marinada, passed Gym challenge.
-void checkpoint_34(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
-// start: Won auction at Porto Marinada, passed Gym challenge.
-// end: Defeat Cascarrafa Gym
-void checkpoint_35(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 

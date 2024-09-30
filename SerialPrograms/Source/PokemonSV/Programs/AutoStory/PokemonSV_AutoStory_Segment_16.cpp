@@ -78,41 +78,28 @@ void checkpoint_32(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
+        DirectionDetector direction;
         do_action_and_monitor_for_battles(env.program_info(), env.console, context,
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 80, 0, 40);
+                direction.change_direction(env.console, context, 0.3491);
                 pbf_move_left_joystick(context, 128, 0, 400, 100);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 80, 100);
-                pbf_move_left_joystick(context, 128, 0, 550, 100);                
+                direction.change_direction(env.console, context, 5.075911);
+                pbf_move_left_joystick(context, 128, 0, 525, 100);                
         });
 
-        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 210, 255, 50);
+        direction.change_direction(env.console, context, 3.771252);
         pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
         // walk towards elevator
-        pbf_move_left_joystick(context, 128, 0, 500, 100);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
         // jump to ensure you get on elevator
         pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 200);
         pbf_wait(context, 3 * TICKS_PER_SECOND);
-        context.wait_for_all_requests();
         // wait for overworld to reappear after stepping off elevator
-        OverworldWatcher        overworld(env.console, COLOR_CYAN);
-        int ret = wait_until(
-            env.console, context, 
-            Milliseconds(20000),
-            { overworld }
-        );
-        if (ret == 0){
-            env.console.log("Overworld detected.");
-        }else{
-            throw OperationFailedException(
-                ErrorReport::SEND_ERROR_REPORT, env.console,
-                "Failed to detect overworld.",
-                true
-            );
-        } 
-        pbf_move_left_joystick(context, 128, 0, 100, 100);
-        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 67, 100);
+        wait_for_overworld(env.program_info(), env.console, context, 30);
+
+        pbf_move_left_joystick(context, 128, 0, 120, 100);     
+        direction.change_direction(env.console, context, 5.11);  
         walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 20);
         mash_button_till_overworld(env.console, context, BUTTON_A);
        

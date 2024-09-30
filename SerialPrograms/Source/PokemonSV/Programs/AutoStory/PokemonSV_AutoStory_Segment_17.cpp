@@ -151,23 +151,9 @@ void checkpoint_35(
         // jump to ensure you get on elevator
         pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 200);
         pbf_wait(context, 3 * TICKS_PER_SECOND);
-        context.wait_for_all_requests();
         // wait for overworld to reappear after stepping off elevator
-        OverworldWatcher        overworld(env.console, COLOR_CYAN);
-        int ret = wait_until(
-            env.console, context, 
-            Milliseconds(20000),
-            { overworld }
-        );
-        if (ret == 0){
-            env.console.log("Overworld detected.");
-        }else{
-            throw OperationFailedException(
-                ErrorReport::SEND_ERROR_REPORT, env.console,
-                "Failed to detect overworld.",
-                true
-            );
-        } 
+        wait_for_overworld(env.program_info(), env.console, context, 30);
+
         pbf_move_left_joystick(context, 128, 0, 120, 100);     
 
         direction.change_direction(env.console, context, 5.11);  
@@ -195,61 +181,6 @@ void checkpoint_35(
     }
 
 }
-
-void checkpoint_36(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }         
-    }
-
-}
-
-void checkpoint_37(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }         
-    }
-
-}
-
 
 
 }

@@ -703,6 +703,31 @@ void wait_for_gradient_arrow(
     }          
 }
 
+void wait_for_overworld(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context, 
+    uint16_t seconds_timeout
+){
+    context.wait_for_all_requests();
+    OverworldWatcher        overworld(console, COLOR_CYAN);
+    int ret = wait_until(
+        console, context, 
+        Milliseconds(seconds_timeout * 1000),
+        { overworld }
+    );
+    if (ret == 0){
+        console.log("Overworld detected.");
+    }else{
+        throw OperationFailedException(
+            ErrorReport::SEND_ERROR_REPORT, console,
+            "Failed to detect overworld.",
+            true
+        );
+    }     
+
+}
+
 void press_A_until_dialog(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context, uint16_t seconds_between_button_presses){
     context.wait_for_all_requests();
     AdvanceDialogWatcher advance_dialog(COLOR_RED);
