@@ -612,6 +612,7 @@ void change_settings_prior_to_autostory(SingleSwitchProgramEnvironment& env, Bot
     }
 }
 
+
 void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& context,  Language language, bool use_inference){
     env.console.log("Update settings.");
     if (use_inference){
