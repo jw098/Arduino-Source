@@ -57,6 +57,7 @@ enum class CallbackEnum{
     BLACK_DIALOG_BOX,
     GRADIENT_ARROW,
     SWAP_MENU,
+    MOVE_SELECT,
 };
 
 enum class StartPoint{
@@ -122,6 +123,8 @@ void run_battle_press_A(
     std::vector<CallbackEnum> optional_callbacks = {},
     bool detect_wipeout = false
 );
+
+void select_top_move(ConsoleHandle& console, BotBaseContext& context, size_t consecutive_move_select);
 
 // press A to clear tutorial screens
 // throw exception if tutorial screen never detected

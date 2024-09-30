@@ -55,6 +55,7 @@ void run_battle_press_A(
     bool detect_wipeout
 ){
     int16_t num_times_seen_overworld = 0;
+    size_t consecutive_move_select = 0;
     while (true){
         NormalBattleMenuWatcher battle(COLOR_BLUE);
         SwapMenuWatcher         fainted(COLOR_PURPLE);
@@ -62,9 +63,10 @@ void run_battle_press_A(
         AdvanceDialogWatcher    dialog(COLOR_RED);
         DialogArrowWatcher dialog_arrow(COLOR_RED, console.overlay(), {0.850, 0.820, 0.020, 0.050}, 0.8365, 0.846);
         GradientArrowWatcher next_pokemon(COLOR_BLUE, GradientArrowType::RIGHT, {0.50, 0.51, 0.30, 0.10});
+        MoveSelectWatcher move_select_menu(COLOR_YELLOW);
 
         std::vector<PeriodicInferenceCallback> callbacks; 
-        std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::BATTLE, CallbackEnum::OVERWORLD, CallbackEnum::ADVANCE_DIALOG, CallbackEnum::SWAP_MENU}; // mandatory callbacks
+        std::vector<CallbackEnum> enum_all_callbacks{CallbackEnum::BATTLE, CallbackEnum::OVERWORLD, CallbackEnum::ADVANCE_DIALOG, CallbackEnum::SWAP_MENU, CallbackEnum::MOVE_SELECT}; // mandatory callbacks
         enum_all_callbacks.insert(enum_all_callbacks.end(), enum_optional_callbacks.begin(), enum_optional_callbacks.end()); // append the mandatory and optional callback vectors together
         for (const CallbackEnum& enum_callback : enum_all_callbacks){
             switch(enum_callback){
@@ -85,7 +87,10 @@ void run_battle_press_A(
                 break;
             case CallbackEnum::SWAP_MENU:  
                 callbacks.emplace_back(fainted);
-                break;                          
+                break;                     
+            case CallbackEnum::MOVE_SELECT:
+                callbacks.emplace_back(move_select_menu);
+                break;
             default:
                 throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "run_battle_press_A: Unknown callback requested.");
             }
@@ -109,8 +114,14 @@ void run_battle_press_A(
         CallbackEnum enum_callback = enum_all_callbacks[ret];
         switch (enum_callback){
         case CallbackEnum::BATTLE: // battle
-            console.log("Detected battle menu, spam first move.");
-            pbf_mash_button(context, BUTTON_A, 3 * TICKS_PER_SECOND);
+            console.log("Detected battle menu.");
+            consecutive_move_select = 0;
+            pbf_press_button(context, BUTTON_A, 20, 105);
+            break;
+        case CallbackEnum::MOVE_SELECT:
+            console.log("Detected move select. Spam first move");
+            consecutive_move_select++;
+            select_top_move(console, context, consecutive_move_select);
             break;
         case CallbackEnum::OVERWORLD: // overworld
             console.log("Detected overworld, battle over.");
@@ -167,6 +178,16 @@ void run_battle_press_A(
           
         }
     }
+}
+
+void select_top_move(ConsoleHandle& console, BotBaseContext& context, size_t consecutive_move_select){
+    if (consecutive_move_select > 3){
+        // to handle case where move is disabled/out of PP/taunted
+        console.log("Failed to select a move 3 times. Choosing a different move.", COLOR_RED);
+        pbf_press_dpad(context, DPAD_DOWN, 20, 40);
+    }
+    pbf_mash_button(context, BUTTON_A, 100);
+
 }
 
 void clear_tutorial(ConsoleHandle& console, BotBaseContext& context, uint16_t seconds_timeout){
