@@ -188,6 +188,27 @@ void handle_unexpected_battles(
     >&& action
 );
 
+// if stationary in overworld for an amount of time (seconds_stationary), run `recovery_action` then try `action` again
+// return once successfully completed `action`
+// throw exception if fails to complete `action` within a certain amount of time (minutes_timeout).
+void handle_when_stationary_in_overworld(
+    const ProgramInfo& info, 
+    ConsoleHandle& console,
+    BotBaseContext& context,
+    std::function<
+        void(const ProgramInfo& info, 
+        ConsoleHandle& console,
+        BotBaseContext& context)
+    >&& action,
+    std::function<
+        void(const ProgramInfo& info, 
+        ConsoleHandle& console,
+        BotBaseContext& context)
+    >&& recovery_action,
+    size_t seconds_stationary = 5,
+    uint16_t minutes_timeout = 5
+);
+
 void wait_for_gradient_arrow(
     const ProgramInfo& info, 
     ConsoleHandle& console, 
