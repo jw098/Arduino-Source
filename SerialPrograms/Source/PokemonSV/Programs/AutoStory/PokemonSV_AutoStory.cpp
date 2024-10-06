@@ -627,9 +627,9 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
 
     if (TEST_DIRECTION_CHANGE){
         DirectionDetector direction;
-        // direction.change_direction(env.console, context, DIR_RADIANS);
+        // direction.change_direction(env.program_info(), env.console, context, DIR_RADIANS);
         VideoSnapshot snapshot = env.console.video().snapshot();
-        env.console.log("current direction: " + std::to_string(direction.current_direction(env.console, snapshot)));
+        env.console.log("current direction: " + std::to_string(direction.get_current_direction(env.console, snapshot)));
         return;
     }    
 

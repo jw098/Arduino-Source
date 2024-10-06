@@ -81,13 +81,13 @@ void checkpoint_32(
         DirectionDetector direction;
         do_action_and_monitor_for_battles(env.program_info(), env.console, context,
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                direction.change_direction(env.console, context, 0.3491);
+                direction.change_direction(env.program_info(), env.console, context, 0.3491);
                 pbf_move_left_joystick(context, 128, 0, 400, 100);
-                direction.change_direction(env.console, context, 5.075911);
+                direction.change_direction(env.program_info(), env.console, context, 5.075911);
                 pbf_move_left_joystick(context, 128, 0, 525, 100);                
         });
 
-        direction.change_direction(env.console, context, 3.771252);
+        direction.change_direction(env.program_info(), env.console, context, 3.771252);
         pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
         // walk towards elevator
@@ -99,7 +99,7 @@ void checkpoint_32(
         wait_for_overworld(env.program_info(), env.console, context, 30);
 
         pbf_move_left_joystick(context, 128, 0, 120, 100);     
-        direction.change_direction(env.console, context, 5.11);  
+        direction.change_direction(env.program_info(), env.console, context, 5.11);  
         walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 20);
         mash_button_till_overworld(env.console, context, BUTTON_A);
        

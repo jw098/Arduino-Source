@@ -93,7 +93,7 @@ void checkpoint_36(
         // section 1
         do_action_and_monitor_for_battles(env.program_info(), env.console, context,
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                direction.change_direction(env.console, context, 4.677921);
+                direction.change_direction(env.program_info(), env.console, context, 4.677921);
                 pbf_move_left_joystick(context, 128, 0, 150, 100);
         });        
 

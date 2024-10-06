@@ -288,7 +288,7 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 
     // std::pair<double, double> north_location = detector.locate_north(image);
     // detector.current_direction(image);
-    detector.change_direction(console, context, 3.14);
+    detector.change_direction(env.program_info(), console, context, 0);
 
 #endif
 

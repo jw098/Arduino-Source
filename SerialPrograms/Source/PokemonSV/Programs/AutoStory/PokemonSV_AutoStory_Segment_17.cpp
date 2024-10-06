@@ -85,7 +85,7 @@ void checkpoint_34(
                 realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 255, 50);
 
                 // section 1
-                direction.change_direction(env.console, context, 1.606);
+                direction.change_direction(env.program_info(), env.console, context, 1.606);
                 pbf_move_left_joystick(context, 128, 0, 200, 100);
 
                 pbf_press_button(context, BUTTON_PLUS, 20, 20);
@@ -137,13 +137,13 @@ void checkpoint_35(
         DirectionDetector direction;
         do_action_and_monitor_for_battles(env.program_info(), env.console, context,
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                direction.change_direction(env.console, context, 0.3491);
+                direction.change_direction(env.program_info(), env.console, context, 0.3491);
                 pbf_move_left_joystick(context, 128, 0, 400, 100);
-                direction.change_direction(env.console, context, 5.075911);
+                direction.change_direction(env.program_info(), env.console, context, 5.075911);
                 pbf_move_left_joystick(context, 128, 0, 525, 100);                
         });
 
-        direction.change_direction(env.console, context, 3.771252);
+        direction.change_direction(env.program_info(), env.console, context, 3.771252);
         pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
         // walk towards elevator
@@ -156,9 +156,9 @@ void checkpoint_35(
 
         pbf_move_left_joystick(context, 128, 0, 120, 100);     
 
-        direction.change_direction(env.console, context, 5.11);  
+        direction.change_direction(env.program_info(), env.console, context, 5.11);  
         pbf_move_left_joystick(context, 128, 0, 1600, 100); 
-        direction.change_direction(env.console, context, 3.2245);          
+        direction.change_direction(env.program_info(), env.console, context, 3.2245);          
         
         walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 18);
         // talk to Nemona
