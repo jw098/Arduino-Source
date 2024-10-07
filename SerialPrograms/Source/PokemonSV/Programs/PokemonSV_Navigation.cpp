@@ -724,14 +724,13 @@ void fly_to_closest_pokecenter_on_map(const ProgramInfo& info, ConsoleHandle& co
                     true
                 );
             }
-        }catch (OperationFailedException&){ // pokecenter was detected, but failed to fly there
+        }catch (OperationFailedException& e){ 
             try_count++;
             if (try_count >= MAX_TRY_COUNT){
-                throw OperationFailedException(
-                    ErrorReport::SEND_ERROR_REPORT, console,
-                    "fly_to_closest_pokecenter_on_map(): At max warpable map level, pokecenter was detected, but failed to fly there.",
-                    true
-                );
+                // either: 
+                // - pokecenter was detected, but failed to fly there. 
+                // - could not find pokecenter icon.
+                throw e;
             }
             console.log("Failed to find the fly menuitem. Restart the closest Pokecenter travel process.");
             press_Bs_to_back_to_overworld(info, console, context);
@@ -778,8 +777,7 @@ void reset_to_pokecenter(const ProgramInfo& info, ConsoleHandle& console, BotBas
         try {
             open_map_from_overworld(info, console, context);
             fly_to_closest_pokecenter_on_map(info, console, context);
-        }catch (UnexpectedBattleException& e){
-            (void) e;
+        }catch (UnexpectedBattleException&){
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);            
         }
     }
@@ -933,8 +931,7 @@ bool attempt_fly_to_overlapping_flypoint(
 
             return fly_to_overworld_from_map(info, console, context, true);            
 
-        }catch (UnexpectedBattleException& e){
-            (void) e;
+        }catch (UnexpectedBattleException&){
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);            
         }
     }

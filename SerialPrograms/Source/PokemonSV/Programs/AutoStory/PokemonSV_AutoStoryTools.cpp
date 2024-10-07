@@ -175,7 +175,7 @@ void run_battle_press_A(
                 "run_battle_press_A(): Lead pokemon fainted.",
                 true
             );        
-        default: // timeout
+        default:
             throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "run_battle_press_A: Unknown callback triggered.");
           
         }
@@ -279,6 +279,8 @@ void clear_dialog(ConsoleHandle& console, BotBaseContext& context,
             case CallbackEnum::BLACK_DIALOG_BOX:
                 callbacks.emplace_back(black_dialog_box);
                 break;              
+            default:
+                throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "clear_dialog: Unknown callback requested.");                
             }
         }
 
@@ -455,8 +457,7 @@ void overworld_navigation(
                     if (should_realign){
                         try {
                             realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-                        }catch (UnexpectedBattleException& e){
-                            (void) e;
+                        }catch (UnexpectedBattleException&){
                             pbf_wait(context, 30 * TICKS_PER_SECOND);  // catch exception to allow the battle callback to take over.
                         }
                         
@@ -488,8 +489,7 @@ void overworld_navigation(
                 }
 
                 break;
-            }catch (UnexpectedBattleException& e){
-                (void) e;
+            }catch (UnexpectedBattleException&){
                 break;
             }
         case 1: // dialog
@@ -761,6 +761,75 @@ void handle_when_stationary_in_overworld(
     }
 }
 
+
+void handle_unexpected_battles(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context,
+    std::function<
+        void(const ProgramInfo& info, 
+        ConsoleHandle& console,
+        BotBaseContext& context)
+    >&& action
+){
+    while (true){
+        try {
+            context.wait_for_all_requests();
+            action(info, console, context);
+            return;
+        }catch (UnexpectedBattleException&){
+            run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
+        }
+    }
+}
+
+// void handle_when_stationary_in_overworld(
+//     const ProgramInfo& info, 
+//     ConsoleHandle& console,
+//     BotBaseContext& context,
+//     std::function<
+//         void(const ProgramInfo& info, 
+//         ConsoleHandle& console,
+//         BotBaseContext& context)
+//     >&& action,
+//     std::function<
+//         void(const ProgramInfo& info, 
+//         ConsoleHandle& console,
+//         BotBaseContext& context)
+//     >&& recovery_action,
+//     size_t seconds_stationary,
+//     uint16_t minutes_timeout
+// ){
+//     StationaryOverworldWatcher stationary_overworld(COLOR_RED, {0.865, 0.82, 0.08, 0.1}, seconds_stationary);
+//     WallClock start = current_time();
+//     while (true){
+//         if (current_time() - start > std::chrono::minutes(minutes_timeout)){
+//             throw OperationFailedException(
+//                 ErrorReport::SEND_ERROR_REPORT, console,
+//                 "handle_when_stationary_in_overworld(): Failed to complete action after 5 minutes.",
+//                 true
+//             );
+//         }
+
+//         int ret = run_until(
+//             console, context,
+//             [&](BotBaseContext& context){
+//                 context.wait_for_all_requests();
+//                 action(info, console, context);
+//             },
+//             {stationary_overworld}        
+//         );
+//         if (ret < 0){
+//             // successfully completed action without being stuck in a position where the overworld is stationary.
+//             return;
+//         }else if (ret == 0){
+//             // if stationary in overworld, run recovery action then try action again
+//             context.wait_for_all_requests();
+//             recovery_action(info, console, context);            
+//         }
+//     }
+// }
+
 void wait_for_gradient_arrow(
     const ProgramInfo& info, 
     ConsoleHandle& console, 
@@ -853,8 +922,7 @@ bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseC
             }
             return is_ride_active;        
 
-        }catch(UnexpectedBattleException& e){
-            (void) e;
+        }catch(UnexpectedBattleException&){
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
         }
     }
@@ -973,12 +1041,10 @@ void realign_player_from_landmark(
 
             return;      
 
-        }catch (OperationFailedException& e){
-            (void) e;
+        }catch (OperationFailedException&){
             // reset to overworld if failed to center on the pokecenter, and re-try
             leave_phone_to_overworld(info, console, context);
-        }catch (UnexpectedBattleException& e){
-            (void) e;
+        }catch (UnexpectedBattleException&){
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
         }
     }
@@ -1057,12 +1123,10 @@ void move_cursor_towards_flypoint_and_go_there(
 
             return;      
 
-        }catch (OperationFailedException& e){
-            (void) e;
+        }catch (OperationFailedException&){
             // reset to overworld if failed to center on the pokecenter, and re-try
             leave_phone_to_overworld(info, console, context);
-        }catch (UnexpectedBattleException& e){
-            (void) e;
+        }catch (UnexpectedBattleException&){
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
         }
     }
