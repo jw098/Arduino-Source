@@ -707,8 +707,7 @@ void handle_unexpected_battles(
             context.wait_for_all_requests();
             action(info, console, context);
             return;
-        }catch (UnexpectedBattleException& e){
-            (void) e;
+        }catch (UnexpectedBattleException&){
             run_battle_press_A(console, context, BattleStopCondition::STOP_OVERWORLD);
         }
     }
@@ -783,52 +782,6 @@ void handle_unexpected_battles(
     }
 }
 
-// void handle_when_stationary_in_overworld(
-//     const ProgramInfo& info, 
-//     ConsoleHandle& console,
-//     BotBaseContext& context,
-//     std::function<
-//         void(const ProgramInfo& info, 
-//         ConsoleHandle& console,
-//         BotBaseContext& context)
-//     >&& action,
-//     std::function<
-//         void(const ProgramInfo& info, 
-//         ConsoleHandle& console,
-//         BotBaseContext& context)
-//     >&& recovery_action,
-//     size_t seconds_stationary,
-//     uint16_t minutes_timeout
-// ){
-//     StationaryOverworldWatcher stationary_overworld(COLOR_RED, {0.865, 0.82, 0.08, 0.1}, seconds_stationary);
-//     WallClock start = current_time();
-//     while (true){
-//         if (current_time() - start > std::chrono::minutes(minutes_timeout)){
-//             throw OperationFailedException(
-//                 ErrorReport::SEND_ERROR_REPORT, console,
-//                 "handle_when_stationary_in_overworld(): Failed to complete action after 5 minutes.",
-//                 true
-//             );
-//         }
-
-//         int ret = run_until(
-//             console, context,
-//             [&](BotBaseContext& context){
-//                 context.wait_for_all_requests();
-//                 action(info, console, context);
-//             },
-//             {stationary_overworld}        
-//         );
-//         if (ret < 0){
-//             // successfully completed action without being stuck in a position where the overworld is stationary.
-//             return;
-//         }else if (ret == 0){
-//             // if stationary in overworld, run recovery action then try action again
-//             context.wait_for_all_requests();
-//             recovery_action(info, console, context);            
-//         }
-//     }
-// }
 
 void wait_for_gradient_arrow(
     const ProgramInfo& info, 
