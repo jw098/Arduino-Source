@@ -36,7 +36,7 @@ public:
 // end: Spoke to Cortondo Gym reception. At Cortondo West Pokecenter.
 void checkpoint_24(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
-// start: 
+// start: Spoke to Cortondo Gym reception. At Cortondo West Pokecenter.
 // end: (Placeholder) Done Cortondo Gym challenge
 void checkpoint_25(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 

@@ -142,7 +142,21 @@ void checkpoint_25(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
-       
+
+        // section 1. align to Olive roll NPC
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 157, 0, 40);
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 40, 10);
+        
+        // section 1.1. keep walking forward and talk to Olive roll NPC
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10);
+            }
+        );     
+        mash_button_till_overworld(env.console, context, BUTTON_A);
+
         break;
     }catch(...){
         context.wait_for_all_requests();
