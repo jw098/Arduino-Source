@@ -47,46 +47,20 @@ std::string AutoStory_Segment_12::end_text() const{
     return "End: Beat Cortondo Gym battle.";
 }
 
+
+// todo: update with checkpoint 26
 void AutoStory_Segment_12::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 10.3: Cortondo Gym - Gym battle", COLOR_ORANGE);
 
-    checkpoint_25(env, context, options.notif_status_update);
+    // checkpoint_25(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 10.3: Cortondo Gym - Gym battle", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
-
-}
-
-
-void checkpoint_25(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch(...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }             
-    }
 
 }
 

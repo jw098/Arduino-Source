@@ -31,11 +31,6 @@ public:
         AutoStoryOptions options) const override;
 };
 
-// start: (Placeholder) Beat Cortondo Gym leader (Bug)
-// end: 
-void checkpoint_25(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
-
-
 
 }
 }
