@@ -350,6 +350,7 @@ SOURCES += \
     Source/Kernels/ImageFilters/Kernels_ImageFilter_Basic_x64_AVX2.cpp \
     Source/Kernels/ImageFilters/Kernels_ImageFilter_Basic_x64_AVX512.cpp \
     Source/Kernels/ImageFilters/Kernels_ImageFilter_Basic_x64_SSE42.cpp \
+    Source/Kernels/ImageFilters/Kernels_ImageFilter_Green_Default.cpp \
     Source/Kernels/ImageScaleBrightness/Kernels_ImageScaleBrightness.cpp \
     Source/Kernels/ImageScaleBrightness/Kernels_ImageScaleBrightness_Default.cpp \
     Source/Kernels/ImageScaleBrightness/Kernels_ImageScaleBrightness_arm64_NEON.cpp \
