@@ -27,7 +27,27 @@ public:
     // return ImageFloatBox of the of the Olive, based on the largest blob of green
     ImageFloatBox get_olive_floatbox(ConsoleHandle& console, BotBaseContext& context, ImageFloatBox box = {0, 0.15, 1, 0.7});
 
-    void align_to_olive(
+    ImageFloatBox align_to_olive(
+        const ProgramInfo& info, 
+        ConsoleHandle& console, 
+        BotBaseContext& context, 
+        double direction_facing, 
+        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7}
+    );
+
+    // push the olive forward. 
+    // move forward a certain number of ticks, as per total_forward_distance
+    // always face a certain direction, as per direction_facing
+    void push_olive_forward(
+        const ProgramInfo& info, 
+        ConsoleHandle& console, 
+        BotBaseContext& context, 
+        double direction_facing, 
+        uint16_t total_forward_distance,
+        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7}        
+    );
+
+    uint16_t walk_up_to_olive(
         const ProgramInfo& info, 
         ConsoleHandle& console, 
         BotBaseContext& context, 

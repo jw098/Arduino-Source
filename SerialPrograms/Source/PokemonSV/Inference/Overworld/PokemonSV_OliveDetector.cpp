@@ -117,7 +117,7 @@ ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseC
     return largest_green;
 }
 
-void OliveDetector::align_to_olive(
+ImageFloatBox OliveDetector::align_to_olive(
     const ProgramInfo& info, 
     ConsoleHandle& console, 
     BotBaseContext& context, 
@@ -125,12 +125,13 @@ void OliveDetector::align_to_olive(
     ImageFloatBox area_to_check
 ){
     size_t MAX_ATTEMPTS = 10;
+    ImageFloatBox olive_box;
     DirectionDetector direction;
     for (size_t i = 0; i < MAX_ATTEMPTS; i++){
         direction.change_direction(info, console, context, direction_facing);
         pbf_move_left_joystick(context, 128, 0, 5, 20);
 
-        ImageFloatBox olive_box = get_olive_floatbox(console, context, area_to_check);
+        olive_box = get_olive_floatbox(console, context, area_to_check);
 
         std::pair<double, double> olive = box_center(olive_box);
         double olive_x = olive.first;
@@ -140,7 +141,7 @@ void OliveDetector::align_to_olive(
         double x_diff = olive_x - 0.5;
         console.log("olive_x: " +  std::to_string(olive_x) + ", olive_y: " +  std::to_string(olive_y) + ", olive_area: " +  std::to_string(olive_area));
         if (std::abs(x_diff) < 0.01){
-            return;
+            return olive_box;
         }
 
         if (olive_x == 0 && olive_y == 0){
@@ -166,11 +167,100 @@ void OliveDetector::align_to_olive(
         pbf_move_left_joystick(context, push_x, 128, push_duration, 100);
     
     }
-    
+    return olive_box;
+}
 
+
+// todo: detect and handle case where olive is stuck.
+// todo: detect and handle case where olive is slightly to the left, and so we need to move on to the next phase
+void OliveDetector::push_olive_forward(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context, 
+    double direction_facing, 
+    uint16_t total_forward_distance,
+    ImageFloatBox area_to_check
+){
+    uint16_t ticks_walked = 0;
+    size_t MAX_ATTEMPTS = 10;
+    for (size_t i = 0; i < MAX_ATTEMPTS; i++){
+        align_to_olive(info, console, context, direction_facing, area_to_check);
+        ticks_walked += walk_up_to_olive(info, console, context, direction_facing);
+        
+
+        if (ticks_walked > total_forward_distance){
+            console.log("Distance walked: " + std::to_string(ticks_walked));
+            return;
+        }
+
+        uint16_t push_olive = 75;
+        align_to_olive(info, console, context, direction_facing, area_to_check);
+        // check location of olive before and after push
+        // if olive is approximately in the same location, then the olive is stuck. try moving backward and running forward again.
+        ImageFloatBox olive_box_1 = get_olive_floatbox(console, context, area_to_check);
+        for (size_t j = 0; j < 3; j++){
+            
+            pbf_move_left_joystick(context, 128, 0, push_olive, 7 * TICKS_PER_SECOND);
+            console.log("Push the olive.");
+            ticks_walked += push_olive;
+            ImageFloatBox olive_box_2 = get_olive_floatbox(console, context, area_to_check);
+            double x_diff = std::abs(olive_box_1.x - olive_box_2.x);
+            double y_diff = std::abs(olive_box_1.y - olive_box_2.y);
+
+            if (x_diff < 0.01 && y_diff < 0.01){
+                console.log("Olive is stuck? Move backwards and try pushing again.");
+                pbf_move_left_joystick(context, 128, 255, 75, 100);  // walk backwards
+                ticks_walked -= 75;
+                push_olive = 200; // run forward more on the next push
+            }else{
+                break;
+            }
+        }
+        console.log("Distance walked: " + std::to_string(ticks_walked));
+        
+    }
+
+    throw OperationFailedException(
+        ErrorReport::SEND_ERROR_REPORT, console,
+        "push_olive_forward(): Something went wrong. Failed to walk the Olive forward as expected.",
+        true
+    );
 
 }
 
+uint16_t OliveDetector::walk_up_to_olive(
+    const ProgramInfo& info, 
+    ConsoleHandle& console, 
+    BotBaseContext& context, 
+    double direction_facing, 
+    ImageFloatBox area_to_check
+){
+    uint16_t ticks_walked = 0;
+    size_t MAX_ATTEMPTS = 20;
+    for (size_t i = 0; i < MAX_ATTEMPTS; i++){
+        ImageFloatBox olive_box = get_olive_floatbox(console, context, area_to_check);
+        std::pair<double, double> olive = box_center(olive_box);
+        // double olive_x = olive.first;
+        double olive_y = olive.second;
+
+        uint16_t scale_factor = 2000;
+        uint16_t push_duration = std::max(uint16_t(std::pow((0.57 - olive_y), 2) * scale_factor), uint16_t(20));
+        console.log("olive_y: " + std::to_string(olive_y));
+        if (olive_y > 0.51){
+            return ticks_walked;
+        }        
+        console.log("push duration: " +  std::to_string(push_duration));
+        ticks_walked += push_duration;
+        pbf_move_left_joystick(context, 128, 0, push_duration, 100);
+    }    
+
+    throw OperationFailedException(
+        ErrorReport::SEND_ERROR_REPORT, console,
+        "walk_up_to_olive(): Something went wrong. Failed to walk up to the Olive",
+        true
+    );
+
+}
 
 
 
