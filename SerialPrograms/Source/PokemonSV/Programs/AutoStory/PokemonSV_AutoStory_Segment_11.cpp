@@ -127,7 +127,6 @@ void checkpoint_24(
 }
 
 
-// todo: uncomment checkpoint_save
 void checkpoint_25(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -138,7 +137,7 @@ void checkpoint_25(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
@@ -156,6 +155,51 @@ void checkpoint_25(
             }
         );     
         mash_button_till_overworld(env.console, context, BUTTON_A);
+
+        // section 2
+        pbf_move_left_joystick(context, 128, 0, 1300, 100);
+
+        // section 3
+        DirectionDetector direction;
+        direction.change_direction(env.program_info(), env.console, context, 6.0);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
+
+        // section 4. align to corner
+        direction.change_direction(env.program_info(), env.console, context,  4.69);
+        pbf_move_left_joystick(context, 128, 0, 150, 100);
+
+        // section 5. battle first NPC
+        direction.change_direction(env.program_info(), env.console, context,  1.485);
+        walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10, 128, 20);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::BATTLE, CallbackEnum::DIALOG_ARROW});
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
+        mash_button_till_overworld(env.console, context, BUTTON_A);
+
+        // section 6
+        direction.change_direction(env.program_info(), env.console, context, 5.95);
+        pbf_move_left_joystick(context, 128, 0, 1000, 100);
+
+        // section 7
+        direction.change_direction(env.program_info(), env.console, context,  1.327);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
+
+        // section 8
+        direction.change_direction(env.program_info(), env.console, context,  6.106);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+
+        // section 9. battle second NPC
+        direction.change_direction(env.program_info(), env.console, context,  4.275);
+        walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10, 128, 20);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::BATTLE, CallbackEnum::DIALOG_ARROW});
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG);
+        mash_button_till_overworld(env.console, context, BUTTON_A);
+
+        // section 10. leave Olive roll
+        pbf_mash_button(context, BUTTON_Y, 100);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_PROMPT, 60, {CallbackEnum::PROMPT_DIALOG});
+        clear_dialog(env.console, context, ClearDialogMode::STOP_TIMEOUT, 15, {CallbackEnum::PROMPT_DIALOG});
+        wait_for_overworld(env.program_info(), env.console, context);
+        enter_menu_from_overworld(env.program_info(), env.console, context, -1);
 
         break;
     }catch(...){
