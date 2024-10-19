@@ -37,8 +37,12 @@ public:
 void checkpoint_24(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 // start: Spoke to Cortondo Gym reception. At Cortondo West Pokecenter.
-// end: Beat trainers at Olive Roll, but leave Olive unmoved. Then back out, in front of the Olive Roll NPC.
+// end: Defeated the trainers at Olive Roll, but left Olive unmoved. Then backed out, standing in front of the Olive Roll NPC.
 void checkpoint_25(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: Defeated the trainers at Olive Roll, but left Olive unmoved. Then backed out, standing in front of the Olive Roll NPC.
+// end: Completed Olive roll gym challenge. At Cortondon East Pokecenter.
+void checkpoint_26(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 

@@ -33,7 +33,7 @@ public:
         "PokemonSV/Olive.png", Color(0,0,0), Color(255, 255, 255), 5
     ){
         m_aspect_ratio_lower = 0.5;
-        m_aspect_ratio_upper = 1.5;
+        m_aspect_ratio_upper = 3;
         m_area_ratio_lower = 0.5;
         m_area_ratio_upper = 1.5;
     }
@@ -127,6 +127,8 @@ ImageFloatBox OliveDetector::align_to_olive(
     size_t MAX_ATTEMPTS = 10;
     ImageFloatBox olive_box;
     DirectionDetector direction;
+    uint16_t scale_factor = 130;
+    int16_t prev_push_direction = 0;
     for (size_t i = 0; i < MAX_ATTEMPTS; i++){
         direction.change_direction(info, console, context, direction_facing);
         pbf_move_left_joystick(context, 128, 0, 5, 20);
@@ -152,19 +154,30 @@ ImageFloatBox OliveDetector::align_to_olive(
             );
         }
 
-        uint16_t scale_factor = 130;
-        if (olive_y > 0.50){
-            scale_factor = 100;
-
-        }
-        uint16_t push_duration = std::max(uint16_t((std::abs(x_diff) + 0.02) * scale_factor / (olive_y)), uint16_t(15));
-
         int16_t push_direction = (x_diff > 0) ? 1 : -1;
+        if (olive_y > 0.50 && scale_factor > 100){
+            scale_factor = 100;
+        }
+        if (push_direction * -1 == prev_push_direction){  
+            // if you overshot the olive, and are now pushing in the opposite direction
+            // then reduce the push_duration.
+            scale_factor = int16_t(scale_factor * 0.5);
+        }
+        
+        // cout << "olive_height" << olive_box.height << endl;
+        // if (olive_box.height > 0.4){
+        //     scale_factor = 50;
+        // }
+
+
+        uint16_t push_duration = std::max(uint16_t((std::abs(x_diff) + 0.02) * scale_factor / (olive_y)), uint16_t(15));
         double push_magnitude = 128; // std::max(double(128 / (i + 1)), double(20)); // push less with each iteration/attempt
         uint8_t push_x = uint8_t(std::max(std::min(int(128 + (push_direction * push_magnitude)), 255), 0));
+        console.log("scale_factor: " + std::to_string(scale_factor));
         console.log("push x: " + std::to_string(push_x) + ", push duration: " +  std::to_string(push_duration));
         pbf_wait(context, 100);
         pbf_move_left_joystick(context, push_x, 128, push_duration, 100);
+        prev_push_direction = push_direction;
     
     }
     return olive_box;
@@ -216,6 +229,12 @@ void OliveDetector::push_olive_forward(
                 break;
             }
         }
+        
+        if (ticks_walked > total_forward_distance){
+            console.log("Distance walked: " + std::to_string(ticks_walked));
+            return;
+        }
+
         console.log("Distance walked: " + std::to_string(ticks_walked));
         
     }
@@ -251,7 +270,7 @@ uint16_t OliveDetector::walk_up_to_olive(
         }        
         console.log("push duration: " +  std::to_string(push_duration));
         ticks_walked += push_duration;
-        pbf_move_left_joystick(context, 128, 0, push_duration, 100);
+        pbf_move_left_joystick(context, 128, 0, push_duration, 20);
     }    
 
     throw OperationFailedException(

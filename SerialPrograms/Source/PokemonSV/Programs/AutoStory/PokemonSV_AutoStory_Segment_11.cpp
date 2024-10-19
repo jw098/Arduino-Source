@@ -4,6 +4,7 @@
  *
  */
 
+#include "Common/Cpp/DateTime.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/Exceptions/FatalProgramException.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
@@ -12,11 +13,15 @@
 #include "CommonFramework/Tools/StatsTracking.h"
 #include "CommonFramework/Tools/VideoResolutionCheck.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
+#include "NintendoSwitch/Commands/NintendoSwitch_Commands_Routines.h"
+#include "NintendoSwitch/Programs/NintendoSwitch_GameEntry.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
+#include "PokemonSV/PokemonSV_Settings.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
 #include "PokemonSV_AutoStory_Segment_11.h"
 
@@ -212,6 +217,85 @@ void checkpoint_25(
     }
 
 }
+
+// todo: uncomment checkpoint_save
+void checkpoint_26(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            // checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }         
+        context.wait_for_all_requests();
+
+        // change the time of day: close game, change time to 5:45 am.
+        pbf_press_button(context, BUTTON_HOME, 20, GameSettings::instance().GAME_TO_HOME_DELAY);
+        change_date(env, context, {2025, 1, 1, 5, 45, 0});
+        reset_game_from_home(env.program_info(), env.console, context);
+
+        // talk to Olive roll NPC
+        walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10, 128, 20);
+        mash_button_till_overworld(env.console, context, BUTTON_A);
+
+        // section 1
+        pbf_move_left_joystick(context, 128, 0, 400, 50);
+        OliveDetector green(env.console);
+        green.push_olive_forward(env.program_info(), env.console, context, 4.5, 800);
+
+        // section 2. realign using fence corner
+        DirectionDetector direction;
+        direction.change_direction(env.program_info(), env.console, context,  2.74);
+        pbf_move_left_joystick(context, 128, 0, 200, 50);
+        direction.change_direction(env.program_info(), env.console, context,  4.328);
+        pbf_move_left_joystick(context, 128, 0, 200, 50);
+        direction.change_direction(env.program_info(), env.console, context,  1.22);
+        pbf_move_left_joystick(context, 128, 0, 150, 50);
+
+        // section 3. push olive past first NPC
+        green.push_olive_forward(env.program_info(), env.console, context, 5.43, 100);
+        green.push_olive_forward(env.program_info(), env.console, context, 5.95, 900);
+
+
+        // section 4. realign using fence corner
+        direction.change_direction(env.program_info(), env.console, context,  4.5);
+        pbf_move_left_joystick(context, 128, 0, 200, 50);
+        direction.change_direction(env.program_info(), env.console, context, 5.86);
+        pbf_move_left_joystick(context, 128, 0, 300, 50);
+        direction.change_direction(env.program_info(), env.console, context,  2.76);
+        pbf_move_left_joystick(context, 128, 0, 80, 50);
+
+        // section 5. push olive across the hump
+        green.push_olive_forward(env.program_info(), env.console, context, 1.27, 700);        
+
+        // section 6. realign using fence.
+        direction.change_direction(env.program_info(), env.console, context,  3.0);
+        pbf_move_left_joystick(context, 128, 0, 150, 50);
+        direction.change_direction(env.program_info(), env.console, context,  1.17);
+        pbf_move_left_joystick(context, 128, 0, 200, 50);
+
+        // section 7. past second NPC
+        green.push_olive_forward(env.program_info(), env.console, context, 5.8, 900);
+
+        // todo: trigger action once overworld no longer detected
+
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        // reset_game(env.program_info(), env.console, context); // the checkpoint itself already resets the game, so need to reset twice
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
+
 
 
 

@@ -127,7 +127,8 @@
 #include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
 #include "PokemonSV/Inference/PokemonSV_PokemonMovesReader.h"
 #include "PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.h"
-
+#include "PokemonSV/Inference/Overworld/PokemonSV_StationaryOverworldWatcher.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h"
 
 #include <QPixmap>
 #include <QVideoFrame>
@@ -275,6 +276,73 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 
 #if 1
     VideoSnapshot image = feed.snapshot();
+    // ImageRGB32 image("z.png");
+
+    // ImageRGB32 filtered = filter_green(image, Color(0xffffffff), 10);
+    // filtered.save("test1.png");    
+    DirectionDetector direction;
+
+
+    OliveDetector green(console);
+    // ImageFloatBox box = green.get_olive_floatbox(console, context, {0, 0.15, 1, 0.7});
+    // // cout << location.x << ", " << location.y << ", " << location.width << ", " << location.height << endl;
+    // double olive_x =  box.x + (box.width / 2);
+    // double olive_y = box.y + (box.height / 2);
+    // console.log("olive_x: " +  std::to_string(olive_x) + ", olive_y: " +  std::to_string(olive_y));
+    // std::pair<double, double> location = green.olive_location(console, context);
+    // cout << location.first << ", " << location.second << endl;
+
+    // green.align_to_olive(env.program_info(), console, context, 4.38024);
+
+    // green.align_to_olive(env.program_info(), console, context, 6.05);
+
+    // green.push_olive_forward(env.program_info(), console, context, 4.38024, 700);
+
+    // cout << green.walk_up_to_olive(env.program_info(), console, context, 4.38024) << endl;
+
+
+
+
+    // uint32_t p = 0xff123456;
+    // cout << std::to_string(p) << endl;
+    // cout << p << endl;
+
+    // uint8_t red = ((p >> 16) & 0xff);
+    // uint8_t green = ((p >> 8) & 0xff);
+    // uint8_t blue = ((p) & 0xff);
+    // cout << std::to_string(red) << endl;
+    // cout << std::to_string(green) << endl;
+    // cout << std::to_string(blue) << endl;
+    
+
+
+    // fly_to_closest_pokecenter_on_map(env.program_info(), console, context);
+    // realign_player_from_landmark(env.program_info(), console, context, {ZoomChange::ZOOM_OUT, 0, 0, 0}, {ZoomChange::ZOOM_IN_TWICE, 0, 128, 50});
+
+    // handle_when_stationary_in_overworld(env.program_info(), console, context, 
+    //     [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+    //         pbf_move_left_joystick(context, 128, 0, 2000, 100);
+    //     }, 
+    //     [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+    //         pbf_move_left_joystick(context, 255, 0, 200, 100);
+    //         DirectionDetector direction;
+    //         direction.change_direction(console, context, 1.623706);
+    //     },
+    //     5, 5
+    // );
+
+
+    // StationaryOverworldWatcher watcher;
+
+    // int ret = wait_until(
+    //     console, scope, std::chrono::seconds(20),
+    //     {watcher}
+    // );
+    // if (ret >= 0){
+    //     console.log("triggered");
+    // }else{
+    //     console.log("timed out");
+    // }
 #endif
 
 #if 0
