@@ -15,6 +15,8 @@
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_Routines.h"
 #include "NintendoSwitch/Programs/NintendoSwitch_GameEntry.h"
+#include "PokemonSwSh/Commands/PokemonSwSh_Commands_DateSpam.h"
+#include "NintendoSwitch/NintendoSwitch_Settings.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
@@ -22,6 +24,7 @@
 #include "PokemonSV/PokemonSV_Settings.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
 #include "PokemonSV_AutoStory_Segment_11.h"
 
@@ -246,7 +249,7 @@ void checkpoint_26(
         // section 1
         pbf_move_left_joystick(context, 128, 0, 400, 50);
         OliveDetector green(env.console);
-        green.push_olive_forward(env.program_info(), env.console, context, 4.5, 800);
+        green.push_olive_forward(env.program_info(), env.console, context, 4.5, 700);
 
         // section 2. realign using fence corner
         DirectionDetector direction;
@@ -258,8 +261,8 @@ void checkpoint_26(
         pbf_move_left_joystick(context, 128, 0, 150, 50);
 
         // section 3. push olive past first NPC
-        green.push_olive_forward(env.program_info(), env.console, context, 5.43, 100);
-        green.push_olive_forward(env.program_info(), env.console, context, 5.95, 900);
+        uint16_t ticks_walked_section3 = green.push_olive_forward(env.program_info(), env.console, context, 5.43, 100);
+        green.push_olive_forward(env.program_info(), env.console, context, 5.95, (1000 - ticks_walked_section3));
 
 
         // section 4. realign using fence corner
@@ -271,18 +274,44 @@ void checkpoint_26(
         pbf_move_left_joystick(context, 128, 0, 80, 50);
 
         // section 5. push olive across the hump
-        green.push_olive_forward(env.program_info(), env.console, context, 1.27, 700);        
+        green.push_olive_forward(env.program_info(), env.console, context, 1.27, 700, {0, 0.15, 1, 0.7}, 125);
 
         // section 6. realign using fence.
         direction.change_direction(env.program_info(), env.console, context,  3.0);
         pbf_move_left_joystick(context, 128, 0, 150, 50);
         direction.change_direction(env.program_info(), env.console, context,  1.17);
-        pbf_move_left_joystick(context, 128, 0, 200, 50);
+        pbf_move_left_joystick(context, 128, 0, 100, 50);
 
         // section 7. past second NPC
-        green.push_olive_forward(env.program_info(), env.console, context, 5.8, 900);
+        NoMinimapWatcher no_minimap(env.console, COLOR_RED, Milliseconds(5000));
+        int ret = run_until(
+            env.console, context,
+            [&](BotBaseContext& context){
+                green.push_olive_forward(env.program_info(), env.console, context, 5.8, 900);
+            },
+            {no_minimap}
+        );
+        if (ret < 0){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT,
+                env.logger(),
+                "Failed to finish Olive roll in the last stretch."
+            );
+        }
+        env.log("No minimap seen. Likely finished the Olive roll.");
 
-        // todo: trigger action once overworld no longer detected
+        // section 8. finish olive roll
+        mash_button_till_overworld(env.console, context, BUTTON_A, 360);
+        
+        // fix the time
+        pbf_press_button(context, BUTTON_HOME, 10, GameSettings::instance().GAME_TO_HOME_DELAY);
+        home_to_date_time(context, false, false);
+        pbf_press_button(context, BUTTON_A, 20, 105);
+        pbf_press_button(context, BUTTON_A, 20, 105);
+        pbf_press_button(context, BUTTON_HOME, 20, ConsoleSettings::instance().SETTINGS_TO_HOME_DELAY);
+        resume_game_from_home(env.console, context);        
+
+        enter_menu_from_overworld(env.program_info(), env.console, context, -1);
 
         break;
     }catch (...){

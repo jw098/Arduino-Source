@@ -38,13 +38,15 @@ public:
     // push the olive forward. 
     // move forward a certain number of ticks, as per total_forward_distance
     // always face a certain direction, as per direction_facing
-    void push_olive_forward(
+    // return number of ticks walked
+    uint16_t push_olive_forward(
         const ProgramInfo& info, 
         ConsoleHandle& console, 
         BotBaseContext& context, 
         double direction_facing, 
         uint16_t total_forward_distance,
-        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7}        
+        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7},
+        uint16_t push_olive = 75   
     );
 
     uint16_t walk_up_to_olive(
