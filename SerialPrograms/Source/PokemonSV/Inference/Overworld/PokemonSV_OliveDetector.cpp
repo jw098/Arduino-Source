@@ -14,6 +14,7 @@
 #include "CommonFramework/ImageMatch/WaterfillTemplateMatcher.h"
 #include "CommonFramework/ImageTools/ImageFilter.h"
 #include "CommonFramework/Tools/ConsoleHandle.h"
+#include "NintendoSwitch/Programs/NintendoSwitch_SnapshotDumper.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "PokemonSV_OliveDetector.h"
@@ -32,7 +33,7 @@ public:
     OliveMatcher() : WaterfillTemplateMatcher(
         "PokemonSV/Olive.png", Color(0,0,0), Color(255, 255, 255), 5
     ){
-        m_aspect_ratio_lower = 0.5;
+        m_aspect_ratio_lower = 0.4;
         m_aspect_ratio_upper = 3;
         m_area_ratio_lower = 0.5;
         m_area_ratio_upper = 1.5;
@@ -55,7 +56,7 @@ void OliveDetector::make_overlays(VideoOverlaySet& items) const{
 
 std::pair<double, double> OliveDetector::olive_location(ConsoleHandle& console, BotBaseContext& context, ImageFloatBox box){
     context.wait_for_all_requests();
-    ImageFloatBox location = get_olive_floatbox(console, context, box);
+    ImageFloatBox location = get_olive_floatbox(console, context, 30, box);
     double x = location.x + (location.width / 2);
     double y = location.y + (location.height / 2);
 
@@ -69,7 +70,7 @@ std::pair<double, double> box_center(ImageFloatBox& box){
     return std::make_pair(x, y);
 }
 
-ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseContext& context, ImageFloatBox box){
+ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseContext& context, uint8_t rgb_gap, ImageFloatBox box){
     context.wait_for_all_requests();
     auto snapshot = console.video().snapshot();
     const ImageViewRGB32& screen = snapshot;
@@ -78,7 +79,7 @@ ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseC
         {combine_rgb(0, 10, 0), combine_rgb(255, 255, 255)},
     };
 
-    ImageRGB32 green_only = filter_green(screen, Color(0xff000000), 10);
+    ImageRGB32 green_only = filter_green(screen, Color(0xff000000), rgb_gap);
 
     const double min_object_size = 1000;
     const double rmsd_threshold = 300;
@@ -122,6 +123,7 @@ ImageFloatBox OliveDetector::align_to_olive(
     ConsoleHandle& console, 
     BotBaseContext& context, 
     double direction_facing, 
+    uint8_t rgb_gap,
     ImageFloatBox area_to_check
 ){
     size_t MAX_ATTEMPTS = 10;
@@ -133,7 +135,7 @@ ImageFloatBox OliveDetector::align_to_olive(
         direction.change_direction(info, console, context, direction_facing);
         pbf_move_left_joystick(context, 128, 0, 5, 20);
 
-        olive_box = get_olive_floatbox(console, context, area_to_check);
+        olive_box = get_olive_floatbox(console, context, rgb_gap, area_to_check);
 
         std::pair<double, double> olive = box_center(olive_box);
         double olive_x = olive.first;
@@ -147,6 +149,7 @@ ImageFloatBox OliveDetector::align_to_olive(
         }
 
         if (olive_x == 0 && olive_y == 0){
+            dump_snapshot(console);
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
                 "align_to_olive(): Olive not detected.",
@@ -176,7 +179,7 @@ ImageFloatBox OliveDetector::align_to_olive(
         console.log("scale_factor: " + std::to_string(scale_factor));
         console.log("push x: " + std::to_string(push_x) + ", push duration: " +  std::to_string(push_duration));
         // pbf_wait(context, 100);
-        uint16_t wait_ticks = 20;
+        uint16_t wait_ticks = 50;
         if (std::abs(x_diff) < 0.05){
             wait_ticks = 100;
         }        
@@ -196,33 +199,35 @@ uint16_t OliveDetector::push_olive_forward(
     BotBaseContext& context, 
     double direction_facing, 
     uint16_t total_forward_distance,
-    ImageFloatBox area_to_check,
-    uint16_t push_olive
+    uint16_t push_olive,
+    uint8_t rgb_gap,
+    ImageFloatBox area_to_check
 ){
+    console.log("push_olive_forward");
     uint16_t initial_push_olive = push_olive;
     uint16_t ticks_walked = 0;
     size_t MAX_ATTEMPTS = 10;
     for (size_t i = 0; i < MAX_ATTEMPTS; i++){
-        align_to_olive(info, console, context, direction_facing, area_to_check);
-        ticks_walked += walk_up_to_olive(info, console, context, direction_facing);
+        align_to_olive(info, console, context, direction_facing, rgb_gap, area_to_check);
+        ticks_walked += walk_up_to_olive(info, console, context, direction_facing, rgb_gap, area_to_check);
         
 
-        if (ticks_walked > total_forward_distance){
+        if (ticks_walked >= total_forward_distance){
             console.log("Distance walked: " + std::to_string(ticks_walked));
             return ticks_walked;
         }
 
-        align_to_olive(info, console, context, direction_facing, area_to_check);
+        align_to_olive(info, console, context, direction_facing, rgb_gap, area_to_check);
         // check location of olive before and after push
         // if olive is approximately in the same location, then the olive is stuck. try moving backward and running forward again.
-        ImageFloatBox olive_box_1 = get_olive_floatbox(console, context, area_to_check);
+        ImageFloatBox olive_box_1 = get_olive_floatbox(console, context, rgb_gap, area_to_check);
         for (size_t j = 0; j < 3; j++){
             console.log("Distance walked: " + std::to_string(ticks_walked));
             console.log("Push the olive.");
             pbf_move_left_joystick(context, 128, 0, push_olive, 7 * TICKS_PER_SECOND);
             
             ticks_walked += push_olive;
-            ImageFloatBox olive_box_2 = get_olive_floatbox(console, context, area_to_check);
+            ImageFloatBox olive_box_2 = get_olive_floatbox(console, context, rgb_gap, area_to_check);
             double x_diff = std::abs(olive_box_1.x - olive_box_2.x);
             double y_diff = std::abs(olive_box_1.y - olive_box_2.y);
 
@@ -258,12 +263,13 @@ uint16_t OliveDetector::walk_up_to_olive(
     ConsoleHandle& console, 
     BotBaseContext& context, 
     double direction_facing, 
+    uint8_t rgb_gap,
     ImageFloatBox area_to_check
 ){
     uint16_t ticks_walked = 0;
     size_t MAX_ATTEMPTS = 20;
     for (size_t i = 0; i < MAX_ATTEMPTS; i++){
-        ImageFloatBox olive_box = get_olive_floatbox(console, context, area_to_check);
+        ImageFloatBox olive_box = get_olive_floatbox(console, context, rgb_gap, area_to_check);
         std::pair<double, double> olive = box_center(olive_box);
         // double olive_x = olive.first;
         double olive_y = olive.second;
@@ -271,13 +277,13 @@ uint16_t OliveDetector::walk_up_to_olive(
         uint16_t scale_factor = 2000;
         uint16_t push_duration = std::max(uint16_t(std::pow((0.57 - olive_y), 2) * scale_factor), uint16_t(20));
         console.log("olive_y: " + std::to_string(olive_y));
-        if (olive_y > 0.51){
+        if (olive_y > 0.515){
             return ticks_walked;
         }        
         console.log("push duration: " +  std::to_string(push_duration));
         ticks_walked += push_duration;
 
-        uint16_t wait_ticks = 20;
+        uint16_t wait_ticks = 50;
         if (olive_y > 0.4){
             wait_ticks = 100;
         }        

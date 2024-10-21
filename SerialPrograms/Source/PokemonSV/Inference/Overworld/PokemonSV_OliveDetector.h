@@ -25,14 +25,19 @@ public:
     std::pair<double, double> olive_location(ConsoleHandle& console, BotBaseContext& context, ImageFloatBox box = {0, 0.15, 1, 0.7});
 
     // return ImageFloatBox of the of the Olive, based on the largest blob of green
-    ImageFloatBox get_olive_floatbox(ConsoleHandle& console, BotBaseContext& context, ImageFloatBox box = {0, 0.15, 1, 0.7});
+    ImageFloatBox get_olive_floatbox(
+        ConsoleHandle& console, 
+        BotBaseContext& context, 
+        uint8_t rgb_gap,
+        ImageFloatBox box = {0, 0.15, 1, 0.7});
 
     ImageFloatBox align_to_olive(
         const ProgramInfo& info, 
         ConsoleHandle& console, 
         BotBaseContext& context, 
         double direction_facing, 
-        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7}
+        uint8_t rgb_gap,
+        ImageFloatBox area_to_check = {0, 0.3, 1.0, 0.40}
     );
 
     // push the olive forward. 
@@ -45,8 +50,9 @@ public:
         BotBaseContext& context, 
         double direction_facing, 
         uint16_t total_forward_distance,
-        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7},
-        uint16_t push_olive = 75   
+        uint16_t push_olive = 75,
+        uint8_t rgb_gap = 20,
+        ImageFloatBox area_to_check = {0, 0.3, 1.0, 0.40}  // {0, 0.15, 1, 0.7}
     );
 
     uint16_t walk_up_to_olive(
@@ -54,7 +60,8 @@ public:
         ConsoleHandle& console, 
         BotBaseContext& context, 
         double direction_facing, 
-        ImageFloatBox area_to_check = {0, 0.15, 1, 0.7}
+        uint8_t rgb_gap = 20,
+        ImageFloatBox area_to_check = {0, 0.3, 1.0, 0.40}
     );
     
 
