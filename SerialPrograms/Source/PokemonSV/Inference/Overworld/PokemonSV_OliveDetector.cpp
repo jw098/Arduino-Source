@@ -6,6 +6,7 @@
 #include "Kernels/Waterfill/Kernels_Waterfill_Session.h"
 #include "CommonFramework/Globals.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
+#include "CommonFramework/Exceptions/OliveActionFailedException.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
 #include "CommonFramework/ImageMatch/ImageDiff.h"
 #include "CommonFramework/ImageMatch/ExactImageMatcher.h"
@@ -33,7 +34,7 @@ public:
     OliveMatcher() : WaterfillTemplateMatcher(
         "PokemonSV/Olive.png", Color(0,0,0), Color(255, 255, 255), 5
     ){
-        m_aspect_ratio_lower = 0.4;
+        m_aspect_ratio_lower = 0.35;
         m_aspect_ratio_upper = 3;
         m_area_ratio_lower = 0.5;
         m_area_ratio_upper = 1.5;
@@ -70,11 +71,7 @@ std::pair<double, double> box_center(ImageFloatBox& box){
     return std::make_pair(x, y);
 }
 
-ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseContext& context, uint8_t rgb_gap, ImageFloatBox box){
-    context.wait_for_all_requests();
-    auto snapshot = console.video().snapshot();
-    const ImageViewRGB32& screen = snapshot;
-
+ImageFloatBox OliveDetector::get_olive_floatbox(const ImageViewRGB32& screen, BotBaseContext& context, uint8_t rgb_gap, ImageFloatBox box){
     const std::vector<std::pair<uint32_t, uint32_t>> filters = {
         {combine_rgb(0, 10, 0), combine_rgb(255, 255, 255)},
     };
@@ -82,7 +79,7 @@ ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseC
     ImageRGB32 green_only = filter_green(screen, Color(0xff000000), rgb_gap);
 
     const double min_object_size = 1000;
-    const double rmsd_threshold = 300;
+    const double rmsd_threshold = 150;
 
     const double screen_rel_size = (screen.height() / 1080.0);
     const size_t min_size = size_t(screen_rel_size * screen_rel_size * min_object_size);
@@ -118,6 +115,23 @@ ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseC
     return largest_green;
 }
 
+ImageFloatBox OliveDetector::get_olive_floatbox(ConsoleHandle& console, BotBaseContext& context, uint8_t rgb_gap, ImageFloatBox box){
+    context.wait_for_all_requests();
+    auto snapshot = console.video().snapshot();
+    const ImageViewRGB32& screen = snapshot;
+    ImageFloatBox olive_box = get_olive_floatbox(screen, context, rgb_gap, box);
+    if (olive_box.x == 0 && olive_box.y == 0){
+        dump_snapshot(console);
+        throw OliveActionFailedException(
+            ErrorReport::SEND_ERROR_REPORT, console,
+            "get_olive_floatbox(): Olive not detected.",
+            true,
+            OliveFail::NO_OLIVE_DETECTED
+        );
+    }  
+    return olive_box;
+}
+
 ImageFloatBox OliveDetector::align_to_olive(
     const ProgramInfo& info, 
     ConsoleHandle& console, 
@@ -148,14 +162,6 @@ ImageFloatBox OliveDetector::align_to_olive(
             return olive_box;
         }
 
-        if (olive_x == 0 && olive_y == 0){
-            dump_snapshot(console);
-            throw OperationFailedException(
-                ErrorReport::SEND_ERROR_REPORT, console,
-                "align_to_olive(): Olive not detected.",
-                true
-            );
-        }
 
         int16_t push_direction = (x_diff > 0) ? 1 : -1;
         if (olive_y > 0.50 && scale_factor > 100){
@@ -228,14 +234,26 @@ uint16_t OliveDetector::push_olive_forward(
             
             ticks_walked += push_olive;
             ImageFloatBox olive_box_2 = get_olive_floatbox(console, context, rgb_gap, area_to_check);
+            double box_1_area = olive_box_1.width * olive_box_1.height;
+            double box_2_area = olive_box_2.width * olive_box_2.height;
+            double area_diff = std::abs(box_1_area - box_2_area);
             double x_diff = std::abs(olive_box_1.x - olive_box_2.x);
             double y_diff = std::abs(olive_box_1.y - olive_box_2.y);
 
-            if (x_diff < 0.01 && y_diff < 0.01){
+            if (area_diff < 0.02 && x_diff < 0.05 && y_diff < 0.05){
                 console.log("Olive is stuck? Move backwards and try pushing again.");
                 pbf_move_left_joystick(context, 128, 255, 75, 100);  // walk backwards
                 ticks_walked -= initial_push_olive;
                 push_olive = 200; // run forward more on the next push
+
+                if (j == 2){
+                    throw OliveActionFailedException(
+                        ErrorReport::SEND_ERROR_REPORT, console,
+                        "push_olive_forward(): Olive stuck.",
+                        true,
+                        OliveFail::OLIVE_STUCK
+                    );                    
+                }
             }else{
                 break;
             }
@@ -250,10 +268,11 @@ uint16_t OliveDetector::push_olive_forward(
         
     }
 
-    throw OperationFailedException(
+    throw OliveActionFailedException(
         ErrorReport::SEND_ERROR_REPORT, console,
         "push_olive_forward(): Something went wrong. Failed to walk the Olive forward as expected.",
-        true
+        true,
+        OliveFail::FAILED_PUSH_OLIVE_TOTAL_DISTANCE
     );
 
 }
@@ -290,10 +309,11 @@ uint16_t OliveDetector::walk_up_to_olive(
         pbf_move_left_joystick(context, 128, 0, push_duration, wait_ticks);
     }    
 
-    throw OperationFailedException(
+    throw OliveActionFailedException(
         ErrorReport::SEND_ERROR_REPORT, console,
         "walk_up_to_olive(): Something went wrong. Failed to walk up to the Olive",
-        true
+        true,
+        OliveFail::FAILED_WALK_TO_OLIVE
     );
 
 }

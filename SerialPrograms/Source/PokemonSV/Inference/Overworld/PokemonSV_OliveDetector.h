@@ -24,12 +24,20 @@ public:
 
     std::pair<double, double> olive_location(ConsoleHandle& console, BotBaseContext& context, ImageFloatBox box = {0, 0.15, 1, 0.7});
 
+    ImageFloatBox get_olive_floatbox(
+        const ImageViewRGB32& screen, 
+        BotBaseContext& context, 
+        uint8_t rgb_gap,
+        ImageFloatBox box
+    );
+
     // return ImageFloatBox of the of the Olive, based on the largest blob of green
     ImageFloatBox get_olive_floatbox(
         ConsoleHandle& console, 
         BotBaseContext& context, 
         uint8_t rgb_gap,
-        ImageFloatBox box = {0, 0.15, 1, 0.7});
+        ImageFloatBox box
+    );
 
     ImageFloatBox align_to_olive(
         const ProgramInfo& info, 
