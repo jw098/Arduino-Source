@@ -7,6 +7,7 @@
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/Exceptions/FatalProgramException.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
+#include "CommonFramework/Exceptions/OliveActionFailedException.h"
 #include "CommonFramework/InferenceInfra/InferenceRoutines.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/Tools/StatsTracking.h"
@@ -17,6 +18,7 @@
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h"
 #include "PokemonSV_AutoStory_Segment_00.h"
 #include "PokemonSV_AutoStory_Segment_01.h"
 #include "PokemonSV_AutoStory_Segment_02.h"
@@ -618,8 +620,47 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         //     NavigationStopCondition::STOP_MARKER, NavigationMovementMode::CLEAR_WITH_LETS_GO, 
         //     128, 0, 60, 10, false);
 
+DirectionDetector direction;
+OliveDetector green(env.console);
+// green.align_to_olive(env.program_info(), env.console, context, 1.27, 20);
+        
+// 
+        // ImageFloatBox olive_box_1 = green.get_olive_floatbox(env.console, context, 20, {0, 0.3, 1.0, 0.40});
+        // double box_1_area = olive_box_1.width * olive_box_1.height;
+        // cout << box_1_area << endl;
 
-
+        for (size_t i = 0; i < 1; i++){
+            try{
+                green.push_olive_forward(env.program_info(), env.console, context, 5.8, 400, 50);
+            }catch (OliveActionFailedException& e){
+                if (i == 1){ // only 1 attempt
+                    throw e;
+                } 
+                if (e.m_fail_reason == OliveFail::OLIVE_STUCK){  // olive possibly stuck on fence
+                    pbf_move_left_joystick(context, 128, 255, 20, 50);
+                    pbf_move_left_joystick(context, 0, 128, 100, 50);
+                    pbf_move_left_joystick(context, 128, 0, 200, 50);
+                    // push olive parallel to fence
+                    green.align_to_olive(env.program_info(), env.console, context, 4.28, 20);
+                    green.walk_up_to_olive(env.program_info(), env.console, context, 4.28);
+                    green.push_olive_forward(env.program_info(), env.console, context, 4.28, 100);
+                    green.align_to_olive(env.program_info(), env.console, context, 4.28, 20);
+                    green.walk_up_to_olive(env.program_info(), env.console, context, 4.28);
+                    // back off
+                    pbf_move_left_joystick(context, 128, 255, 50, 50);
+                    // realign using fence corner
+                    direction.change_direction(env.program_info(), env.console, context,  2.74);
+                    pbf_move_left_joystick(context, 128, 0, 400, 50);
+                    direction.change_direction(env.program_info(), env.console, context,  4.328);
+                    pbf_move_left_joystick(context, 128, 0, 400, 50);
+                    direction.change_direction(env.program_info(), env.console, context,  1.22);
+                    pbf_move_left_joystick(context, 128, 0, 100, 50);                    
+                }else{
+                    // continue trying to push the olive. at a different angle
+                    break;
+                }
+            }
+        }
 
 
         return;

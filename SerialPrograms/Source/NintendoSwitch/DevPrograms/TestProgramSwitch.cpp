@@ -275,8 +275,8 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 //    PokemonLA::ButtonDetector detector(logger, PokemonLA::ButtonType::ButtonA,);
 
 #if 1
-    VideoSnapshot image = feed.snapshot();
-    // ImageRGB32 image("z.png");
+    // VideoSnapshot image = feed.snapshot();
+    ImageRGB32 image("1.png");
 
     // ImageRGB32 filtered = filter_green(image, Color(0xffffffff), 10);
     // filtered.save("test1.png");    
@@ -284,7 +284,10 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 
 
     OliveDetector green(console);
-    // ImageFloatBox box = green.get_olive_floatbox(console, context, {0, 0.15, 1, 0.7});
+    ImageFloatBox box = green.get_olive_floatbox(image, context, 20, {0, 0.15, 1, 0.7}); // {0, 0.3, 1.0, 0.40}
+    ImageRGB32 green_only = filter_green(image, Color(0xff000000), 20);
+    cout << box.x << ", " << box.y << ", " << box.width << ", " << box.height << endl;
+    // green_only.save("test1.png");
     // // cout << location.x << ", " << location.y << ", " << location.width << ", " << location.height << endl;
     // double olive_x =  box.x + (box.width / 2);
     // double olive_y = box.y + (box.height / 2);

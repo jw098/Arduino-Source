@@ -16,6 +16,7 @@ class FatalProgramException;
 
 enum class OliveFail{
     NONE,
+    FAILED_ALIGN_TO_OLIVE,
     FAILED_PUSH_OLIVE_TOTAL_DISTANCE,
     NO_OLIVE_DETECTED,
     FAILED_WALK_TO_OLIVE,

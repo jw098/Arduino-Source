@@ -44,7 +44,7 @@ public:
         ConsoleHandle& console, 
         BotBaseContext& context, 
         double direction_facing, 
-        uint8_t rgb_gap,
+        uint8_t rgb_gap = 20,
         ImageFloatBox area_to_check = {0, 0.3, 1.0, 0.40}
     );
 
