@@ -79,7 +79,7 @@ ImageFloatBox OliveDetector::get_olive_floatbox(const ImageViewRGB32& screen, Bo
     ImageRGB32 green_only = filter_green(screen, Color(0xff000000), rgb_gap);
 
     const double min_object_size = 1000;
-    const double rmsd_threshold = 150;
+    const double rmsd_threshold = 100;
 
     const double screen_rel_size = (screen.height() / 1080.0);
     const size_t min_size = size_t(screen_rel_size * screen_rel_size * min_object_size);
@@ -287,6 +287,8 @@ uint16_t OliveDetector::push_olive_forward(
 
             if (area_diff < 0.02 && x_diff < 0.05 && y_diff < 0.05){
                 console.log("Olive is stuck? Move backwards and try pushing again.");
+                console.log("Olive 1: area: " + std::to_string(box_1_area) + ", x: " + std::to_string(olive_box_1.x) + ", y: " + std::to_string(olive_box_1.y));
+                console.log("Olive 2: area: " + std::to_string(box_2_area) + ", x: " + std::to_string(olive_box_2.x) + ", y: " + std::to_string(olive_box_2.y));
                 pbf_move_left_joystick(context, 128, 255, 75, 100);  // walk backwards
                 ticks_walked -= push_olive;
                 push_olive = 200; // run forward more on the next push

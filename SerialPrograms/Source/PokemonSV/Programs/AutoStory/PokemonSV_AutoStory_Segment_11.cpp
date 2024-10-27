@@ -255,9 +255,10 @@ void checkpoint_26(
         OliveDetector green(env.console);
         size_t MAX_ATTEMPTS_SECTION_1 = 2;
         uint16_t ticks_to_walk_for_section1 = 650;
+        uint16_t push_strength_section_1 = 75;
         for (size_t i = 0; i < MAX_ATTEMPTS_SECTION_1; i++){
             try{
-                green.push_olive_forward(env.program_info(), env.console, context, 4.38, ticks_to_walk_for_section1);
+                green.push_olive_forward(env.program_info(), env.console, context, 4.38, ticks_to_walk_for_section1, push_strength_section_1);
                 // green.align_to_olive(env.program_info(), env.console, context, 4.38);
                 green.walk_up_to_olive(env.program_info(), env.console, context, 4.38);
                 break;
@@ -275,7 +276,8 @@ void checkpoint_26(
                     pbf_move_left_joystick(context, 128, 255, 200, 50);
                     pbf_wait(context, 5 * TICKS_PER_SECOND);
                     context.wait_for_all_requests();
-                    ticks_to_walk_for_section1 = 100;                    
+                    ticks_to_walk_for_section1 = 100;
+                    push_strength_section_1 = 50;               
                 }else{ // FAILED_PUSH_OLIVE_TOTAL_DISTANCE
                     throw e;
                 }
@@ -294,7 +296,7 @@ void checkpoint_26(
         pbf_move_left_joystick(context, 128, 0, 75, 50);
 
         // section 2.1 nudge olive straight
-        size_t MAX_ATTEMPTS_SECTION_2_1 = 1;
+        size_t MAX_ATTEMPTS_SECTION_2_1 = 2;
         for (size_t i = 0; i < MAX_ATTEMPTS_SECTION_2_1; i++){
             try{
                 green.push_olive_forward(env.program_info(), env.console, context, 5.95, 50, 50);
@@ -328,11 +330,11 @@ void checkpoint_26(
         pbf_move_left_joystick(context, 128, 255, 500, 50);        
 
         // section 2.2 push at angle towards outer fence
-        size_t MAX_ATTEMPTS_SECTION_2_2 = 1;
+        size_t MAX_ATTEMPTS_SECTION_2_2 = 2;
         // uint16_t ticks_walked_section2_2 = 0;
         for (size_t i = 0; i < MAX_ATTEMPTS_SECTION_2_2; i++){
             try{
-                green.push_olive_forward(env.program_info(), env.console, context, 5.8, 200, 50);
+                green.push_olive_forward(env.program_info(), env.console, context, 5.8, 250, 50);
                 break;
             }catch (OliveActionFailedException& e){
                 if (i >= MAX_ATTEMPTS_SECTION_2_2-1){
@@ -462,7 +464,8 @@ void checkpoint_26(
         for (size_t i = 0; i < MAX_ATTEMPTS; i++){
             try{
                 green.push_olive_forward(env.program_info(), env.console, context, 1.27, ticks_to_walk_for_section3_2, 125);
-                // green.align_to_olive(env.program_info(), env.console, context, 1.27);
+                pbf_move_left_joystick(context, 128, 255, 100, 50);
+                green.align_to_olive(env.program_info(), env.console, context, 1.27);
                 green.walk_up_to_olive(env.program_info(), env.console, context, 1.27);
                 break;
             }catch (OliveActionFailedException& e){
