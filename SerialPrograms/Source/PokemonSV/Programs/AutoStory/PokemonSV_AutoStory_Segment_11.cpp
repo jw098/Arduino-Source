@@ -45,7 +45,7 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_11::name() const{
-    return "10.2: Cortondo Gym - Gym challenge (unfinished)";
+    return "10.2: Cortondo Gym - Gym challenge";
 }
 
 std::string AutoStory_Segment_11::start_text() const{
@@ -53,7 +53,7 @@ std::string AutoStory_Segment_11::start_text() const{
 }
 
 std::string AutoStory_Segment_11::end_text() const{
-    return "End: Beat Cortondo Gym challenge.";
+    return "End: Beat Cortondo Gym challenge. At Cortondo West Pokecenter.";
 }
 
 void AutoStory_Segment_11::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{

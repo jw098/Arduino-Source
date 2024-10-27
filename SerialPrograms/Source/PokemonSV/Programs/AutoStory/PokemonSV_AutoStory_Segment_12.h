@@ -31,6 +31,9 @@ public:
         AutoStoryOptions options) const override;
 };
 
+// start: At Cortondo East Pokecenter.
+// end: Beat Cortondo Gym. At Cortondo West Pokecenter.
+void checkpoint_28(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 }
 }
