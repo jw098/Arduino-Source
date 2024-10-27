@@ -345,7 +345,21 @@ uint16_t OliveDetector::walk_up_to_olive(
             return ticks_walked;
         }        
         console.log("push duration: " +  std::to_string(push_duration));
-        ticks_walked += push_duration;
+        // when push durations are low, the player moves less than expected
+        // once above 45, you walk about as much as expected
+        double walking_factor = 1;
+        if (push_duration <= 20){
+            walking_factor = 0.40;
+        }else if (push_duration <= 25){
+            walking_factor = 0.53;
+        }else if (push_duration <= 30){
+            walking_factor = 0.69;
+        }else if (push_duration <= 35){
+            walking_factor = 0.83;
+        }else if (push_duration <= 40){
+            walking_factor = 0.91;
+        }
+        ticks_walked += uint16_t(push_duration * walking_factor);
 
         uint16_t wait_ticks = 50;
         if (olive_y > 0.4){
