@@ -62,8 +62,8 @@ void AutoStory_Segment_19::run_segment(SingleSwitchProgramEnvironment& env, BotB
 }
 
 
-
-void checkpoint_38(
+// todo: uncomment checkpoint_save
+void checkpoint_41(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -73,7 +73,7 @@ void checkpoint_38(
     while (true){
     try{
         if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
+            // checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
@@ -90,7 +90,8 @@ void checkpoint_38(
 
 }
 
-void checkpoint_39(
+// todo: uncomment checkpoint_save
+void checkpoint_42(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -100,7 +101,7 @@ void checkpoint_39(
     while (true){
     try{
         if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
+            // checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
@@ -117,7 +118,8 @@ void checkpoint_39(
 
 }
 
-void checkpoint_40(
+// todo: uncomment checkpoint_save
+void checkpoint_43(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -127,7 +129,7 @@ void checkpoint_40(
     while (true){
     try{
         if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
+            // checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();

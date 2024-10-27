@@ -53,8 +53,8 @@ void AutoStory_Segment_14::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 11.2: Bombirdier Titan: Battle Bombirdier", COLOR_ORANGE);
 
-    checkpoint_27(env, context, options.notif_status_update);
-    checkpoint_28(env, context, options.notif_status_update);
+    checkpoint_30(env, context, options.notif_status_update);
+    checkpoint_31(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 11.2: Bombirdier Titan: Battle Bombirdier", COLOR_GREEN);
@@ -65,7 +65,7 @@ void AutoStory_Segment_14::run_segment(SingleSwitchProgramEnvironment& env, BotB
 
 
 
-void checkpoint_27(
+void checkpoint_30(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -250,7 +250,7 @@ void checkpoint_27(
 }
 
 
-void checkpoint_28(
+void checkpoint_31(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update

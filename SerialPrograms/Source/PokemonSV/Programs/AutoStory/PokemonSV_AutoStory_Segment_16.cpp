@@ -53,8 +53,8 @@ void AutoStory_Segment_16::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 13.1: Cascarrafa Gym (Water): Get Kofu's wallet", COLOR_ORANGE);
 
-    checkpoint_32(env, context, options.notif_status_update);
-    checkpoint_33(env, context, options.notif_status_update);
+    checkpoint_35(env, context, options.notif_status_update);
+    checkpoint_36(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 13.1: Cascarrafa Gym (Water): Get Kofu's wallet", COLOR_GREEN);
@@ -64,7 +64,7 @@ void AutoStory_Segment_16::run_segment(SingleSwitchProgramEnvironment& env, BotB
 }
 
 
-void checkpoint_32(
+void checkpoint_35(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -115,7 +115,7 @@ void checkpoint_32(
 
 }
 
-void checkpoint_33(
+void checkpoint_36(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update

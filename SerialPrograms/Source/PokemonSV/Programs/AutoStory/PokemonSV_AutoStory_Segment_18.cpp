@@ -54,8 +54,8 @@ void AutoStory_Segment_18::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 14: Great Tusk/Iron Treads titan", COLOR_ORANGE);
 
-    checkpoint_36(env, context, options.notif_status_update);
-    checkpoint_37(env, context, options.notif_status_update);
+    checkpoint_39(env, context, options.notif_status_update);
+    checkpoint_40(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 14: Great Tusk/Iron Treads titan", COLOR_GREEN);
@@ -65,7 +65,7 @@ void AutoStory_Segment_18::run_segment(SingleSwitchProgramEnvironment& env, BotB
 }
 
 
-void checkpoint_36(
+void checkpoint_39(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -196,7 +196,7 @@ void checkpoint_36(
         if (ret < 0){
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, env.console,
-                "checkpoint_36(): Failed to run into Great Tusk/Iron Treads.",
+                "checkpoint_39(): Failed to run into Great Tusk/Iron Treads.",
                 true
             );            
         }
@@ -243,7 +243,7 @@ void checkpoint_36(
 
 }
 
-void checkpoint_37(
+void checkpoint_40(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update

@@ -54,8 +54,8 @@ void AutoStory_Segment_17::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 13.2: Cascarrafa Gym (Water): Gym battle", COLOR_ORANGE);
 
-    checkpoint_34(env, context, options.notif_status_update);
-    checkpoint_35(env, context, options.notif_status_update);
+    checkpoint_37(env, context, options.notif_status_update);
+    checkpoint_38(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment 13.2: Cascarrafa Gym (Water): Gym battle", COLOR_GREEN);
@@ -65,7 +65,7 @@ void AutoStory_Segment_17::run_segment(SingleSwitchProgramEnvironment& env, BotB
 }
 
 
-void checkpoint_34(
+void checkpoint_37(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -119,7 +119,7 @@ void checkpoint_34(
 
 }
 
-void checkpoint_35(
+void checkpoint_38(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update

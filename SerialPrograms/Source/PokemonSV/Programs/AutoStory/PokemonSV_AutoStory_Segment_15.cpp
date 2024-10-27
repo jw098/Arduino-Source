@@ -55,9 +55,9 @@ void AutoStory_Segment_15::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment 12: Team Star (Dark)", COLOR_ORANGE);
 
-    checkpoint_29(env, context, options.notif_status_update);
-    checkpoint_30(env, context, options.notif_status_update);
-    checkpoint_31(env, context, options.notif_status_update);
+    checkpoint_32(env, context, options.notif_status_update);
+    checkpoint_33(env, context, options.notif_status_update);
+    checkpoint_34(env, context, options.notif_status_update);
    
 
     context.wait_for_all_requests();
@@ -69,7 +69,7 @@ void AutoStory_Segment_15::run_segment(SingleSwitchProgramEnvironment& env, BotB
 
 
 
-void checkpoint_29(
+void checkpoint_32(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -145,7 +145,7 @@ void checkpoint_29(
 
 }
 
-void checkpoint_30(
+void checkpoint_33(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update
@@ -250,7 +250,7 @@ void checkpoint_30(
         if (ret < 0){
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, env.console,
-                "checkpoint_30(): Failed to kill 30 pokemon with Let's go.",
+                "checkpoint_33(): Failed to kill 30 pokemon with Let's go.",
                 true
             );            
         }
@@ -271,7 +271,7 @@ void checkpoint_30(
 
 }
 
-void checkpoint_31(
+void checkpoint_34(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
     EventNotificationOption& notif_status_update

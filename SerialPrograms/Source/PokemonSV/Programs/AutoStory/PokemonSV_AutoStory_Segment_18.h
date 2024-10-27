@@ -34,11 +34,11 @@ public:
 
 // start: Defeated Cascarrafa Gym (Water). At Cascarrafa Gym.
 // end: Defeated Great Tusk/Iron Treads. 
-void checkpoint_36(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+void checkpoint_39(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 // start: Defeated Great Tusk/Iron Treads. 
 // end: At Porto Marinada Pokecenter.
-void checkpoint_37(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+void checkpoint_40(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 

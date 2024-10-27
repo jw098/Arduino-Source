@@ -34,7 +34,7 @@ public:
 
 // start: At Cortondo West Pokecenter.
 // end: At West Province Area One Central Pokecenter
-void checkpoint_26_28(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
+void checkpoint_29(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 
 

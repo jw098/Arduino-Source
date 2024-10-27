@@ -34,11 +34,11 @@ public:
 
 // start: At West Province Area One Central Pokecenter
 // end: Defeated Bombirdier
-void checkpoint_27(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);    
+void checkpoint_30(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);    
 
 // start: Defeated Bombirdier
 // end: At West Province Area One North Pokecenter
-void checkpoint_28(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
+void checkpoint_31(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);   
 
 
 
