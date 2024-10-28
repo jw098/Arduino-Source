@@ -37,7 +37,7 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_17::name() const{
-    return "13.2: Cascarrafa Gym (Water): Gym battle";
+    return "13.2: Cascarrafa Gym (Water): Gym challenge and Gym battle";
 }
 
 std::string AutoStory_Segment_17::start_text() const{

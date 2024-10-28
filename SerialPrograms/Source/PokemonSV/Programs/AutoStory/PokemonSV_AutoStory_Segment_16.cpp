@@ -155,11 +155,13 @@ void checkpoint_36(
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::KEEP_ZOOM, 0, 0, 40},
-            {ZoomChange::ZOOM_IN, 255, 90, 30}
+            {ZoomChange::ZOOM_IN, 255, 128, 45}
         );
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 30, 10, false);        
+            128, 0, 30, 10, false);
+        
+        // cutscene with Kofu looking at flowers
         mash_button_till_overworld(env.console, context, BUTTON_A, 360);            
 
         // section 4. set marker to pokecenter

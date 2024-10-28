@@ -595,6 +595,15 @@ void AutoStory::run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContex
 
     size_t start = STARTPOINT_TUTORIAL.index();
     size_t end = ENDPOINT_TUTORIAL.index();
+
+    if (STORY_SECTION == StorySection::TUTORIAL){
+        start = STARTPOINT_TUTORIAL.index();
+        end = ENDPOINT_TUTORIAL.index();
+    }else if (STORY_SECTION == StorySection::MAIN_STORY){
+        start = 10 + STARTPOINT_MAINSTORY.index();
+        end = 10 + ENDPOINT_MAINSTORY.index();     
+    }
+
     for (size_t segment_index = start; segment_index <= end; segment_index++){
         ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->run_segment(env, context, options);
     }

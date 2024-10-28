@@ -257,7 +257,8 @@ void checkpoint_40(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
-        move_cursor_towards_flypoint_and_go_there(env.program_info(), env.console, context, {ZoomChange::KEEP_ZOOM, 128, 0, 90});
+        open_map_from_overworld(env.program_info(), env.console, context);
+        // move_cursor_towards_flypoint_and_go_there(env.program_info(), env.console, context, {ZoomChange::KEEP_ZOOM, 128, 0, 90});
        
         break;
     }catch (...){
