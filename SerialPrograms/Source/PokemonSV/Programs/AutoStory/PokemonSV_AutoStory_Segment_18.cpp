@@ -45,7 +45,7 @@ std::string AutoStory_Segment_18::start_text() const{
 }
 
 std::string AutoStory_Segment_18::end_text() const{
-    return "End: Defeated Great Tusk/Iron Treads. At Porto Marinada Pokecenter.";
+    return "End: Defeated Great Tusk/Iron Treads. At Mesagoza East Pokecenter.";
 }
 
 void AutoStory_Segment_18::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
@@ -257,8 +257,7 @@ void checkpoint_40(
             first_attempt = false;
         }         
         context.wait_for_all_requests();
-        open_map_from_overworld(env.program_info(), env.console, context);
-        // move_cursor_towards_flypoint_and_go_there(env.program_info(), env.console, context, {ZoomChange::KEEP_ZOOM, 128, 0, 90});
+        move_cursor_towards_flypoint_and_go_there(env.program_info(), env.console, context, {ZoomChange::KEEP_ZOOM, 255, 185, 440});
        
         break;
     }catch (...){
