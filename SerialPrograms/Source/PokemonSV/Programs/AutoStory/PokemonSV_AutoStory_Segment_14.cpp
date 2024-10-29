@@ -135,7 +135,6 @@ void checkpoint_30(
             NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 20, 10, false);
 
-        pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
 
         // section 7

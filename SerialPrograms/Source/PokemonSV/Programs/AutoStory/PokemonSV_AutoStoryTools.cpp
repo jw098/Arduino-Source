@@ -867,6 +867,8 @@ bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseC
 }
 
 void get_on_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+    pbf_press_button(context, BUTTON_PLUS, 20, 20);
+    
     WallClock start = current_time();
     while (!check_ride_active(info, console, context)){
         if (current_time() - start > std::chrono::minutes(3)){

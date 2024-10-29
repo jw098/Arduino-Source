@@ -88,7 +88,6 @@ void checkpoint_37(
                 direction.change_direction(env.program_info(), env.console, context, 1.606);
                 pbf_move_left_joystick(context, 128, 0, 200, 100);
 
-                pbf_press_button(context, BUTTON_PLUS, 20, 20);
                 get_on_ride(env.program_info(), env.console, context);
 
                 // section 2
@@ -144,7 +143,6 @@ void checkpoint_38(
         });
 
         direction.change_direction(env.program_info(), env.console, context, 3.771252);
-        pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
         // walk towards elevator
         pbf_move_left_joystick(context, 128, 0, 700, 100);

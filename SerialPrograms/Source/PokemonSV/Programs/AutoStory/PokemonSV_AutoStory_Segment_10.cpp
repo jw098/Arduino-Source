@@ -85,7 +85,6 @@ void checkpoint_21(
         // move forward
         pbf_move_left_joystick(context, 128, 0, 30, 100);
         // get on ride
-        pbf_press_button(context, BUTTON_PLUS, 20, 20);
         get_on_ride(env.program_info(), env.console, context);
         // turn left
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NO_MARKER, 0, 128, 50);

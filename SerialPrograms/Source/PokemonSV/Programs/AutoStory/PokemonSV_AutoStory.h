@@ -103,7 +103,7 @@ private:
     SimpleIntegerOption<uint16_t> Y_REALIGN;
     SimpleIntegerOption<uint16_t> REALIGN_DURATION;
 
-    BooleanCheckBoxOption ENABLE_TEST_OVERWORLD_MOVE;    
+    BooleanCheckBoxOption ENABLE_MISC_TEST;    
     SimpleIntegerOption<uint16_t> FORWARD_TICKS;
 
     BooleanCheckBoxOption TEST_PBF_LEFT_JOYSTICK;
@@ -112,7 +112,7 @@ private:
     SimpleIntegerOption<uint16_t> HOLD_TICKS;
     SimpleIntegerOption<uint16_t> RELEASE_TICKS;
 
-    BooleanCheckBoxOption TEST_DIRECTION_CHANGE;
+    BooleanCheckBoxOption TEST_DIRECTION;
     FloatingPointOption DIR_RADIANS;
 };
 
