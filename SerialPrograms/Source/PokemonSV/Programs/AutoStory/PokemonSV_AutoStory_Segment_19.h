@@ -32,8 +32,8 @@ public:
 };
 
 
-// start: 
-// end: 
+// start: At Mesagoza (East) Pokecenter.
+// end: At South Province (Area Three) Pokecenter.
 void checkpoint_41(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 // start: 

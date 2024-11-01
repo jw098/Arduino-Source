@@ -386,7 +386,7 @@ bool confirm_marker_present(
 
         int ret = wait_until(
             console, context, 
-            std::chrono::seconds(10),
+            std::chrono::seconds(5),
             {marker, battle}
         );
         switch (ret){
@@ -460,9 +460,14 @@ void overworld_navigation(
                             }
                         }
                     }
+                    context.wait_for_all_requests();
                     if (should_realign){
                         try {
                             realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
+                            if (!confirm_marker_present(info, console, context)){  
+                                // if marker not present, don't keep walking forward.
+                                return;
+                            }                            
                         }catch (UnexpectedBattleException&){
                             pbf_wait(context, 30 * TICKS_PER_SECOND);  // catch exception to allow the battle callback to take over.
                         }
@@ -485,10 +490,9 @@ void overworld_navigation(
             if (auto_heal){
                 auto_heal_from_menu_or_overworld(info, console, context, 0, true);
             }
-
+            context.wait_for_all_requests();
             try {
                 realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-
                 if (!confirm_marker_present(info, console, context)){  
                     // if marker not present, don't keep walking forward.
                     return;
@@ -734,15 +738,17 @@ void handle_when_stationary_in_overworld(
         BotBaseContext& context)
     >&& recovery_action,
     size_t seconds_stationary,
-    uint16_t minutes_timeout
+    uint16_t minutes_timeout, 
+    size_t max_failures
 ){
     StationaryOverworldWatcher stationary_overworld(COLOR_RED, {0.865, 0.82, 0.08, 0.1}, seconds_stationary);
     WallClock start = current_time();
+    size_t num_failures = 0;
     while (true){
         if (current_time() - start > std::chrono::minutes(minutes_timeout)){
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
-                "handle_when_stationary_in_overworld(): Failed to complete action after 5 minutes.",
+                "handle_when_stationary_in_overworld(): Failed to complete action after " + std::to_string(minutes_timeout) + " minutes.",
                 true
             );
         }
@@ -760,8 +766,17 @@ void handle_when_stationary_in_overworld(
             return;
         }else if (ret == 0){
             // if stationary in overworld, run recovery action then try action again
+            console.log("Detected stationary overworld.");
+            num_failures++;
+            if (num_failures > max_failures){
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "handle_when_stationary_in_overworld(): Failed to complete action within " + std::to_string(max_failures) + " attempts.",
+                    true
+                );                
+            }
             context.wait_for_all_requests();
-            recovery_action(info, console, context);            
+            recovery_action(info, console, context);    
         }
     }
 }
@@ -868,7 +883,7 @@ bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseC
 
 void get_on_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
     pbf_press_button(context, BUTTON_PLUS, 20, 20);
-    
+
     WallClock start = current_time();
     while (!check_ride_active(info, console, context)){
         if (current_time() - start > std::chrono::minutes(3)){
