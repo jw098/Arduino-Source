@@ -186,63 +186,6 @@ void checkpoint_41(
 
 }
 
-// todo: uncomment checkpoint_save
-void checkpoint_42(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }         
-    }
-
-}
-
-// todo: uncomment checkpoint_save
-void checkpoint_43(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }         
-    }
-
-}
-
-
 
 
 

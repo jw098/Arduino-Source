@@ -464,10 +464,7 @@ void overworld_navigation(
                     if (should_realign){
                         try {
                             realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-                            if (!confirm_marker_present(info, console, context)){  
-                                // if marker not present, don't keep walking forward.
-                                return;
-                            }                            
+                   
                         }catch (UnexpectedBattleException&){
                             pbf_wait(context, 30 * TICKS_PER_SECOND);  // catch exception to allow the battle callback to take over.
                         }
@@ -692,7 +689,7 @@ void do_action_and_monitor_for_battles(
         {battle_menu}
     );
     if (ret == 0){ // battle detected
-        throw OperationFailedException(
+        throw UnexpectedBattleException(
             ErrorReport::SEND_ERROR_REPORT, console,
             "do_action_and_monitor_for_battles(): Detected battle. Failed to complete action.",
             true
