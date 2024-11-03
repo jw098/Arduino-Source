@@ -55,6 +55,8 @@ namespace PokemonSV{
 
 using namespace Pokemon;
 
+static constexpr size_t INDEX_OF_LAST_TUTORIAL_SEGMENT = 9;
+
 
 std::vector<std::unique_ptr<AutoStory_Segment>> make_autoStory_segment_list(){
     std::vector<std::unique_ptr<AutoStory_Segment>> segment_list;
@@ -105,7 +107,7 @@ StringSelectDatabase make_tutorial_segments_database(){
     StringSelectDatabase ret;
     const StringSelectDatabase& all_segments = ALL_SEGMENTS_SELECT_DATABASE();
     size_t start = 0;
-    size_t end = 10; // all_segments.case_list().size();
+    size_t end = (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1); // all_segments.case_list().size();
     for (size_t i = start; i < end; i++){
         const auto& segment = all_segments[i];
         ret.add_entry(segment);
@@ -121,7 +123,7 @@ const StringSelectDatabase& TUTORIAL_SEGMENTS_SELECT_DATABASE(){
 StringSelectDatabase make_mainstory_segments_database(){
     StringSelectDatabase ret;
     const StringSelectDatabase& all_segments = ALL_SEGMENTS_SELECT_DATABASE();
-    size_t start = 10;
+    size_t start = (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1);
     size_t end = all_segments.case_list().size();
     for (size_t i = start; i < end; i++){
         const auto& segment = all_segments[i];
@@ -575,7 +577,7 @@ std::string AutoStory::start_segment_description(){
     if (STORY_SECTION == StorySection::TUTORIAL){
         segment_index = STARTPOINT_TUTORIAL.index();
     }else if (STORY_SECTION == StorySection::MAIN_STORY){
-        segment_index = STARTPOINT_MAINSTORY.index() + 10;
+        segment_index = STARTPOINT_MAINSTORY.index() + (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1);
     }
     return ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->start_text();
 }
@@ -585,7 +587,7 @@ std::string AutoStory::end_segment_description(){
     if (STORY_SECTION == StorySection::TUTORIAL){
         segment_index = ENDPOINT_TUTORIAL.index();
     }else if (STORY_SECTION == StorySection::MAIN_STORY){
-        segment_index = ENDPOINT_MAINSTORY.index() + 10;
+        segment_index = ENDPOINT_MAINSTORY.index() + (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1);
     }    
     return ALL_AUTO_STORY_SEGMENT_LIST()[segment_index]->end_text();
 }
@@ -605,8 +607,8 @@ void AutoStory::run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContex
         start = STARTPOINT_TUTORIAL.index();
         end = ENDPOINT_TUTORIAL.index();
     }else if (STORY_SECTION == StorySection::MAIN_STORY){
-        start = 10 + STARTPOINT_MAINSTORY.index();
-        end = 10 + ENDPOINT_MAINSTORY.index();     
+        start = (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1) + STARTPOINT_MAINSTORY.index();
+        end = (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1) + ENDPOINT_MAINSTORY.index();     
     }
 
     for (size_t segment_index = start; segment_index <= end; segment_index++){

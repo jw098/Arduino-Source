@@ -51,19 +51,18 @@ void AutoStory_Segment_19::run_segment(SingleSwitchProgramEnvironment& env, BotB
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
-    env.console.overlay().add_log("Start Segment ", COLOR_ORANGE);
+    env.console.overlay().add_log("Start Segment 15.1: Klawf Titan: Go to South Province (Area Three) Pokecenter", COLOR_ORANGE);
 
     checkpoint_41(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
-    env.console.log("End Segment ", COLOR_GREEN);
+    env.console.log("End Segment 15.1: Klawf Titan: Go to South Province (Area Three) Pokecenter", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
 
 }
 
 
-// todo: uncomment checkpoint_save
 void checkpoint_41(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 

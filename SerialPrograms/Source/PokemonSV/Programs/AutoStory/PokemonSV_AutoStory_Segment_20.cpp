@@ -45,19 +45,20 @@ std::string AutoStory_Segment_20::start_text() const{
 }
 
 std::string AutoStory_Segment_20::end_text() const{
-    return "End:";
+    return "End: At Artazon (West) Pokecenter.";
 }
 
 void AutoStory_Segment_20::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
-    env.console.overlay().add_log("Start Segment ", COLOR_ORANGE);
+    env.console.overlay().add_log("Start Segment 15.2: Klawf Titan: Battle Klawf", COLOR_ORANGE);
 
     checkpoint_42(env, context, options.notif_status_update);
+    checkpoint_43(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
-    env.console.log("End Segment ", COLOR_GREEN);
+    env.console.log("End Segment 15.2: Klawf Titan: Battle Klawf", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
 
