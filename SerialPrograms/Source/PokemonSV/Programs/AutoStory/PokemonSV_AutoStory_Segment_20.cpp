@@ -229,6 +229,24 @@ void checkpoint_42(
             NavigationStopCondition::STOP_BATTLE, NavigationMovementMode::DIRECTIONAL_ONLY, 
             128, 0, 25, 25, false);
 
+
+        // battle Klawf phase 1
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_OVERWORLD);
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                direction.change_direction(env.program_info(), env.console, context, 2.83);
+                // pbf_move_left_joystick(context, 128, 0, 800, 50);
+        });         
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 35, 35, false);
+
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 30, {CallbackEnum::BATTLE});
+        // Klawf battle phase 2
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, {CallbackEnum::DIALOG_ARROW});
+        // get ride upgrade
+        mash_button_till_overworld(env.console, context, BUTTON_A);        
+
        
         break;
     }catch (...){
