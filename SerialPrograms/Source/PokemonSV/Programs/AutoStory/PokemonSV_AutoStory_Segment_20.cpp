@@ -45,7 +45,7 @@ std::string AutoStory_Segment_20::start_text() const{
 }
 
 std::string AutoStory_Segment_20::end_text() const{
-    return "End: At Artazon (West) Pokecenter.";
+    return "End: Defeated Klawf. At Artazon (West) Pokecenter.";
 }
 
 void AutoStory_Segment_20::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
