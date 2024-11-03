@@ -136,7 +136,8 @@ void checkpoint_42(
                     128, 0, 30, 10, false);
             }, 
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
+                pbf_move_left_joystick(context, 128, 255, 50, 50);
+                pbf_move_left_joystick(context, 255, 128, 50, 50);
                 realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
             }
         );   
@@ -178,11 +179,11 @@ void checkpoint_42(
             }
         );   
 
-        // section 7. walk up to Klawf on the lower wall, so it moves to the high ground
+         // section 7. walk up to Klawf on the lower wall, so it moves to the high ground
         realign_player_from_landmark(
             env.program_info(), env.console, context, 
             {ZoomChange::KEEP_ZOOM, 255, 150, 50},
-            {ZoomChange::ZOOM_IN, 0, 35, 117}
+            {ZoomChange::ZOOM_IN, 0, 40, 110}
         );  
         handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
@@ -194,93 +195,39 @@ void checkpoint_42(
                 pbf_move_left_joystick(context, 255, 128, 40, 50);
                 realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
             }
-        );                                        
-
-        // section 8. walk towards Klawf on lower wall
-        size_t MAX_ATTEMPTS = 3;
-        for (size_t i = 0; i < MAX_ATTEMPTS; i++){
-            try {
-                context.wait_for_all_requests();
-                do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-                    [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                        direction.change_direction(env.program_info(), env.console, context, 5.95);
-                        pbf_move_left_joystick(context, 128, 0, 300, 100);
-                });
-                break;
-            }catch (UnexpectedBattleException&){
-                run_battle_press_A(env.console, context, BattleStopCondition::STOP_OVERWORLD);
-                direction.change_direction(env.program_info(), env.console, context, 5.95);
-                pbf_move_left_joystick(context, 128, 0, 300, 100);                
-            }
-        }
-
-        // section 9
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 180, 50},
-            {ZoomChange::ZOOM_IN, 0, 35, 100}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 12, 12, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );          
-
-        // section 10
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 180, 50},
-            {ZoomChange::ZOOM_IN, 0, 20, 95}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 12, 12, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );    
-
-        // section 11
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 180, 50},
-            {ZoomChange::ZOOM_IN, 0, 0, 100}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 12, 12, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
         );   
 
-        // section 12
-        direction.change_direction(env.program_info(), env.console, context, 5.76);      
-        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        // section 8. walk up to Klawf on lower wall
+        realign_player_from_landmark(
+            env.program_info(), env.console, context, 
+            {ZoomChange::KEEP_ZOOM, 255, 150, 50},
+            {ZoomChange::ZOOM_IN, 30, 30, 135}
+        );  
+        overworld_navigation(env.program_info(), env.console, context, 
+            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
+            128, 0, 10, 10, false);        
 
-        direction.change_direction(env.program_info(), env.console, context, 0.37);      
-        pbf_move_left_joystick(context, 128, 0, 900, 100);  
-
-        direction.change_direction(env.program_info(), env.console, context, 2.6);      
+        // section 9
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_right_joystick(context, 255, 128, 100, 50);
+                direction.change_direction(env.program_info(), env.console, context, 4.467);
+                pbf_move_left_joystick(context, 128, 0, 700, 50);
+                pbf_move_left_joystick(context, 0, 128, 100, 50);
+                pbf_move_left_joystick(context, 0, 0, 500, 50);
+                direction.change_direction(env.program_info(), env.console, context, 2.795);
+                pbf_move_left_joystick(context, 128, 0, 200, 50);
+                direction.change_direction(env.program_info(), env.console, context, 4.747);
+                pbf_move_left_joystick(context, 128, 0, 600, 50);
+                direction.change_direction(env.program_info(), env.console, context, 5.479);
+                pbf_move_left_joystick(context, 128, 0, 400, 50);
+                direction.change_direction(env.program_info(), env.console, context, 0.33);                
+                pbf_move_left_joystick(context, 128, 0, 900, 50);
+                direction.change_direction(env.program_info(), env.console, context, 2.325);      
+        });        
         overworld_navigation(env.program_info(), env.console, context, 
             NavigationStopCondition::STOP_BATTLE, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 25, 25, false);    
-
-        
+            128, 0, 25, 25, false);
 
        
         break;

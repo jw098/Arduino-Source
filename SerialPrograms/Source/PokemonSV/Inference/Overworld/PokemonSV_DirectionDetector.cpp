@@ -177,6 +177,7 @@ void DirectionDetector::change_direction(
         VideoSnapshot screen = console.video().snapshot();
         double current = get_current_direction(console, screen);
         if (current < 0){ 
+            console.log("Unable to detect current direction.");
             return;
         }
         double target = std::fmod(direction, (2 * PI));
