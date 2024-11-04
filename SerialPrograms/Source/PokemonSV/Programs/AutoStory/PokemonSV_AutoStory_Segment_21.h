@@ -32,7 +32,7 @@ public:
 };
 
 
-// start: 
+// start: Defeated Klawf. At Artazon (West) Pokecenter.
 // end: 
 void checkpoint_44(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 

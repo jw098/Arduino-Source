@@ -738,7 +738,7 @@ void handle_when_stationary_in_overworld(
     uint16_t minutes_timeout, 
     size_t max_failures
 ){
-    StationaryOverworldWatcher stationary_overworld(COLOR_RED, {0.865, 0.82, 0.08, 0.1}, seconds_stationary);
+    
     WallClock start = current_time();
     size_t num_failures = 0;
     while (true){
@@ -749,6 +749,7 @@ void handle_when_stationary_in_overworld(
                 true
             );
         }
+        StationaryOverworldWatcher stationary_overworld(COLOR_RED, {0.865, 0.825, 0.08, 0.1}, seconds_stationary);
 
         int ret = run_until(
             console, context,

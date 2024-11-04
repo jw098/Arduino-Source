@@ -37,11 +37,11 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_21::name() const{
-    return "";
+    return "16.1: Artazon Gym (Grass): Gym challenge";
 }
 
 std::string AutoStory_Segment_21::start_text() const{
-    return "Start: ";
+    return "Start: Defeated Klawf. At Artazon (West) Pokecenter.";
 }
 
 std::string AutoStory_Segment_21::end_text() const{
@@ -54,7 +54,7 @@ void AutoStory_Segment_21::run_segment(SingleSwitchProgramEnvironment& env, BotB
     context.wait_for_all_requests();
     env.console.overlay().add_log("Start Segment ", COLOR_ORANGE);
 
-    // checkpoint_(env, context, options.notif_status_update);
+    checkpoint_44(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment ", COLOR_GREEN);
@@ -64,7 +64,6 @@ void AutoStory_Segment_21::run_segment(SingleSwitchProgramEnvironment& env, BotB
 }
 
 
-// todo: uncomment checkpoint_save
 void checkpoint_44(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -75,11 +74,54 @@ void checkpoint_44(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }         
         context.wait_for_all_requests();
 
+        // place the marker somewhere else. the current location disrupts the Stationary detector
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 128, 50);
+
+        DirectionDetector direction;
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                direction.change_direction(env.program_info(), env.console, context, 6.198);
+                pbf_move_left_joystick(context, 128, 0, 400, 100);
+                direction.change_direction(env.program_info(), env.console, context, 4.693);
+                pbf_move_left_joystick(context, 128, 0, 1000, 100);
+        });
+        // walk up right set of stairs
+        direction.change_direction(env.program_info(), env.console, context, 4.276);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
+
+        // realign using lamp-post
+        direction.change_direction(env.program_info(), env.console, context, 2.34);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.81);
+        pbf_move_left_joystick(context, 255, 0, 600, 100);
+
+        // move toward gym building
+        direction.change_direction(env.program_info(), env.console, context, 4.26);
+        pbf_move_left_joystick(context, 128, 0, 900, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.05);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        pbf_wait(context, 7 * TICKS_PER_SECOND);
+        context.wait_for_all_requests();
+
+        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+                walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 20);
+            }, 
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+                pbf_move_left_joystick(context, 0, 0, 100, 50);
+            },
+            5, 5
+        );          
+
+        // enter gym building. talk go Nemona and battle her.
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::BLACK_DIALOG_BOX, CallbackEnum::PROMPT_DIALOG, CallbackEnum::DIALOG_ARROW, CallbackEnum::BATTLE});        
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, {CallbackEnum::GRADIENT_ARROW});
+        mash_button_till_overworld(env.console, context, BUTTON_A);
 
        
         break;

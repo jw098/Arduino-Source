@@ -242,6 +242,9 @@ AutoStory::AutoStory()
     , m_advanced_options(
         "<font size=4><b>Advanced Options: (developer only)</b></font>"
     )
+    , m_advanced_options_end(
+        ""
+    )    
     , CHANGE_SETTINGS(
         "<b>Change settings at Program Start:</b><br>"
         "This is to ensure the program has the correct settings, particularly with Autosave turned off.",
@@ -343,6 +346,31 @@ AutoStory::AutoStory()
         LockMode::UNLOCK_WHILE_RUNNING,
         0
     )
+    , TEST_PBF_LEFT_JOYSTICK2(
+        "<b>TEST2: pbf_move_left_joystick():</b>",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        false
+    )     
+    , X_MOVE2(
+        "--X_MOVE:<br>x = 0 : left, x = 128 : neutral, x = 255 : right.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        128
+    )     
+    , Y_MOVE2(
+        "--Y_MOVE:<br>y = 0 : up, y = 128 : neutral, y = 255 : down.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        128
+    )   
+    , HOLD_TICKS2(
+        "--HOLD_TICKS:",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        0
+    )    
+    , RELEASE_TICKS2(
+        "--RELEASE_TICKS:",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        0
+    )    
     , TEST_DIRECTION(
         "<b>TEST: get_current_direction():</b>",
         LockMode::UNLOCK_WHILE_RUNNING,
@@ -366,7 +394,13 @@ AutoStory::AutoStory()
         PA_ADD_OPTION(X_MOVE);
         PA_ADD_OPTION(Y_MOVE);
         PA_ADD_OPTION(HOLD_TICKS);
-        PA_ADD_OPTION(RELEASE_TICKS);        
+        PA_ADD_OPTION(RELEASE_TICKS);  
+
+        PA_ADD_OPTION(TEST_PBF_LEFT_JOYSTICK2);
+        PA_ADD_OPTION(X_MOVE2);
+        PA_ADD_OPTION(Y_MOVE2);
+        PA_ADD_OPTION(HOLD_TICKS2);
+        PA_ADD_OPTION(RELEASE_TICKS2);              
 
         PA_ADD_OPTION(ENABLE_TEST_CHECKPOINTS);
         PA_ADD_OPTION(START_CHECKPOINT);
@@ -382,7 +416,8 @@ AutoStory::AutoStory()
         // PA_ADD_OPTION(REALIGN_DURATION);
 
         PA_ADD_OPTION(ENABLE_MISC_TEST);
-        // PA_ADD_OPTION(FORWARD_TICKS);        
+        // PA_ADD_OPTION(FORWARD_TICKS);  
+        PA_ADD_OPTION(m_advanced_options_end);
     }
 
 
@@ -411,6 +446,7 @@ AutoStory::AutoStory()
     ENABLE_TEST_REALIGN.add_listener(*this);
     ENABLE_MISC_TEST.add_listener(*this);
     TEST_PBF_LEFT_JOYSTICK.add_listener(*this);
+    TEST_PBF_LEFT_JOYSTICK2.add_listener(*this);
     TEST_DIRECTION.add_listener(*this);
 }
 
@@ -480,7 +516,19 @@ void AutoStory::value_changed(void* object){
         Y_MOVE.set_visibility(ConfigOptionState::DISABLED);
         HOLD_TICKS.set_visibility(ConfigOptionState::DISABLED);
         RELEASE_TICKS.set_visibility(ConfigOptionState::DISABLED);      
-    }    
+    }   
+
+    if (TEST_PBF_LEFT_JOYSTICK2){
+        X_MOVE2.set_visibility(ConfigOptionState::ENABLED);
+        Y_MOVE2.set_visibility(ConfigOptionState::ENABLED);
+        HOLD_TICKS2.set_visibility(ConfigOptionState::ENABLED);
+        RELEASE_TICKS2.set_visibility(ConfigOptionState::ENABLED);
+    }else{
+        X_MOVE2.set_visibility(ConfigOptionState::DISABLED);
+        Y_MOVE2.set_visibility(ConfigOptionState::DISABLED);
+        HOLD_TICKS2.set_visibility(ConfigOptionState::DISABLED);
+        RELEASE_TICKS2.set_visibility(ConfigOptionState::DISABLED);      
+    }     
 
 
     if (TEST_DIRECTION){
@@ -644,7 +692,12 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
     if (TEST_PBF_LEFT_JOYSTICK){
         pbf_move_left_joystick(context, X_MOVE, Y_MOVE, HOLD_TICKS, RELEASE_TICKS);
         return;
-    }        
+    } 
+
+    if (TEST_PBF_LEFT_JOYSTICK2){
+        pbf_move_left_joystick(context, X_MOVE2, Y_MOVE2, HOLD_TICKS2, RELEASE_TICKS2);
+        return;
+    }            
 
     if (ENABLE_TEST_CHECKPOINTS){
         // test individual checkpoints
@@ -684,7 +737,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
 
 
     // test code
-    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_MISC_TEST || TEST_PBF_LEFT_JOYSTICK || TEST_DIRECTION){
+    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_MISC_TEST || TEST_PBF_LEFT_JOYSTICK || TEST_PBF_LEFT_JOYSTICK2 || TEST_DIRECTION){
         test_code(env, context);
         return;
     }

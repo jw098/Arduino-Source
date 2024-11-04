@@ -37,7 +37,7 @@ public:
 void checkpoint_42(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 // start: Defeated Klawf.
-// end: At Artazon (West) Pokecenter.
+// end: Defeated Klawf. At Artazon (West) Pokecenter.
 void checkpoint_43(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
