@@ -623,6 +623,10 @@ void AutoStory::test_checkpoints(
             for (int i = 0; i < loop; i++){
                 if (i > 0){
                     reset_game(env.program_info(), console, context);
+                    enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+                    // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+                    env.log("Wait 10 seconds.");
+                    context.wait_for(Milliseconds(10 * 1000));              
                 }
                 console.log("checkpoint_" + number + ": loop " + std::to_string(i));
                 checkpoint_list[checkpoint]();
