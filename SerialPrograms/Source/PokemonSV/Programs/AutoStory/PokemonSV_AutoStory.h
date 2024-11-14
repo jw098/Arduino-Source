@@ -119,7 +119,8 @@ private:
     SimpleIntegerOption<uint16_t> HOLD_TICKS2;
     SimpleIntegerOption<uint16_t> RELEASE_TICKS2;    
 
-    BooleanCheckBoxOption TEST_DIRECTION;
+    BooleanCheckBoxOption TEST_CURRENT_DIRECTION;
+    BooleanCheckBoxOption TEST_CHANGE_DIRECTION;
     FloatingPointOption DIR_RADIANS;
 };
 

@@ -371,11 +371,16 @@ AutoStory::AutoStory()
         LockMode::UNLOCK_WHILE_RUNNING,
         0
     )    
-    , TEST_DIRECTION(
+    , TEST_CURRENT_DIRECTION(
         "<b>TEST: get_current_direction():</b>",
         LockMode::UNLOCK_WHILE_RUNNING,
         false
-    )     
+    ) 
+    , TEST_CHANGE_DIRECTION(
+        "<b>TEST: change_direction():</b>",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        false
+    )         
     , DIR_RADIANS(
         "direction in radians",
         LockMode::UNLOCK_WHILE_RUNNING,
@@ -387,8 +392,9 @@ AutoStory::AutoStory()
         PA_ADD_OPTION(m_advanced_options);
         PA_ADD_OPTION(CHANGE_SETTINGS);
 
-        PA_ADD_OPTION(TEST_DIRECTION);
-        // PA_ADD_OPTION(DIR_RADIANS);    
+        PA_ADD_OPTION(TEST_CURRENT_DIRECTION);
+        PA_ADD_OPTION(TEST_CHANGE_DIRECTION);
+        PA_ADD_OPTION(DIR_RADIANS);    
 
         PA_ADD_OPTION(TEST_PBF_LEFT_JOYSTICK);
         PA_ADD_OPTION(X_MOVE);
@@ -447,7 +453,8 @@ AutoStory::AutoStory()
     ENABLE_MISC_TEST.add_listener(*this);
     TEST_PBF_LEFT_JOYSTICK.add_listener(*this);
     TEST_PBF_LEFT_JOYSTICK2.add_listener(*this);
-    TEST_DIRECTION.add_listener(*this);
+    TEST_CURRENT_DIRECTION.add_listener(*this);
+    TEST_CHANGE_DIRECTION.add_listener(*this);
 }
 
 void AutoStory::value_changed(void* object){
@@ -531,7 +538,7 @@ void AutoStory::value_changed(void* object){
     }     
 
 
-    if (TEST_DIRECTION){
+    if (TEST_CHANGE_DIRECTION){
         DIR_RADIANS.set_visibility(ConfigOptionState::ENABLED);
     }else{
         DIR_RADIANS.set_visibility(ConfigOptionState::DISABLED);  
@@ -685,11 +692,19 @@ void AutoStory::run_autostory(SingleSwitchProgramEnvironment& env, BotBaseContex
 }
 
 void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
-    if (TEST_DIRECTION){
+    if (TEST_CURRENT_DIRECTION){
         DirectionDetector direction;
         // direction.change_direction(env.program_info(), env.console, context, DIR_RADIANS);
         VideoSnapshot snapshot = env.console.video().snapshot();
         env.console.log("current direction: " + std::to_string(direction.get_current_direction(env.console, snapshot)));
+        return;
+    }
+
+    if (TEST_CHANGE_DIRECTION){
+        DirectionDetector direction;
+        direction.change_direction(env.program_info(), env.console, context, DIR_RADIANS);
+        // VideoSnapshot snapshot = env.console.video().snapshot();
+        // env.console.log("current direction: " + std::to_string(direction.get_current_direction(env.console, snapshot)));
         return;
     }    
 
@@ -726,6 +741,99 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
 
         DirectionDetector direction;
 
+        // // realign to wall
+        // direction.change_direction(env.program_info(), env.console, context, 1.477);
+        // pbf_move_left_joystick(context, 128, 0, 500, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 2.166);
+        // pbf_move_left_joystick(context, 0, 0, 300, 100);
+
+        
+        // // get sunflora 1
+        // direction.change_direction(env.program_info(), env.console, context, 4.85);
+        // pbf_move_left_joystick(context, 128, 0, 300, 100);        
+        // pbf_mash_button(context, BUTTON_A, 500);
+        // check_num_sunflora_found(env, context, 1);
+
+        // // get sunflora 2
+        // direction.change_direction(env.program_info(), env.console, context, 0.384);
+        // pbf_move_left_joystick(context, 128, 0, 120, 100);
+        // pbf_mash_button(context, BUTTON_A, 250);
+        // check_num_sunflora_found(env, context, 2);
+
+        // // get sunflora 3
+        // direction.change_direction(env.program_info(), env.console, context, 5.377);
+        // pbf_move_left_joystick(context, 128, 0, 120, 100);        
+        // pbf_mash_button(context, BUTTON_A, 250);
+        // check_num_sunflora_found(env, context, 3);        
+
+        // get_on_ride(env.program_info(), env.console, context);
+
+        // // get sunflora 4
+        // // align to corner 4.1
+        // direction.change_direction(env.program_info(), env.console, context, 1.90);
+        // pbf_move_left_joystick(context, 128, 0, 200, 100);    
+        // direction.change_direction(env.program_info(), env.console, context, 2.166);
+        // pbf_move_left_joystick(context, 0, 0, 300, 100);
+
+        // // align to corner 4.2
+        // direction.change_direction(env.program_info(), env.console, context, 6.056);
+        // pbf_move_left_joystick(context, 128, 0, 670, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 1.22);
+        // pbf_move_left_joystick(context, 128, 0, 200, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 1.69);
+        // pbf_move_left_joystick(context, 0, 0, 500, 100);
+
+        // direction.change_direction(env.program_info(), env.console, context, 5.85);
+        // pbf_move_left_joystick(context, 128, 0, 60, 100);
+        // pbf_mash_button(context, BUTTON_A, 250);
+        // check_num_sunflora_found(env, context, 4);
+
+        // // get sunflora 5
+        // // align to corner 5.1
+        // direction.change_direction(env.program_info(), env.console, context, 1.59);
+        // pbf_move_left_joystick(context, 128, 0, 200, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 1.79);
+        // pbf_move_left_joystick(context, 0, 0, 500, 100);        
+        // direction.change_direction(env.program_info(), env.console, context, 6.055);        
+        // pbf_move_left_joystick(context, 128, 0, 400, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 5.06);   
+        // pbf_move_left_joystick(context, 128, 0, 600, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 4.38);   
+        // pbf_move_left_joystick(context, 0, 0, 700, 100);
+
+        // direction.change_direction(env.program_info(), env.console, context, 2.53);   
+        // pbf_move_left_joystick(context, 128, 0, 160, 100);
+        // direction.change_direction(env.program_info(), env.console, context, 0.78);   
+        // pbf_move_left_joystick(context, 128, 0, 80, 100);
+        // pbf_mash_button(context, BUTTON_A, 250);
+        // check_num_sunflora_found(env, context, 5);
+
+        // sunflora 6
+        // align to corner 6.1
+        direction.change_direction(env.program_info(), env.console, context, 4.2);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.38);   
+        pbf_move_left_joystick(context, 0, 0, 700, 100);        
+
+        direction.change_direction(env.program_info(), env.console, context, 0.96);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.17);        
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.86);
+        pbf_mash_button(context, BUTTON_A, 250);
+        check_num_sunflora_found(env, context, 6);
+
+        // sunflora 7
+        // align to corner 7.1
+        direction.change_direction(env.program_info(), env.console, context, 2.06);
+        pbf_move_left_joystick(context, 128, 0, 80, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.7); 
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.22);               
+        pbf_move_left_joystick(context, 255, 0, 700, 100);  
+
+
+
 
         return;
     }
@@ -741,7 +849,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, BotBaseContext& con
 
 
     // test code
-    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_MISC_TEST || TEST_PBF_LEFT_JOYSTICK || TEST_PBF_LEFT_JOYSTICK2 || TEST_DIRECTION){
+    if (ENABLE_TEST_CHECKPOINTS || ENABLE_TEST_REALIGN || ENABLE_MISC_TEST || TEST_PBF_LEFT_JOYSTICK || TEST_PBF_LEFT_JOYSTICK2 || TEST_CHANGE_DIRECTION || TEST_CURRENT_DIRECTION){
         test_code(env, context);
         return;
     }

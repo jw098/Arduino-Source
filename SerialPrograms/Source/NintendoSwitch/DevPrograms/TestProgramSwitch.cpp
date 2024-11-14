@@ -275,7 +275,10 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 //    PokemonLA::ButtonDetector detector(logger, PokemonLA::ButtonType::ButtonA,);
 
 #if 1
-    // VideoSnapshot image = feed.snapshot();
+
+    VideoSnapshot image = feed.snapshot();
+    ImageFloatBox box = {0.27, 0.02, 0.04, 0.055};
+    cout << read_number_waterfill(logger, extract_box_reference(image, box), 0xff000000, 0xff808080) << endl;
     // ImageRGB32 image("1.png");
 
     // ImageRGB32 filtered = filter_green(image, Color(0xffffffff), 10);

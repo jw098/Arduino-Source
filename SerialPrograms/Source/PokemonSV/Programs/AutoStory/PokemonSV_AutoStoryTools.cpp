@@ -12,6 +12,9 @@
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/Tools/StatsTracking.h"
 #include "CommonFramework/ImageTools/SolidColorTest.h"
+#include "CommonFramework/ImageTools/ImageBoxes.h"
+#include "CommonFramework/ImageTools/ImageFilter.h"
+#include "CommonFramework/OCR/OCR_NumberReader.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
 #include "NintendoSwitch/Inference/NintendoSwitch_DateReader.h"
@@ -1134,6 +1137,25 @@ void change_date(
             );
         }
     }
+}
+
+void check_num_sunflora_found(SingleSwitchProgramEnvironment& env, BotBaseContext& context, int expected_number){
+    context.wait_for_all_requests();
+    VideoSnapshot screen = env.console.video().snapshot();
+    ImageFloatBox num_sunflora_box = {0.27, 0.02, 0.04, 0.055};
+    int number = OCR::read_number_waterfill(env.console, extract_box_reference(screen, num_sunflora_box), 0xff000000, 0xff808080);
+
+    if (number != expected_number){
+        throw OperationFailedException(
+            ErrorReport::SEND_ERROR_REPORT,
+            env.logger(),
+            "The number of sunflora found is different than expected."
+        );
+    }else{
+        env.console.log("Number of sunflora found: " + std::to_string(number));
+    }
+
+
 }
 
 

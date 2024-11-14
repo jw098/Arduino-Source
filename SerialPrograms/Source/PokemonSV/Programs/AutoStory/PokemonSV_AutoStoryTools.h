@@ -295,6 +295,8 @@ void change_date(
     const DateTime& date
 );
 
+void check_num_sunflora_found(SingleSwitchProgramEnvironment& env, BotBaseContext& context, int expected_number);
+
 }
 }
 }
