@@ -50,7 +50,6 @@ std::string AutoStory_Segment_12::end_text() const{
 }
 
 
-// todo: update with checkpoint 26
 void AutoStory_Segment_12::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
@@ -112,7 +111,7 @@ void checkpoint_28(
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT,
                 env.logger(),
-                "Failed to finish Olive roll in the last stretch."
+                "Failed to enter Cortondo Gym."
             );
         }
 
