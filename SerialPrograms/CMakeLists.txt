@@ -1325,10 +1325,6 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Inference/Overworld/PokemonSV_AreaZeroSkyDetector.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.cpp
     Source/PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h
-    Source/PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.cpp
-    Source/PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.h    
-    Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.cpp
-    Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoHpReader.cpp
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoHpReader.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoKillDetector.cpp
