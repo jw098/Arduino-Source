@@ -1333,10 +1333,14 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoHpReader.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoKillDetector.cpp
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoKillDetector.h
+    Source/PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.cpp
+    Source/PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.h
+    Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.cpp
+    Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h    
     Source/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.cpp
     Source/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_StationaryOverworldWatcher.cpp
-    Source/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetectorWatcher.h    
+    Source/PokemonSV/Inference/Overworld/PokemonSV_StationaryOverworldWatcher.h    
     Source/PokemonSV/Inference/Picnics/PokemonSV_PicnicDetector.cpp
     Source/PokemonSV/Inference/Picnics/PokemonSV_PicnicDetector.h
     Source/PokemonSV/Inference/Picnics/PokemonSV_SandwichHandDetector.cpp
@@ -2063,7 +2067,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}../../ FILES ${MAIN_SOURCES})
 
 if (APPLE)
     # TODO: set up the correct application icon
-    # set(SerialPrograms_ICON ${CMAKE_CURRENT_SOURCE_DIR}/../Resources/icon.icns)
+    set(SerialPrograms_ICON ${CMAKE_CURRENT_SOURCE_DIR}/../IconResource/icon.icns)
     # set_source_files_properties(SerialPrograms_ICON PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
     # Links on how to create a MacOS app bundle with cmake
@@ -2076,17 +2080,18 @@ if (APPLE)
         MACOSX_BUNDLE_BUNDLE_NAME SerialPrograms
         MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
-        # MACOSX_BUNDLE_ICON_FILE icon
+        MACOSX_BUNDLE_ICON_FILE "icon.icns"
         # MacOSXBundleInfo.plist.in is modified from https://github.com/Kitware/CMake/blob/master/Modules/MacOSXBundleInfo.plist.in
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in
+        RESOURCE ${SerialPrograms_ICON}
     )
 else() # WIN and Linux:
     add_executable(SerialPrograms WIN32 ${MAIN_SOURCES})
 endif()
 
 set_target_properties(SerialPrograms PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(SerialPrograms Qt${QT_MAJOR}::Widgets Qt${QT_MAJOR}::SerialPort Qt${QT_MAJOR}::Multimedia Qt${QT_MAJOR}::MultimediaWidgets)
-target_link_libraries(SerialPrograms Threads::Threads)
+target_link_libraries(SerialPrograms PRIVATE Qt${QT_MAJOR}::Widgets Qt${QT_MAJOR}::SerialPort Qt${QT_MAJOR}::Multimedia Qt${QT_MAJOR}::MultimediaWidgets)
+target_link_libraries(SerialPrograms PRIVATE Threads::Threads)
 
 #add defines
 target_compile_definitions(SerialPrograms PRIVATE NOMINMAX)
@@ -2136,7 +2141,7 @@ if (MSVC)
         MAP_IMPORTED_CONFIG_MINSIZEREL      RELEASE
     )
 
-    target_link_libraries(SerialPrograms tesseractPA.lib OpenCV_lib Sleepy.lib dpp_lib)
+    target_link_libraries(SerialPrograms PRIVATE tesseractPA.lib OpenCV_lib Sleepy.lib dpp_lib)
     target_compile_definitions(SerialPrograms PRIVATE PA_TESSERACT PA_SLEEPY PA_DPP _CRT_SECURE_NO_WARNINGS)
 
     target_compile_options(SerialPrograms PRIVATE /FAs /FaAssembly/ /MP /W4 /WX /utf-8)
@@ -2166,7 +2171,7 @@ else()
     # pkg_search_module(OPENCV REQUIRED opencv)
     include_directories(${OpenCV_INCLUDE_DIRS})
     link_directories(${OpenCV_LIBRARY_DIRS})
-    target_link_libraries(SerialPrograms ${OpenCV_LIBS})
+    target_link_libraries(SerialPrograms PRIVATE ${OpenCV_LIBS})
 
     #we hope to use our own Tesseract build in future so we can rid that dependency
     #but right now to run on Linux and Mac we need to use external Tesseract library
@@ -2179,8 +2184,8 @@ else()
         include_directories(${LEPTONICA_INCLUDE_DIRS})
         link_directories(${TESSERACT_LIBRARY_DIRS})
         link_directories(${LEPTONICA_LIBRARY_DIRS})
-        target_link_libraries(SerialPrograms ${TESSERACT_LINK_LIBRARIES})
-        target_link_libraries(SerialPrograms ${LEPTONICA_LINK_LIBRARIES})
+        target_link_libraries(SerialPrograms PRIVATE ${TESSERACT_LINK_LIBRARIES})
+        target_link_libraries(SerialPrograms PRIVATE ${LEPTONICA_LINK_LIBRARIES})
     endif()
 
     # enable dpp integration
@@ -2191,7 +2196,7 @@ else()
             INTERFACE_COMPILE_DEFINITIONS "PA_DPP"
             INTERFACE_LINK_LIBRARIES "-L/opt/homebrew/lib -lssl -lcrypto -lopus -lsodium -lz" # add dpp's deps
         )
-        target_link_libraries(SerialPrograms libdpp)
+        target_link_libraries(SerialPrograms PRIVATE libdpp)
     endif()
 
     # Add -Wno-c11-extensions to avoid clang gives
@@ -2203,7 +2208,7 @@ else()
     if (WIN32)
     elseif (APPLE)
         # on macOS, need this framework to query OS API to control display sleep and system sleep behavior
-        target_link_libraries(SerialPrograms "-framework IOKit -framework CoreFoundation")
+        target_link_libraries(SerialPrograms PRIVATE "-framework IOKit -framework CoreFoundation")
     elseif(UNIX)
     endif()
 
@@ -2299,4 +2304,8 @@ file(GLOB MY_DLLS
   "../3rdPartyBinaries/*.dll"
 )
 file(COPY ${MY_DLLS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
+if (QT_MAJOR GREATER_EQUAL 6)
+    qt_finalize_target(SerialPrograms)
 endif()

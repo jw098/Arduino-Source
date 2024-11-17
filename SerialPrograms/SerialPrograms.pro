@@ -667,6 +667,8 @@ SOURCES += \
     Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.cpp \
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoHpReader.cpp \
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoKillDetector.cpp \
+    Source/PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.cpp \
+    Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.cpp \
     Source/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.cpp \
     Source/PokemonSV/Inference/Overworld/PokemonSV_StationaryOverworldWatcher.cpp \
     Source/PokemonSV/Inference/Picnics/PokemonSV_PicnicDetector.cpp \
@@ -1460,6 +1462,7 @@ HEADERS += \
     Source/Kernels/BinaryMatrix/Kernels_SparseBinaryMatrixCore.h \
     Source/Kernels/BinaryMatrix/Kernels_SparseBinaryMatrixCore.tpp \
     Source/Kernels/ImageFilters/Kernels_ImageFilter_Basic.h \
+    Source/Kernels/ImageFilters/Kernels_ImageFilter_Green_Default.h \
     Source/Kernels/ImageScaleBrightness/Kernels_ImageScaleBrightness.h \
     Source/Kernels/ImageStats/Kernels_ImagePixelSumSqr.h \
     Source/Kernels/ImageStats/Kernels_ImagePixelSumSqrDev.h \
@@ -1781,6 +1784,8 @@ HEADERS += \
     Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h \
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoHpReader.h \
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoKillDetector.h \
+    Source/PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.h \
+    Source/PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h \
     Source/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h \
     Source/PokemonSV/Inference/Overworld/PokemonSV_StationaryOverworldWatcher.h \
     Source/PokemonSV/Inference/Picnics/PokemonSV_PicnicDetector.h \

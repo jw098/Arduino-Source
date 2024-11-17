@@ -117,7 +117,7 @@ StringSelectDatabase make_tutorial_segments_database(){
     StringSelectDatabase ret;
     const StringSelectDatabase& all_segments = ALL_SEGMENTS_SELECT_DATABASE();
     size_t start = 0;
-    size_t end = (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1); // all_segments.case_list().size();
+    size_t end = INDEX_OF_LAST_TUTORIAL_SEGMENT + 1;
     for (size_t i = start; i < end; i++){
         const auto& segment = all_segments[i];
         ret.add_entry(segment);
@@ -133,7 +133,7 @@ const StringSelectDatabase& TUTORIAL_SEGMENTS_SELECT_DATABASE(){
 StringSelectDatabase make_mainstory_segments_database(){
     StringSelectDatabase ret;
     const StringSelectDatabase& all_segments = ALL_SEGMENTS_SELECT_DATABASE();
-    size_t start = (INDEX_OF_LAST_TUTORIAL_SEGMENT + 1);
+    size_t start = INDEX_OF_LAST_TUTORIAL_SEGMENT + 1;
     size_t end = all_segments.case_list().size();
     for (size_t i = start; i < end; i++){
         const auto& segment = all_segments[i];
