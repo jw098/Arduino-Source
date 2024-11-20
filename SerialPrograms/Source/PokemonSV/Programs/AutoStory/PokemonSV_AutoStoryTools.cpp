@@ -853,7 +853,7 @@ void press_A_until_dialog(const ProgramInfo& info, ConsoleHandle& console, BotBa
     }
 }
 
-bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+bool is_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
     while (true){
         try {
             // open main menu
@@ -879,14 +879,22 @@ bool check_ride_active(const ProgramInfo& info, ConsoleHandle& console, BotBaseC
 }
 
 void get_on_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+    get_on_or_off_ride(info, console, context, true);
+}
+
+void get_off_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+    get_on_or_off_ride(info, console, context, false);
+}
+
+void get_on_or_off_ride(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context, bool get_on){
     pbf_press_button(context, BUTTON_PLUS, 20, 20);
 
     WallClock start = current_time();
-    while (!check_ride_active(info, console, context)){
+    while (get_on != is_ride_active(info, console, context)){
         if (current_time() - start > std::chrono::minutes(3)){
             throw OperationFailedException(
                 ErrorReport::SEND_ERROR_REPORT, console,
-                "get_on_ride(): Failed to get on ride after 3 minutes.",
+                "get_on_or_off_ride(): Failed to get on/off ride after 3 minutes.",
                 true
             );
         }        

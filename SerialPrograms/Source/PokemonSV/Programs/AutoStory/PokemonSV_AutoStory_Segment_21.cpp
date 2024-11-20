@@ -16,6 +16,7 @@
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
 #include "PokemonSV_AutoStoryTools.h"
@@ -142,7 +143,6 @@ void checkpoint_44(
 
 }
 
-// todo: uncomment checkpoint_save
 void checkpoint_45(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -153,7 +153,7 @@ void checkpoint_45(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }else{
             enter_menu_from_overworld(env.program_info(), env.console, context, -1);
@@ -185,6 +185,211 @@ void checkpoint_45(
         pbf_move_left_joystick(context, 128, 0, 500, 100);
         direction.change_direction(env.program_info(), env.console, context, 2.166);
         pbf_move_left_joystick(context, 0, 0, 300, 100);
+
+        // get sunflora 1
+        direction.change_direction(env.program_info(), env.console, context, 4.85);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);        
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 1);
+
+        // get sunflora 2
+        direction.change_direction(env.program_info(), env.console, context, 0.384);
+        pbf_move_left_joystick(context, 128, 0, 120, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 2);
+
+        // get sunflora 3
+        direction.change_direction(env.program_info(), env.console, context, 5.377);
+        pbf_move_left_joystick(context, 128, 0, 120, 100);        
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 3);        
+
+        get_on_ride(env.program_info(), env.console, context);
+
+        // get sunflora 4
+        // align to corner 4.1
+        direction.change_direction(env.program_info(), env.console, context, 1.90);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);    
+        direction.change_direction(env.program_info(), env.console, context, 2.166);
+        pbf_move_left_joystick(context, 0, 0, 300, 100);
+
+        // align to corner 4.2
+        direction.change_direction(env.program_info(), env.console, context, 6.056);
+        pbf_move_left_joystick(context, 128, 0, 670, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.22);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.69);
+        pbf_move_left_joystick(context, 0, 0, 500, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 5.85);
+        pbf_move_left_joystick(context, 128, 0, 60, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 4);
+
+        // get sunflora 5
+        // align to corner 5.1
+        direction.change_direction(env.program_info(), env.console, context, 1.59);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.79);
+        pbf_move_left_joystick(context, 0, 0, 500, 100);        
+        direction.change_direction(env.program_info(), env.console, context, 6.055);        
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.06);   
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.38);   
+        pbf_move_left_joystick(context, 0, 0, 700, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 2.53);   
+        pbf_move_left_joystick(context, 128, 0, 160, 100);
+        direction.change_direction(env.program_info(), env.console, context, 0.78);   
+        pbf_move_left_joystick(context, 128, 0, 90, 100);  // todo: adjust this. 80 -> 90?
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 5);
+
+        // sunflora 6
+        // align to corner 6.1
+        direction.change_direction(env.program_info(), env.console, context, 4.2);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.38);   
+        pbf_move_left_joystick(context, 0, 0, 700, 100);        
+
+        direction.change_direction(env.program_info(), env.console, context, 0.96);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.17);        
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.86);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 6);
+
+        // sunflora 7
+        // align to corner 7.1
+        direction.change_direction(env.program_info(), env.console, context, 2.06);
+        pbf_move_left_joystick(context, 128, 0, 80, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.7); 
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.22);               
+        pbf_move_left_joystick(context, 255, 0, 700, 100);        
+
+        // align to corner 7.2. bush
+        direction.change_direction(env.program_info(), env.console, context, 2.34);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.42);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        // align to corner 7.3. lamp-post
+        direction.change_direction(env.program_info(), env.console, context, 0);
+        pbf_move_left_joystick(context, 128, 0, 120, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.75);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 2.95);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        direction.change_direction(env.program_info(), env.console, context, 2.22);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.01);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+
+        // align to corner 7.4. wall corner
+        direction.change_direction(env.program_info(), env.console, context, 3.70);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.28);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.54);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+
+        // align to corner 7.5. bush
+        direction.change_direction(env.program_info(), env.console, context, 3.11);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 60, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.28);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.60);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 1.17);
+        pbf_move_left_joystick(context, 128, 0, 130, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 7);            
+
+        // sunflora 8
+        // align to corner 8.1. bush
+        direction.change_direction(env.program_info(), env.console, context, 4.54);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.60);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 1.64);
+        pbf_move_left_joystick(context, 128, 0, 350, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.36);
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        pbf_press_button(context, BUTTON_A, 50, 50);
+        pbf_press_button(context, BUTTON_A, 50, 50); // extra press in case one is dropped
+        pbf_press_button(context, BUTTON_A, 50, 50);
+        pbf_wait(context, 250);
+        mash_button_till_overworld(env.console, context, BUTTON_B);
+        check_num_sunflora_found(env, context, 8);  
+        pbf_wait(context, 3 * TICKS_PER_SECOND);
+
+        // // sunflora 9
+        // // align to corner 9.1. bush
+        pbf_move_left_joystick(context, 128, 255, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.89);
+        pbf_move_left_joystick(context, 128, 0, 350, 100);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 180);
+        get_off_ride(env.program_info(), env.console, context);
+        direction.change_direction(env.program_info(), env.console, context, 3.60);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+
+
+        direction.change_direction(env.program_info(), env.console, context, 1.48);
+        pbf_move_left_joystick(context, 128, 0, 50, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.11);
+        pbf_move_left_joystick(context, 128, 0, 180, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.75);
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        get_on_ride(env.program_info(), env.console, context);
+        direction.change_direction(env.program_info(), env.console, context, 5.53);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 9);
+
+        // sunflora 10
+        // align to corner 10.1. bush
+        pbf_move_left_joystick(context, 0, 128, 200, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 4.02);
+        pbf_move_left_joystick(context, 128, 0, 250, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 10);
+
+        // go back to Sunflora NPC
+        // align to corner 11.1. bush
+        direction.change_direction(env.program_info(), env.console, context, 0.65);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 800, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 4.49);
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.53);
+
+        NoMinimapWatcher no_minimap(env.console, COLOR_RED, Milliseconds(5000));
+        int ret = run_until(
+            env.console, context,
+            [&](BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30 * TICKS_PER_SECOND, 100);
+            },
+            {no_minimap}
+        );
+        if (ret < 0){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT,
+                env.logger(),
+                "Failed to finish reach the Sunflora NPC."
+            );
+        }
+        env.log("No minimap seen. Likely finished the Artazon gym challenge.");        
 
        
         break;
