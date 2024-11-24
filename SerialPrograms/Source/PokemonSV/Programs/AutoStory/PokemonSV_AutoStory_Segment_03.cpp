@@ -86,7 +86,7 @@ void checkpoint_05(
         pbf_move_left_joystick(context, 128, 0, 7 * TICKS_PER_SECOND, 20);
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 40, 84, 60);
         env.console.log("overworld_navigation: Go to mom at the gate.");
-        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0, 20);
+        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0, 20, 20, true, true);
         
         context.wait_for_all_requests();
         env.console.log("Get mom's sandwich");
@@ -123,7 +123,7 @@ void checkpoint_06(
         pbf_move_left_joystick(context, 128, 0, 6 * TICKS_PER_SECOND, 20);
         realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 110, 10, 60);
         env.console.log("overworld_navigation: Go to Nemona.");
-        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0, 20);
+        overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 128, 0, 20, 20, true, true);
         
         context.wait_for_all_requests();
         env.console.log("clear_dialog: Talk with Nemona to start catch tutorial. Stop when detect battle.");

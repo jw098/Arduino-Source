@@ -83,7 +83,6 @@ AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
             stats.m_checkpoint++;
             env.update_stats();
             send_program_status_notification(env, notif_status_update, "Saved at checkpoint.");     
-            first_attempt = false;
         }
         
         context.wait_for_all_requests();

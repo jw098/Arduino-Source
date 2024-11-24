@@ -214,6 +214,7 @@ AutoStory::AutoStory()
     )       
     , MAINSTORY_NOTE{
         "Ensure you have a level 100 Gardevoir with the moves in the following order: Moonblast, Dazzling Gleam, Psychic, Mystical Fire.<br>"
+        "Also, make sure you have two other strong pokemon (e.g. level 100 Talonflames)<br>"
         "Refer to the documentation on github for more details."
     }
     , START_DESCRIPTION(
@@ -741,7 +742,6 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         //     128, 0, 60, 10, false);
 
         DirectionDetector direction;
-
 
 
 

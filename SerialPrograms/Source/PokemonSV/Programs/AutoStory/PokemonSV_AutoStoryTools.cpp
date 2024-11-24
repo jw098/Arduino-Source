@@ -632,7 +632,7 @@ void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& contex
             {MenuOptionItemEnum::GIVE_NICKNAMES, {MenuOptionToggleEnum::OFF}},
             {MenuOptionItemEnum::VERTICAL_CAMERA_CONTROLS, {MenuOptionToggleEnum::REGULAR, MenuOptionToggleEnum::NORMAL}},
             {MenuOptionItemEnum::HORIZONTAL_CAMERA_CONTROLS, {MenuOptionToggleEnum::REGULAR, MenuOptionToggleEnum::NORMAL}},
-            {MenuOptionItemEnum::CAMERA_SUPPORT, {MenuOptionToggleEnum::ON}},
+            {MenuOptionItemEnum::CAMERA_SUPPORT, {MenuOptionToggleEnum::OFF}},
             {MenuOptionItemEnum::CAMERA_INTERPOLATION, {MenuOptionToggleEnum::NORMAL, MenuOptionToggleEnum::AVERAGE}},
             {MenuOptionItemEnum::CAMERA_DISTANCE, {MenuOptionToggleEnum::CLOSE}},
             {MenuOptionItemEnum::AUTOSAVE, {MenuOptionToggleEnum::OFF}},
@@ -650,7 +650,7 @@ void change_settings(SingleSwitchProgramEnvironment& env, BotBaseContext& contex
         config_option(context, 1); // Give Nicknames: Off
         config_option(context, 0); // Vertical Camera Controls: Regular
         config_option(context, 0); // Horiztontal Camera Controls: Regular
-        config_option(context, 0); // Camera Support: On
+        config_option(context, 1); // Camera Support: Off
         config_option(context, 0); // Camera Interpolation: Normal
         config_option(context, 0); // Camera Distance: Close
         config_option(context, 1); // Autosave: Off
