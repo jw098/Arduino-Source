@@ -622,6 +622,10 @@ void AutoStory::test_checkpoints(
             checkpoint_list[checkpoint]();
             continue;
         }
+        bool has_minimap = true;
+        if (checkpoint < 3){
+            has_minimap = false;
+        }
         
         const size_t DIGITS = 3;
         std::string number = std::to_string(checkpoint);
@@ -633,14 +637,14 @@ void AutoStory::test_checkpoints(
                 if (i > 0){
                     try {
                         reset_game(env.program_info(), console, context);
-                        enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+                        enter_menu_from_overworld(env.program_info(), env.console, context, -1, MenuSide::NONE, has_minimap);
                         // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
                         env.log("Wait 10 seconds.");
                         context.wait_for(Milliseconds(10 * 1000));
                     }catch(...){
                         // try one more time
                         reset_game(env.program_info(), console, context);
-                        enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+                        enter_menu_from_overworld(env.program_info(), env.console, context, -1, MenuSide::NONE, has_minimap);
                         // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
                         env.log("Wait 10 seconds.");
                         context.wait_for(Milliseconds(10 * 1000));                        
