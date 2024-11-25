@@ -100,9 +100,9 @@ void checkpoint_16(
         context.wait_for_all_requests();
 
         // walk forward
-        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
         // turn left 
-        pbf_move_left_joystick(context, 0, 128, 50, 100);
+        pbf_move_left_joystick(context, 0, 128, 20, 100);
 
         // talk to Arven. stop at overworld. need prompt, overworld, white button A. and book?
         env.console.log("Talk with Arven. Receive Titan questline (Path of Legends).");
