@@ -752,8 +752,8 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
         //     128, 0, 60, 10, false);
 
         DirectionDetector direction;
-
-
+        
+   
 
         return;
     }

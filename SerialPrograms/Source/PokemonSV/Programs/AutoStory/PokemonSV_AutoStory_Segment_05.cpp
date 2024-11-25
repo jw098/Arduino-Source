@@ -16,7 +16,7 @@
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
-#include "PokemonSV/Inference/PokemonSV_TutorialDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
 #include "PokemonSV_AutoStoryTools.h"
 #include "PokemonSV_AutoStory_Segment_05.h"
 
@@ -126,11 +126,10 @@ void checkpoint_10(
                 realign_player(env.program_info(), console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 230, 110, 100);
                 pbf_move_left_joystick(context, 128, 0, 6 * TICKS_PER_SECOND, 8 * TICKS_PER_SECOND);
                 pbf_move_left_joystick(context, 128, 0, 4 * TICKS_PER_SECOND, 20);
-                pbf_move_left_joystick(context, 255, 128, 15, 20);
-                pbf_press_button(context, BUTTON_L, 20, 20);
-                pbf_move_left_joystick(context, 128, 0, 7 * TICKS_PER_SECOND, 20);                
             }
         );
+        DirectionDetector direction;
+        direction.change_direction(env.program_info(), env.console, context, 5.41);
 
         env.console.log("overworld_navigation: Go to Nemona on the lighthouse.");
         overworld_navigation(env.program_info(), env.console, context, NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_SPAM_A, 128, 0, 20, 20, true, true);
