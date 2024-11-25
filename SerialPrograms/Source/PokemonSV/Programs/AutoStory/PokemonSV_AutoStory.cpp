@@ -755,7 +755,6 @@ void AutoStory::test_code(SingleSwitchProgramEnvironment& env, BotBaseContext& c
 
 
 
-
         return;
     }
 
