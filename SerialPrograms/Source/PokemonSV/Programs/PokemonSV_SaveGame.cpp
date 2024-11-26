@@ -113,6 +113,7 @@ void save_game_tutorial(const ProgramInfo& info, ConsoleHandle& console, BotBase
     int ret0 = run_until(
         console, context,
         [](BotBaseContext& context){
+            pbf_wait(context, 500); // avoiding pressing X if menu already open
             for (size_t i = 0; i < 10; i++){
                 pbf_press_button(context, BUTTON_X, 20, 500);
             }

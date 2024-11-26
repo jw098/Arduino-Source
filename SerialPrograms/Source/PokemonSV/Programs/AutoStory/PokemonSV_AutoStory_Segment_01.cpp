@@ -114,7 +114,7 @@ void checkpoint_02(
     bool first_attempt = true;
     while (true){
     try{
-        if(!first_attempt){
+        if(first_attempt){
             save_game_tutorial(env.program_info(), env.console, context);
             stats.m_checkpoint++;
             env.update_stats();
