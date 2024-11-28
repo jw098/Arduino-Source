@@ -489,8 +489,8 @@ void overworld_navigation(
             context.wait_for_all_requests();
             try {
                 realign_player(info, console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-                if (!confirm_marker_present(info, console, context)){  
-                    // if marker not present, don't keep walking forward.
+                if (stop_condition == NavigationStopCondition::STOP_MARKER && !confirm_marker_present(info, console, context)){  
+                    // if marker not present when using marker based navigation, don't keep walking forward.
                     return;
                 }
 
