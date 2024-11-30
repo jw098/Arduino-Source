@@ -91,6 +91,7 @@ AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
         enter_menu_from_overworld(env.program_info(), env.console, context, 0, MenuSide::RIGHT, false);
         change_settings(env, context, language, first_attempt);
         pbf_mash_button(context, BUTTON_B, 2 * TICKS_PER_SECOND);
+        context.wait_for_all_requests();
 
         break;  
     }catch(...){

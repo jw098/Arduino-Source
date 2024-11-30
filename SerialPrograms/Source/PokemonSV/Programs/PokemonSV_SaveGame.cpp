@@ -107,6 +107,8 @@ void save_game_from_menu_or_overworld(
 
 
 void save_game_tutorial(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+    console.log("Save game from tutorial. Open the menu.");
+    context.wait_for_all_requests();
     
     // open the menu.
     MainMenuWatcher menu(COLOR_RED);
