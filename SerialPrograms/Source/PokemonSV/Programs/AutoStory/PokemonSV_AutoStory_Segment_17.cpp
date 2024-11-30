@@ -158,7 +158,16 @@ void checkpoint_38(
         pbf_move_left_joystick(context, 128, 0, 1600, 100); 
         direction.change_direction(env.program_info(), env.console, context, 3.2245);          
         
-        walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 18);
+        
+        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+                walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 18);
+            }, 
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+                pbf_move_left_joystick(context, 255, 0, 100, 50);
+                pbf_move_left_joystick(context, 0, 0, 100, 50);
+            }
+        );         
         // talk to Nemona
         mash_button_till_overworld(env.console, context, BUTTON_A, 360);
 
