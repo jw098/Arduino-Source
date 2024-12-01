@@ -189,20 +189,44 @@ void checkpoint_44(
         // get sunflora 1
         direction.change_direction(env.program_info(), env.console, context, 4.85);
         pbf_move_left_joystick(context, 128, 0, 300, 100);        
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 1);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 1);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );
 
         // get sunflora 2
         direction.change_direction(env.program_info(), env.console, context, 0.384);
         pbf_move_left_joystick(context, 128, 0, 120, 100);
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 2);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 2);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );        
 
         // get sunflora 3
         direction.change_direction(env.program_info(), env.console, context, 5.377);
-        pbf_move_left_joystick(context, 128, 0, 120, 100);        
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 3);        
+        pbf_move_left_joystick(context, 128, 0, 120, 100);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 3);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );              
 
         get_on_ride(env.program_info(), env.console, context);
 
@@ -223,8 +247,16 @@ void checkpoint_44(
 
         direction.change_direction(env.program_info(), env.console, context, 5.85);
         pbf_move_left_joystick(context, 128, 0, 60, 100);
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 4);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 4);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );        
 
         // get sunflora 5
         // align to corner 5.1
@@ -243,8 +275,16 @@ void checkpoint_44(
         pbf_move_left_joystick(context, 128, 0, 160, 100);
         direction.change_direction(env.program_info(), env.console, context, 0.78);   
         pbf_move_left_joystick(context, 128, 0, 90, 100);  // todo: adjust this. 80 -> 90?
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 5);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 5);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );        
 
         // sunflora 6
         // align to corner 6.1
@@ -258,8 +298,16 @@ void checkpoint_44(
         direction.change_direction(env.program_info(), env.console, context, 5.17);        
         pbf_move_left_joystick(context, 128, 0, 100, 100);
         direction.change_direction(env.program_info(), env.console, context, 3.86);
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 6);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 6);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );        
 
         // sunflora 7
         // align to corner 7.1
@@ -267,8 +315,8 @@ void checkpoint_44(
         pbf_move_left_joystick(context, 128, 0, 80, 100);
         direction.change_direction(env.program_info(), env.console, context, 4.7); 
         pbf_move_left_joystick(context, 128, 0, 100, 100);
-        direction.change_direction(env.program_info(), env.console, context, 5.22);               
-        pbf_move_left_joystick(context, 255, 0, 700, 100);        
+        direction.change_direction(env.program_info(), env.console, context, 5.01);               
+        pbf_move_left_joystick(context, 128, 0, 1600, 100);        
 
         // align to corner 7.2. bush
         direction.change_direction(env.program_info(), env.console, context, 2.34);
@@ -277,6 +325,7 @@ void checkpoint_44(
         pbf_move_left_joystick(context, 128, 0, 400, 100);
 
         // align to corner 7.3. lamp-post
+        // todo: adjust routine to get to lampost. go behind the sculpture and goat?
         direction.change_direction(env.program_info(), env.console, context, 0);
         pbf_move_left_joystick(context, 128, 0, 120, 100);
         direction.change_direction(env.program_info(), env.console, context, 1.75);
@@ -307,8 +356,16 @@ void checkpoint_44(
 
         direction.change_direction(env.program_info(), env.console, context, 1.17);
         pbf_move_left_joystick(context, 128, 0, 130, 100);
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 7);            
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 7);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );           
 
         // sunflora 8
         // align to corner 8.1. bush
@@ -323,13 +380,22 @@ void checkpoint_44(
         pbf_move_left_joystick(context, 128, 0, 350, 100);
         direction.change_direction(env.program_info(), env.console, context, 4.36);
         pbf_move_left_joystick(context, 128, 0, 100, 100);
-        pbf_press_button(context, BUTTON_A, 50, 50);
-        pbf_press_button(context, BUTTON_A, 50, 50); // extra press in case one is dropped
-        pbf_press_button(context, BUTTON_A, 50, 50);
-        pbf_wait(context, 250);
-        mash_button_till_overworld(env.console, context, BUTTON_B);
-        check_num_sunflora_found(env, context, 8);  
-        pbf_wait(context, 3 * TICKS_PER_SECOND);
+
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_press_button(context, BUTTON_A, 50, 50);
+                pbf_press_button(context, BUTTON_A, 50, 50); // extra press in case one is dropped
+                pbf_press_button(context, BUTTON_A, 50, 50);
+                pbf_wait(context, 250);
+                press_Bs_to_back_to_overworld(env.program_info(), env.console, context);
+                check_num_sunflora_found(env, context, 8);  
+                pbf_wait(context, 3 * TICKS_PER_SECOND);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );        
 
         // // sunflora 9
         // // align to corner 9.1. bush
@@ -351,8 +417,16 @@ void checkpoint_44(
         get_on_ride(env.program_info(), env.console, context);
         direction.change_direction(env.program_info(), env.console, context, 5.53);
         pbf_move_left_joystick(context, 128, 0, 600, 100);
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 9);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 9);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );
 
         // sunflora 10
         // align to corner 10.1. bush
@@ -360,8 +434,16 @@ void checkpoint_44(
 
         direction.change_direction(env.program_info(), env.console, context, 4.02);
         pbf_move_left_joystick(context, 128, 0, 250, 100);
-        pbf_mash_button(context, BUTTON_A, 500);
-        check_num_sunflora_found(env, context, 10);
+        handle_failed_action(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){ 
+                pbf_mash_button(context, BUTTON_A, 500);
+                check_num_sunflora_found(env, context, 10);
+            },
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30, 100);
+            },
+            3
+        );
 
         // go back to Sunflora NPC
         // align to corner 11.1. bush
@@ -389,7 +471,9 @@ void checkpoint_44(
                 "Failed to finish reach the Sunflora NPC."
             );
         }
-        env.log("No minimap seen. Likely finished the Artazon gym challenge.");        
+        env.log("No minimap seen. Likely finished the Artazon gym challenge.");
+
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD});
 
        
         break;

@@ -33,11 +33,11 @@ public:
 
 
 // start: Defeated Klawf. At Artazon (West) Pokecenter.
-// end: 
+// end: At Artazon Gym building. Battled Nemona. Received Sunflora gym challenge.
 void checkpoint_43(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
-// start: 
-// end: 
+// start: At Artazon Gym building. Battled Nemona. Received Sunflora gym challenge.
+// end: Finished Sunflora gym challenge.
 void checkpoint_44(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 // start: 
