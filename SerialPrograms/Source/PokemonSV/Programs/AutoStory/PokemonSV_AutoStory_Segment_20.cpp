@@ -166,6 +166,7 @@ void checkpoint_44(
         context.wait_for_all_requests();
 
         // talk to receptionist
+        env.console.log("Talk to Artazon gym receptionist.");
         walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10);
         clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD});
 
