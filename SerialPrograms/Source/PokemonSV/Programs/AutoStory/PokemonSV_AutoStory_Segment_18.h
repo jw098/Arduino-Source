@@ -37,7 +37,7 @@ public:
 void checkpoint_39(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 // start: Defeated Great Tusk/Iron Treads. 
-// end: At Mesagoza East Pokecenter.
+// end: At South Province (Area Three) Pokecenter.
 void checkpoint_40(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 

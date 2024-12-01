@@ -16,6 +16,7 @@
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSwSh/Inference/PokemonSwSh_IvJudgeReader.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_DirectionDetector.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_NoMinimapDetector.h"
 #include "PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "PokemonSV/Programs/PokemonSV_SaveGame.h"
 #include "PokemonSV_AutoStoryTools.h"
@@ -37,229 +38,32 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_20::name() const{
-    return "15.2: Klawf Titan: Battle Klawf";
+    return "16.1: Artazon Gym (Grass): Gym challenge";
 }
 
 std::string AutoStory_Segment_20::start_text() const{
-    return "Start: At South Province (Area Three) Pokecenter.";
+    return "Start: Defeated Klawf. At Artazon (West) Pokecenter.";
 }
 
 std::string AutoStory_Segment_20::end_text() const{
-    return "End: Defeated Klawf. At Artazon (West) Pokecenter.";
+    return "End: ";
 }
 
 void AutoStory_Segment_20::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
     AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
 
     context.wait_for_all_requests();
-    env.console.overlay().add_log("Start Segment 15.2: Klawf Titan: Battle Klawf", COLOR_ORANGE);
+    env.console.overlay().add_log("Start Segment ", COLOR_ORANGE);
 
-    checkpoint_42(env, context, options.notif_status_update);
     checkpoint_43(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
-    env.console.log("End Segment 15.2: Klawf Titan: Battle Klawf", COLOR_GREEN);
+    env.console.log("End Segment ", COLOR_GREEN);
     stats.m_segment++;
     env.update_stats();
 
 }
 
-
-
-void checkpoint_42(
-    SingleSwitchProgramEnvironment& env, 
-    BotBaseContext& context, 
-    EventNotificationOption& notif_status_update
-){
-    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
-    bool first_attempt = true;
-    while (true){
-    try{
-        if (first_attempt){
-            checkpoint_save(env, context, notif_status_update);
-            first_attempt = false;
-        }         
-        context.wait_for_all_requests();
-
-        // section 1
-        DirectionDetector direction;
-        direction.change_direction(env.program_info(), env.console, context, 0.14);
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                pbf_move_left_joystick(context, 128, 0, 200, 100);
-        });        
-
-        // section 2. walk until hit dialog
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 0, 128, 70},
-            {ZoomChange::ZOOM_IN, 255, 93, 170}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 20, 10, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 0, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );   
-        // clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::BLACK_DIALOG_BOX});
-        mash_button_till_overworld(env.console, context, BUTTON_A);
-
-
-        // section 3. 
-        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 30, 10, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 0, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );          
-
-        // section 4
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 128, 100},
-            {ZoomChange::ZOOM_IN, 0, 90, 157}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 30, 10, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 128, 255, 50, 50);
-                pbf_move_left_joystick(context, 255, 128, 50, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );   
-
-        // section 5
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 150, 70},
-            {ZoomChange::ZOOM_IN, 0, 95, 112}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 30, 10, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 0, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );   
-
-        // section 6
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 128, 60},
-            {ZoomChange::ZOOM_IN, 0, 50, 105}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 24, 8, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 128, 255, 50, 50);
-                pbf_move_left_joystick(context, 255, 128, 50, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );   
-
-         // section 7. walk up to Klawf on the lower wall, so it moves to the high ground
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 150, 50},
-            {ZoomChange::ZOOM_IN, 0, 40, 110}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 30, 10, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );   
-
-        // section 8. walk up to Klawf on lower wall
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 150, 50},
-            {ZoomChange::ZOOM_IN, 30, 30, 135}
-        );  
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 10, 10, false);        
-
-        // section 9
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                pbf_move_right_joystick(context, 255, 128, 100, 50);
-                direction.change_direction(env.program_info(), env.console, context, 4.467);
-                pbf_move_left_joystick(context, 128, 0, 700, 50);
-                pbf_move_left_joystick(context, 0, 128, 100, 50);
-                pbf_move_left_joystick(context, 0, 0, 500, 50);
-                direction.change_direction(env.program_info(), env.console, context, 2.795);
-                pbf_move_left_joystick(context, 128, 0, 200, 50);
-                direction.change_direction(env.program_info(), env.console, context, 4.747);
-                pbf_move_left_joystick(context, 128, 0, 600, 50);
-                direction.change_direction(env.program_info(), env.console, context, 5.479);
-                pbf_move_left_joystick(context, 128, 0, 400, 50);
-                direction.change_direction(env.program_info(), env.console, context, 0.33);                
-                pbf_move_left_joystick(context, 128, 0, 900, 50);
-                direction.change_direction(env.program_info(), env.console, context, 2.325);      
-        });        
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_BATTLE, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 25, 25, false);
-
-
-        // battle Klawf phase 1
-        run_battle_press_A(env.console, context, BattleStopCondition::STOP_OVERWORLD);
-        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
-                direction.change_direction(env.program_info(), env.console, context, 2.83);
-                // pbf_move_left_joystick(context, 128, 0, 800, 50);
-        });         
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_DIALOG, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 0, 35, 35, false);
-
-        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 30, {CallbackEnum::BATTLE});
-        // Klawf battle phase 2
-        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, {CallbackEnum::DIALOG_ARROW});
-        // get ride upgrade
-        mash_button_till_overworld(env.console, context, BUTTON_A);        
-
-       
-        break;
-    }catch (...){
-        context.wait_for_all_requests();
-        env.console.log("Resetting from checkpoint.");
-        reset_game(env.program_info(), env.console, context);
-        stats.m_reset++;
-        env.update_stats();
-    }         
-    }
-
-}
 
 void checkpoint_43(
     SingleSwitchProgramEnvironment& env, 
@@ -273,93 +77,60 @@ void checkpoint_43(
         if (first_attempt){
             checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
-        }         
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
         context.wait_for_all_requests();
 
-        // section 1
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 180, 50},
-            {ZoomChange::ZOOM_IN, 0, 80, 110}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 24, 12, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 0, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );
+        // place the marker somewhere else. the current location disrupts the Stationary detector
+        realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 0, 128, 50);
 
-        // section 2
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 255, 150, 50},
-            {ZoomChange::ZOOM_IN, 0, 80, 38}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 36, 12, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );   
+        DirectionDetector direction;
+        do_action_and_monitor_for_battles(env.program_info(), env.console, context,
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){
+                direction.change_direction(env.program_info(), env.console, context, 6.198);
+                pbf_move_left_joystick(context, 128, 0, 400, 100);
+                direction.change_direction(env.program_info(), env.console, context, 4.693);
+                pbf_move_left_joystick(context, 128, 0, 1000, 100);
+        });
+        // walk up right set of stairs
+        direction.change_direction(env.program_info(), env.console, context, 4.276);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
 
-        // section 3
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 0, 0, 0},
-            {ZoomChange::ZOOM_IN, 65, 0, 45}
-        );  
-        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 24, 12, false);
-            }, 
-            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 255, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );       
+        // realign using lamp-post
+        direction.change_direction(env.program_info(), env.console, context, 2.34);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.81);
+        pbf_move_left_joystick(context, 255, 0, 600, 100);
 
-        // section 4. set marker to pokecenter
-        realign_player_from_landmark(
-            env.program_info(), env.console, context, 
-            {ZoomChange::KEEP_ZOOM, 0, 0, 0},
-            {ZoomChange::ZOOM_IN, 0, 0, 0}
-        );  
+        // move toward gym building
+        direction.change_direction(env.program_info(), env.console, context, 4.26);
+        pbf_move_left_joystick(context, 128, 0, 900, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.05);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        pbf_wait(context, 7 * TICKS_PER_SECOND);
+        context.wait_for_all_requests();
+
         handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                overworld_navigation(env.program_info(), env.console, context, 
-                    NavigationStopCondition::STOP_MARKER, NavigationMovementMode::DIRECTIONAL_ONLY, 
-                    128, 0, 30, 10, false);
+                walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_ONLY, 20);
             }, 
             [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
-                pbf_move_left_joystick(context, 0, 128, 40, 50);
-                realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_OLD_MARKER);
-            }
-        );                  
+                pbf_move_left_joystick(context, 0, 0, 100, 50);
+            },
+            5, 5
+        );          
+
+        // enter gym building. talk go Nemona and battle her.
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::BLACK_DIALOG_BOX, CallbackEnum::PROMPT_DIALOG, CallbackEnum::DIALOG_ARROW, CallbackEnum::BATTLE});        
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, {CallbackEnum::GRADIENT_ARROW});
+        mash_button_till_overworld(env.console, context, BUTTON_A);
+
        
-        // section 5. set marker past pokecenter
-        handle_unexpected_battles(env.program_info(), env.console, context,
-        [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){                        
-            realign_player(env.program_info(), env.console, context, PlayerRealignMode::REALIGN_NEW_MARKER, 255, 255, 30);
-        });      
-        overworld_navigation(env.program_info(), env.console, context, 
-            NavigationStopCondition::STOP_TIME, NavigationMovementMode::DIRECTIONAL_ONLY, 
-            128, 15, 12, 12, false);           // can't wrap in handle_when_stationary_in_overworld(), since we expect to be stationary when walking into the pokecenter
-          
-
-        fly_to_overlapping_flypoint(env.program_info(), env.console, context);  
-
         break;
     }catch (...){
         context.wait_for_all_requests();
@@ -372,6 +143,454 @@ void checkpoint_43(
 
 }
 
+void checkpoint_44(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
+
+        context.wait_for_all_requests();
+
+        // talk to receptionist
+        walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD});
+
+        pbf_move_left_joystick(context, 128, 255, 500, 100);
+        pbf_wait(context, 3 * TICKS_PER_SECOND);        
+        // wait for overworld after leaving gym
+        wait_for_overworld(env.program_info(), env.console, context, 30);      
+        
+        // talk to Sunflora NPC
+        DirectionDetector direction;
+        direction.change_direction(env.program_info(), env.console, context, 4.91);
+        walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 10);
+        clear_dialog(env.console, context, ClearDialogMode::STOP_OVERWORLD, 60, {CallbackEnum::OVERWORLD, CallbackEnum::PROMPT_DIALOG});
+
+        // realign to wall
+        direction.change_direction(env.program_info(), env.console, context, 1.477);
+        pbf_move_left_joystick(context, 128, 0, 500, 100);
+        direction.change_direction(env.program_info(), env.console, context, 2.166);
+        pbf_move_left_joystick(context, 0, 0, 300, 100);
+
+        // get sunflora 1
+        direction.change_direction(env.program_info(), env.console, context, 4.85);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);        
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 1);
+
+        // get sunflora 2
+        direction.change_direction(env.program_info(), env.console, context, 0.384);
+        pbf_move_left_joystick(context, 128, 0, 120, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 2);
+
+        // get sunflora 3
+        direction.change_direction(env.program_info(), env.console, context, 5.377);
+        pbf_move_left_joystick(context, 128, 0, 120, 100);        
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 3);        
+
+        get_on_ride(env.program_info(), env.console, context);
+
+        // get sunflora 4
+        // align to corner 4.1
+        direction.change_direction(env.program_info(), env.console, context, 1.90);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);    
+        direction.change_direction(env.program_info(), env.console, context, 2.166);
+        pbf_move_left_joystick(context, 0, 0, 300, 100);
+
+        // align to corner 4.2
+        direction.change_direction(env.program_info(), env.console, context, 6.056);
+        pbf_move_left_joystick(context, 128, 0, 670, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.22);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.69);
+        pbf_move_left_joystick(context, 0, 0, 500, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 5.85);
+        pbf_move_left_joystick(context, 128, 0, 60, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 4);
+
+        // get sunflora 5
+        // align to corner 5.1
+        direction.change_direction(env.program_info(), env.console, context, 1.59);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.79);
+        pbf_move_left_joystick(context, 0, 0, 500, 100);        
+        direction.change_direction(env.program_info(), env.console, context, 6.055);        
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.06);   
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.38);   
+        pbf_move_left_joystick(context, 0, 0, 700, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 2.53);   
+        pbf_move_left_joystick(context, 128, 0, 160, 100);
+        direction.change_direction(env.program_info(), env.console, context, 0.78);   
+        pbf_move_left_joystick(context, 128, 0, 90, 100);  // todo: adjust this. 80 -> 90?
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 5);
+
+        // sunflora 6
+        // align to corner 6.1
+        direction.change_direction(env.program_info(), env.console, context, 4.2);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.38);   
+        pbf_move_left_joystick(context, 0, 0, 700, 100);        
+
+        direction.change_direction(env.program_info(), env.console, context, 0.96);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.17);        
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.86);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 6);
+
+        // sunflora 7
+        // align to corner 7.1
+        direction.change_direction(env.program_info(), env.console, context, 2.06);
+        pbf_move_left_joystick(context, 128, 0, 80, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.7); 
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.22);               
+        pbf_move_left_joystick(context, 255, 0, 700, 100);        
+
+        // align to corner 7.2. bush
+        direction.change_direction(env.program_info(), env.console, context, 2.34);
+        pbf_move_left_joystick(context, 128, 0, 700, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.42);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        // align to corner 7.3. lamp-post
+        direction.change_direction(env.program_info(), env.console, context, 0);
+        pbf_move_left_joystick(context, 128, 0, 120, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.75);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 2.95);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+        direction.change_direction(env.program_info(), env.console, context, 2.22);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 1.01);
+        pbf_move_left_joystick(context, 128, 0, 300, 100);
+
+        // align to corner 7.4. wall corner
+        direction.change_direction(env.program_info(), env.console, context, 3.70);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.28);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.54);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+
+        // align to corner 7.5. bush
+        direction.change_direction(env.program_info(), env.console, context, 3.11);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 60, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.28);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.60);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 1.17);
+        pbf_move_left_joystick(context, 128, 0, 130, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 7);            
+
+        // sunflora 8
+        // align to corner 8.1. bush
+        direction.change_direction(env.program_info(), env.console, context, 4.54);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.60);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 1.64);
+        pbf_move_left_joystick(context, 128, 0, 350, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.36);
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        pbf_press_button(context, BUTTON_A, 50, 50);
+        pbf_press_button(context, BUTTON_A, 50, 50); // extra press in case one is dropped
+        pbf_press_button(context, BUTTON_A, 50, 50);
+        pbf_wait(context, 250);
+        mash_button_till_overworld(env.console, context, BUTTON_B);
+        check_num_sunflora_found(env, context, 8);  
+        pbf_wait(context, 3 * TICKS_PER_SECOND);
+
+        // // sunflora 9
+        // // align to corner 9.1. bush
+        pbf_move_left_joystick(context, 128, 255, 200, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.89);
+        pbf_move_left_joystick(context, 128, 0, 350, 100);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 180);
+        get_off_ride(env.program_info(), env.console, context);
+        direction.change_direction(env.program_info(), env.console, context, 3.60);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+
+
+        direction.change_direction(env.program_info(), env.console, context, 1.48);
+        pbf_move_left_joystick(context, 128, 0, 50, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.11);
+        pbf_move_left_joystick(context, 128, 0, 180, 100);
+        direction.change_direction(env.program_info(), env.console, context, 4.75);
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        get_on_ride(env.program_info(), env.console, context);
+        direction.change_direction(env.program_info(), env.console, context, 5.53);
+        pbf_move_left_joystick(context, 128, 0, 600, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 9);
+
+        // sunflora 10
+        // align to corner 10.1. bush
+        pbf_move_left_joystick(context, 0, 128, 200, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 4.02);
+        pbf_move_left_joystick(context, 128, 0, 250, 100);
+        pbf_mash_button(context, BUTTON_A, 500);
+        check_num_sunflora_found(env, context, 10);
+
+        // go back to Sunflora NPC
+        // align to corner 11.1. bush
+        direction.change_direction(env.program_info(), env.console, context, 0.65);
+        pbf_move_left_joystick(context, 128, 0, 200, 100);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 800, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 4.49);
+        pbf_move_left_joystick(context, 128, 0, 100, 100);
+        direction.change_direction(env.program_info(), env.console, context, 5.53);
+
+        NoMinimapWatcher no_minimap(env.console, COLOR_RED, Milliseconds(5000));
+        int ret = run_until(
+            env.console, context,
+            [&](BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 0, 30 * TICKS_PER_SECOND, 100);
+            },
+            {no_minimap}
+        );
+        if (ret < 0){
+            throw OperationFailedException(
+                ErrorReport::SEND_ERROR_REPORT,
+                env.logger(),
+                "Failed to finish reach the Sunflora NPC."
+            );
+        }
+        env.log("No minimap seen. Likely finished the Artazon gym challenge.");        
+
+       
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        reset_game(env.program_info(), env.console, context);
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
+
+// todo: uncomment checkpoint_save
+void checkpoint_45(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            // checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
+        
+        context.wait_for_all_requests();
+
+
+       
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        reset_game(env.program_info(), env.console, context);
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
+
+// todo: uncomment checkpoint_save
+void checkpoint_46(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            // checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
+        
+        context.wait_for_all_requests();
+
+
+       
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        reset_game(env.program_info(), env.console, context);
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
+
+
+// todo: uncomment checkpoint_save
+void checkpoint_47(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            // checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
+
+        context.wait_for_all_requests();
+
+
+       
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        reset_game(env.program_info(), env.console, context);
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
+
+
+// todo: uncomment checkpoint_save
+void checkpoint_48(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            // checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
+
+        context.wait_for_all_requests();
+
+
+       
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        reset_game(env.program_info(), env.console, context);
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
+
+
+// todo: uncomment checkpoint_save
+void checkpoint_49(
+    SingleSwitchProgramEnvironment& env, 
+    BotBaseContext& context, 
+    EventNotificationOption& notif_status_update
+){
+    AutoStoryStats& stats = env.current_stats<AutoStoryStats>();
+    bool first_attempt = true;
+    while (true){
+    try{
+        if (first_attempt){
+            // checkpoint_save(env, context, notif_status_update);
+            first_attempt = false;
+        }else{
+            enter_menu_from_overworld(env.program_info(), env.console, context, -1);
+            // we wait 10 seconds then save, so that the initial conditions are slightly different on each reset.
+            env.log("Wait 10 seconds.");
+            context.wait_for(Milliseconds(10 * 1000));
+            save_game_from_overworld(env.program_info(), env.console, context);
+        }
+
+        context.wait_for_all_requests();
+
+
+       
+        break;
+    }catch (...){
+        context.wait_for_all_requests();
+        env.console.log("Resetting from checkpoint.");
+        reset_game(env.program_info(), env.console, context);
+        stats.m_reset++;
+        env.update_stats();
+    }         
+    }
+
+}
 
 
 

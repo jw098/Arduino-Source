@@ -32,13 +32,33 @@ public:
 };
 
 
-// start: At South Province (Area Three) Pokecenter.
-// end: Defeated Klawf.
-void checkpoint_42(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
-
-// start: Defeated Klawf.
-// end: Defeated Klawf. At Artazon (West) Pokecenter.
+// start: Defeated Klawf. At Artazon (West) Pokecenter.
+// end: 
 void checkpoint_43(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_44(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_45(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update); 
+
+// start: 
+// end: 
+void checkpoint_46(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_47(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_48(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
+
+// start: 
+// end: 
+void checkpoint_49(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 

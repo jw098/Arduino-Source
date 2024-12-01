@@ -32,12 +32,13 @@ public:
 };
 
 
-// start: At Mesagoza (East) Pokecenter.
-// end: At South Province (Area Three) Pokecenter.
+// start: At South Province (Area Three) Pokecenter.
+// end: Defeated Klawf.
 void checkpoint_41(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
-
-
+// start: Defeated Klawf.
+// end: Defeated Klawf. At Artazon (West) Pokecenter.
+void checkpoint_42(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
 
 
