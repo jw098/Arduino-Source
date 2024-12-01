@@ -287,8 +287,6 @@ file(GLOB MAIN_SOURCES
     Source/CommonFramework/ControllerDevices/SerialPortSession.h
     Source/CommonFramework/ControllerDevices/SerialPortWidget.cpp
     Source/CommonFramework/ControllerDevices/SerialPortWidget.h
-    Source/CommonFramework/CrashDump.cpp
-    Source/CommonFramework/CrashDump.h
     Source/CommonFramework/Environment/Environment.cpp
     Source/CommonFramework/Environment/Environment.h
     Source/CommonFramework/Environment/Environment_Linux.h
@@ -305,6 +303,13 @@ file(GLOB MAIN_SOURCES
     Source/CommonFramework/Environment/HardwareValidation_x86.tpp
     Source/CommonFramework/Environment/SystemSleep.cpp
     Source/CommonFramework/Environment/SystemSleep.h
+    Source/CommonFramework/Environment/SystemSleep_Apple.tpp
+    Source/CommonFramework/Environment/SystemSleep_Windows.tpp
+    Source/CommonFramework/ErrorReports/ErrorReports.cpp
+    Source/CommonFramework/ErrorReports/ErrorReports.h
+    Source/CommonFramework/ErrorReports/ProgramDumper.cpp
+    Source/CommonFramework/ErrorReports/ProgramDumper.h
+    Source/CommonFramework/ErrorReports/ProgramDumper_Windows.tpp
     Source/CommonFramework/Exceptions/FatalProgramException.cpp
     Source/CommonFramework/Exceptions/FatalProgramException.h
     Source/CommonFramework/Exceptions/OliveActionFailedException.cpp
@@ -463,6 +468,8 @@ file(GLOB MAIN_SOURCES
     Source/CommonFramework/Options/Environment/ProcessPriorityOption.h
     Source/CommonFramework/Options/Environment/ProcessorLevelOption.cpp
     Source/CommonFramework/Options/Environment/ProcessorLevelOption.h
+    Source/CommonFramework/Options/Environment/SleepSuppressOption.cpp
+    Source/CommonFramework/Options/Environment/SleepSuppressOption.h
     Source/CommonFramework/Options/Environment/ThemeSelectorOption.cpp
     Source/CommonFramework/Options/Environment/ThemeSelectorOption.h
     Source/CommonFramework/Options/LabelCellOption.cpp
@@ -2092,17 +2099,18 @@ target_link_libraries(SerialPrograms PRIVATE Threads::Threads)
 #add defines
 target_compile_definitions(SerialPrograms PRIVATE NOMINMAX)
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../Internal/SerialPrograms/TelemetryURLs.h")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../Internal/SerialPrograms/Internal0.cpp")
     target_compile_definitions(SerialPrograms PRIVATE PA_OFFICIAL)
-    target_sources(SerialPrograms PRIVATE ../../Internal/SerialPrograms/TelemetryURLs.h)
     target_sources(SerialPrograms PRIVATE ../../Internal/SerialPrograms/NintendoSwitch_TestPrograms.cpp)
     target_sources(SerialPrograms PRIVATE ../../Internal/SerialPrograms/NintendoSwitch_TestPrograms.h)
+    target_sources(SerialPrograms PRIVATE ../../Internal/SerialPrograms/Internal0.cpp)
+    target_sources(SerialPrograms PRIVATE ../../Internal/SerialPrograms/Internal1.cpp)
 endif()
 
 #extract opencv_world460d.dll from archive on Windows Debug builds
 if (MSVC)
     if (CMAKE_BUILD_TYPE MATCHES "Debug")
-        file(ARCHIVE_EXTRACT INPUT ../3rdPartyBinaries/opencv_world460d.zip DESTINATION ../3rdPartyBinaries/)
+        file(ARCHIVE_EXTRACT INPUT ../../../3rdPartyBinaries/opencv_world460d.zip DESTINATION ../../../3rdPartyBinaries/)
     endif()
 endif()
 

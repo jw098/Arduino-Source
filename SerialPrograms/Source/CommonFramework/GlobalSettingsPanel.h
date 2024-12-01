@@ -16,6 +16,8 @@
 #include "CommonFramework/Options/Environment/ProcessPriorityOption.h"
 #include "CommonFramework/Options/Environment/ProcessorLevelOption.h"
 #include "CommonFramework/Options/Environment/ThemeSelectorOption.h"
+#include "CommonFramework/Options/Environment/SleepSuppressOption.h"
+#include "CommonFramework/ErrorReports/ErrorReports.h"
 #include "CommonFramework/VideoPipeline/Backends/CameraImplementations.h"
 #include "CommonFramework/Panels/SettingsPanel.h"
 #include "CommonFramework/Panels/PanelTools.h"
@@ -41,7 +43,6 @@ public:
     SimpleIntegerOption<uint32_t> WIDTH;
     SimpleIntegerOption<uint32_t> HEIGHT;
 };
-
 
 
 struct DebugSettings{
@@ -81,14 +82,15 @@ private:
     virtual void value_changed(void* object) override;
 
 public:
-    BooleanCheckBoxOption SEND_ERROR_REPORTS;
+    BooleanCheckBoxOption CHECK_FOR_UPDATES;
 
     StringOption STATS_FILE;
     BooleanCheckBoxOption ALL_STATS;
-    BooleanCheckBoxOption CHECK_FOR_UPDATES;
 
     ResolutionOption WINDOW_SIZE;
     ThemeSelectorOption THEME;
+
+    SleepSuppressOptions SLEEP_SUPPRESS;
 
     SectionDividerOption m_discord_settings;
     Integration::DiscordSettingsOption DISCORD;
@@ -118,6 +120,9 @@ public:
     SimpleIntegerOption<uint8_t> AUTO_RESET_VIDEO_SECONDS;
 
     BooleanCheckBoxOption ENABLE_LIFETIME_SANITIZER;
+
+//    BooleanCheckBoxOption SEND_ERROR_REPORTS0;
+    ErrorReportOption ERROR_REPORTS;
 
     ProcessorLevelOption PROCESSOR_LEVEL0;
 

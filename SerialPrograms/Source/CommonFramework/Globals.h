@@ -17,6 +17,7 @@ extern const bool IS_BETA_VERSION;
 extern const int PROGRAM_VERSION_MAJOR;
 extern const int PROGRAM_VERSION_MINOR;
 extern const int PROGRAM_VERSION_PATCH;
+extern const std::string PROGRAM_VERSION_BASE;
 extern const std::string PROGRAM_VERSION;
 
 extern const std::string PROGRAM_NAME;
@@ -27,6 +28,8 @@ extern const std::string ONLINE_DOC_URL;
 extern const std::string PROJECT_GITHUB;
 extern const std::string PROJECT_GITHUB_URL;
 extern const std::string PROJECT_SOURCE_URL;
+
+extern const std::string COMPILER_VERSION;
 
 const auto SERIAL_REFRESH_RATE = std::chrono::milliseconds(1000);
 

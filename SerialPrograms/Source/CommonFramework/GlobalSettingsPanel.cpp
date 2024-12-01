@@ -100,11 +100,10 @@ GlobalSettings::~GlobalSettings(){
 }
 GlobalSettings::GlobalSettings()
     : BatchOption(LockMode::LOCK_WHILE_RUNNING)
-    , SEND_ERROR_REPORTS(
-        "<b>Send Error Reports:</b><br>"
-        "Send error reports to the " + PROGRAM_NAME + " server to help them resolve issues and improve the program.",
-        LockMode::LOCK_WHILE_RUNNING,
-        IS_BETA_VERSION
+    , CHECK_FOR_UPDATES(
+        "<b>Check for Updates:</b><br>Automatically check for updates.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        true
     )
     , STATS_FILE(
         false,
@@ -115,11 +114,6 @@ GlobalSettings::GlobalSettings()
     )
     , ALL_STATS(
         "<b>All Stats:</b><br>Include all-time stats for notifications.",
-        LockMode::UNLOCK_WHILE_RUNNING,
-        true
-    )
-    , CHECK_FOR_UPDATES(
-        "<b>Check for Updates:</b><br>Automatically check for updates.",
         LockMode::UNLOCK_WHILE_RUNNING,
         true
     )
@@ -224,6 +218,14 @@ GlobalSettings::GlobalSettings()
         LockMode::UNLOCK_WHILE_RUNNING,
         IS_BETA_VERSION
     )
+#if 0
+    , SEND_ERROR_REPORTS0(
+        "<b>Send Error Reports:</b><br>"
+        "Send error reports to the " + PROGRAM_NAME + " server to help them resolve issues and improve the program.",
+        LockMode::LOCK_WHILE_RUNNING,
+        true
+    )
+#endif
     , DEVELOPER_TOKEN(
         true,
         "<b>Developer Token:</b><br>Restart application to take full effect after changing this.",
@@ -231,12 +233,14 @@ GlobalSettings::GlobalSettings()
         "", ""
     )
 {
-    PA_ADD_OPTION(SEND_ERROR_REPORTS);
+    PA_ADD_OPTION(CHECK_FOR_UPDATES);
     PA_ADD_OPTION(STATS_FILE);
     PA_ADD_OPTION(ALL_STATS);
-    PA_ADD_OPTION(CHECK_FOR_UPDATES);
     PA_ADD_OPTION(WINDOW_SIZE);
     PA_ADD_OPTION(THEME);
+#ifdef PA_ENABLE_SLEEP_SUPPRESS
+    PA_ADD_OPTION(SLEEP_SUPPRESS);
+#endif
 
     PA_ADD_STATIC(m_discord_settings);
     PA_ADD_OPTION(DISCORD);
@@ -268,6 +272,11 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(ENABLE_LIFETIME_SANITIZER);
 
     PA_ADD_OPTION(PROCESSOR_LEVEL0);
+
+#ifdef PA_OFFICIAL
+//    PA_ADD_OPTION(SEND_ERROR_REPORTS0);
+    PA_ADD_OPTION(ERROR_REPORTS);
+#endif
 
     PA_ADD_OPTION(DEVELOPER_TOKEN);
 

@@ -129,6 +129,10 @@
 #include "PokemonSV/Programs/AutoStory/PokemonSV_AutoStoryTools.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_StationaryOverworldWatcher.h"
 #include "PokemonSV/Inference/Overworld/PokemonSV_OliveDetector.h"
+//#include "CommonFramework/Environment/SystemSleep.h"
+#include "CommonFramework/ErrorReports/ErrorReports.h"
+
+
 
 #include <QPixmap>
 #include <QVideoFrame>
@@ -274,7 +278,44 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
 
 //    PokemonLA::ButtonDetector detector(logger, PokemonLA::ButtonType::ButtonA,);
 
+//    while (true){
+//        SystemSleepController::instance().push_screen_on();
+//        scope.wait_for(std::chrono::seconds(10));
+//    }
+
+//    SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
+
+
+
+#if 0
+    VideoSnapshot image = feed.snapshot();
+    report_error(
+        &env.logger(),
+        env.program_info(),
+        "testtest",
+        {{"title", "message"}},
+        image,
+        {"test.txt"}
+    );
+#endif
+
 #if 1
+    VideoSnapshot image = feed.snapshot();
+//    ImageRGB32 image("screenshot-20241124-135028529403.png");
+
+    DateReader date_reader;
+    date_reader.make_overlays(overlays);
+    auto date = date_reader.read_date(logger, image);
+//    auto date = date_reader.read_date(logger, std::make_shared<ImageRGB32>(std::move(image)));
+    cout << "year =  " << (int)date.second.year << endl;
+    cout << "month = " << (int)date.second.month << endl;
+    cout << "day =   " << (int)date.second.day << endl;
+    cout << "hour =  " << (int)date.second.hour << endl;
+    cout << "min =   " << (int)date.second.minute << endl;
+    cout << "secs =  " << (int)date.second.second << endl;
+#endif
+
+#if 0
 
     VideoSnapshot image = feed.snapshot();
     ImageFloatBox box = {0.27, 0.02, 0.04, 0.055};
