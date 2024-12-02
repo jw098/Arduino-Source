@@ -38,7 +38,7 @@ using namespace Pokemon;
 
 
 std::string AutoStory_Segment_20::name() const{
-    return "16.1: Artazon Gym (Grass): Gym challenge";
+    return "16: Artazon Gym (Grass)";
 }
 
 std::string AutoStory_Segment_20::start_text() const{
@@ -46,7 +46,7 @@ std::string AutoStory_Segment_20::start_text() const{
 }
 
 std::string AutoStory_Segment_20::end_text() const{
-    return "End: ";
+    return "End: Defeated Artazon Gym (Grass). Inside gym building.";
 }
 
 void AutoStory_Segment_20::run_segment(SingleSwitchProgramEnvironment& env, BotBaseContext& context, AutoStoryOptions options) const{
@@ -56,6 +56,8 @@ void AutoStory_Segment_20::run_segment(SingleSwitchProgramEnvironment& env, BotB
     env.console.overlay().add_log("Start Segment ", COLOR_ORANGE);
 
     checkpoint_43(env, context, options.notif_status_update);
+    checkpoint_44(env, context, options.notif_status_update);
+    checkpoint_45(env, context, options.notif_status_update);
 
     context.wait_for_all_requests();
     env.console.log("End Segment ", COLOR_GREEN);
@@ -489,7 +491,6 @@ void checkpoint_44(
 
 }
 
-// todo: uncomment checkpoint_save
 void checkpoint_45(
     SingleSwitchProgramEnvironment& env, 
     BotBaseContext& context, 
@@ -500,7 +501,7 @@ void checkpoint_45(
     while (true){
     try{
         if (first_attempt){
-            // checkpoint_save(env, context, notif_status_update);
+            checkpoint_save(env, context, notif_status_update);
             first_attempt = false;
         }else{
             enter_menu_from_overworld(env.program_info(), env.console, context, -1);
@@ -512,7 +513,34 @@ void checkpoint_45(
         
         context.wait_for_all_requests();
 
+        get_on_ride(env.program_info(), env.console, context);
 
+        DirectionDetector direction;
+        direction.change_direction(env.program_info(), env.console, context, 1.52);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);    
+        direction.change_direction(env.program_info(), env.console, context, 2.62);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+
+        direction.change_direction(env.program_info(), env.console, context, 2.18);
+        pbf_controller_state(context, BUTTON_B, DPAD_NONE, 128, 0, 128, 128, 150);
+        pbf_move_left_joystick(context, 128, 0, 400, 100);
+        direction.change_direction(env.program_info(), env.console, context, 3.16);
+        pbf_move_left_joystick(context, 0, 0, 100, 50);
+
+        handle_when_stationary_in_overworld(env.program_info(), env.console, context, 
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){           
+                walk_forward_until_dialog(env.program_info(), env.console, context, NavigationMovementMode::DIRECTIONAL_SPAM_A, 20);
+            }, 
+            [&](const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context){   
+                pbf_move_left_joystick(context, 0, 0, 100, 50);
+                pbf_move_left_joystick(context, 255, 0, 100, 50);
+            },
+            5, 2, 2
+        ); 
+
+        clear_dialog(env.console, context, ClearDialogMode::STOP_BATTLE, 60, {CallbackEnum::PROMPT_DIALOG, CallbackEnum::BATTLE, CallbackEnum::DIALOG_ARROW});
+        run_battle_press_A(env.console, context, BattleStopCondition::STOP_DIALOG, {CallbackEnum::GRADIENT_ARROW});
+        mash_button_till_overworld(env.console, context, BUTTON_A);
        
         break;
     }catch (...){

@@ -40,11 +40,11 @@ void checkpoint_43(SingleSwitchProgramEnvironment& env, BotBaseContext& context,
 // end: Finished Sunflora gym challenge.
 void checkpoint_44(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
-// start: 
-// end: 
+// start: Finished Sunflora gym challenge.
+// end: Defeated Artazon Gym (Grass). Inside gym building.
 void checkpoint_45(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update); 
 
-// start: 
+// start: Defeated Artazon Gym (Grass). Inside gym building.
 // end: 
 void checkpoint_46(SingleSwitchProgramEnvironment& env, BotBaseContext& context, EventNotificationOption& notif_status_update);  
 
