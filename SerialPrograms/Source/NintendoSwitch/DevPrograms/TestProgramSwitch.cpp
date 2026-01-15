@@ -169,7 +169,7 @@
 #include "Common/CRC32/pabb_CRC32.h"
 #include "Common/PABotBase2/PABotBase2_PacketParser.h"
 #include "Common/Cpp/StreamConnections/ReliableStreamConnection.h"
-#include "ML/Inference/ML_PaddleOCRPipeline.h"
+#include "CommonTools/OCR/OCR_RawPaddleOCR.h"
 
 
 
@@ -490,17 +490,6 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
     VideoOverlaySet overlays(overlay);
 
 
-    MockConnection unreliable_connection;
-    {
-        ReliableStreamConnection connection(logger, unreliable_connection, 1s);
-
-        cout << connection.send_request(0x20) << endl;
-//        cout << connection.send_request(0x21) << endl;
-
-
-        scope.wait_for(10s);
-        cout << "================ End Test ================" << endl;
-    }
 
 #if 0
     DataPacket packet;
@@ -705,11 +694,12 @@ void TestProgram::program(MultiSwitchProgramEnvironment& env, CancellableScope& 
     // ImageRGB32 image1(IMAGE_PATH);
     auto image1 = feed.snapshot();
     ImageViewRGB32 cropped = extract_box_reference(image1, ImageFloatBox{BOX.x(), BOX.y(), BOX.width(), BOX.height()});
-    ML::PaddleOCRPipeline paddle_ocr(LANGUAGE);
 
     // auto snapshot = feed.snapshot();
-    std::string text = paddle_ocr.recognize(cropped);
+    std::string text = OCR::paddle_ocr_read(LANGUAGE, image1);
     cout << text << endl;
+
+    
 
 #endif
 
