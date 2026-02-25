@@ -346,6 +346,7 @@ void stress_test(Logger& logger, CancellableScope& scope){
 
 
 
+
 void TestProgramComputer::program(ProgramEnvironment& env, CancellableScope& scope){
     using namespace Kernels;
     using namespace NintendoSwitch;
