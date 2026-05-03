@@ -9,12 +9,14 @@
 
 #include "Common/Cpp/Containers/Pimpl.h"
 #include "Common/Cpp/Concurrency/AsyncTask.h"
+// #include "Common/Cpp/Concurrency/ConditionVariable.h"
 #include "Common/Cpp/CancellableScope.h"
 #include "Common/Cpp/LifetimeSanitizer.h"
 // #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "Common/Cpp/Options/StaticTableOption.h"
 #include "ResourceDownloadHelpers.h"
 #include "ResourceDownloadOptions.h"
+#include "ResourceDownloadTable.h"
 #include <mutex>
 
 namespace PokemonAutomation{
@@ -22,21 +24,13 @@ namespace PokemonAutomation{
 
 // must be initialized as shared_ptr, so that `shared_from_this` can work
 // so you're forced to use the factory method `create`
-class DownloadThread : public CancellableScope, public std::enable_shared_from_this<DownloadThread> {
-
-private:
-    struct ConstructorKey { 
-        explicit ConstructorKey() = default; 
-    };
+class DownloadThread : public CancellableScope{
 
 public:
     ~DownloadThread();
-    DownloadThread(ConstructorKey, ResourceDownloadRow& row);
+    DownloadThread(ResourceDownloadRow& row, Mutex& lock, ConditionVariable& cv);
 
 public:
-    // factor method to initialize DownloadThread, since it must be a shared_ptr
-    static std::shared_ptr<DownloadThread> create(ResourceDownloadRow& row);
-    
     void start_download_thread();
 
     // throws OperationCancelledException if the user cancels the action
@@ -47,6 +41,10 @@ public:
 private:
     ResourceDownloadRow& m_row;
     AsyncTask m_worker;
+
+    std::atomic<bool> m_stopping{false};
+    Mutex& m_download_lock;
+    ConditionVariable& m_download_cv;
 };
 
 enum class ButtonState{
@@ -59,6 +57,10 @@ class ResourceDownloadRow : public StaticTableRow{
 public:
     ~ResourceDownloadRow();
     ResourceDownloadRow(
+        ResourceDownloadTable& parent_table,
+        Mutex& lock,
+        ConditionVariable& cv,
+        uint16_t index,
         DownloadedResourceMetadata local_metadata,
         bool is_downloaded,
         std::optional<uint16_t> version_num,
@@ -113,13 +115,20 @@ public:
     void update_button_state(ButtonState state);
 
     inline ButtonState get_button_state(){ return m_button_state; }
-    
+
+    bool is_download_ready_to_start();
+    void remove_self_from_download_queue();    
 
 private:
     std::once_flag init_flag;
     std::unique_ptr<RemoteMetadata> m_remote_metadata;
 
+    ResourceDownloadTable& m_parent_table;
+    Mutex& m_download_lock;
+    ConditionVariable& m_download_cv;
+
     ButtonState m_button_state;
+    uint16_t m_index;
     DownloadedResourceMetadata m_local_metadata;
     struct Data;
     Pimpl<Data> m_data;

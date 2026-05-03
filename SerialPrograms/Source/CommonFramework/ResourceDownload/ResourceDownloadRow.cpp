@@ -43,26 +43,31 @@ DownloadThread::~DownloadThread(){
     this->cancel();
     m_worker.wait_and_ignore_exceptions();
 }
-DownloadThread::DownloadThread(ConstructorKey, ResourceDownloadRow& row) 
+DownloadThread::DownloadThread(ResourceDownloadRow& row, Mutex& lock, ConditionVariable& cv)
     : CancellableScope()
     , m_row(row)
+    , m_download_lock(lock)
+    , m_download_cv(cv)
 {}
 
-std::shared_ptr<DownloadThread> DownloadThread::create(ResourceDownloadRow& row){
-    return std::make_shared<DownloadThread>(ConstructorKey{}, row);
-}
-
 void DownloadThread::start_download_thread(){
-    auto self = shared_from_this();
     m_worker = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
-    [this, self]{
+    [this]{
+
+        {
+            std::unique_lock<Mutex> lock(m_download_lock);
+            m_download_cv.wait(lock, [this] { return m_row.is_download_ready_to_start() || m_stopping; });
+
+            if (m_stopping) return;
+        }
         
         // runs when lambda is finished
-        // updates button state, and releases DownloadRow's ownership over this thread
-        // the thread cleans itself up when `self` goes out of scope at the end of this lambda
+        // updates button state, removes self from download queue
         struct ScopeGuard {
             DownloadThread* thread_ptr;
             ~ScopeGuard() {
+                thread_ptr->m_row.remove_self_from_download_queue();
+                thread_ptr->m_stopping = true;
                 thread_ptr->m_row.on_download_finished();
             }
         } guard{this};
@@ -273,13 +278,21 @@ ResourceDownloadRow::~ResourceDownloadRow(){
     m_worker2.wait_and_ignore_exceptions();
 }
 ResourceDownloadRow::ResourceDownloadRow(
+    ResourceDownloadTable& parent_table,
+    Mutex& lock,
+    ConditionVariable& cv,
+    uint16_t index,
     DownloadedResourceMetadata local_metadata,
     bool is_downloaded,
     std::optional<uint16_t> version_num,
     ResourceVersionStatus version_status
 )
     : StaticTableRow(local_metadata.resource_name)
+    , m_parent_table(parent_table)
+    , m_download_lock(lock)
+    , m_download_cv(cv)
     , m_button_state(ButtonState::READY)
+    , m_index(index)
     , m_local_metadata(local_metadata)
     , m_data(CONSTRUCT_TOKEN, local_metadata.resource_name, local_metadata.size_decompressed_bytes, is_downloaded, version_num, version_status)
     , m_download_button(*this)
@@ -430,7 +443,8 @@ std::string ResourceDownloadRow::predownload_warning_summary(RemoteMetadata& rem
 void ResourceDownloadRow::start_download(){
 
     if (m_download_thread == nullptr){
-        m_download_thread = DownloadThread::create(*this);  //std::make_shared<DownloadThread>(*this);
+        m_parent_table.add_row_to_download_list(m_index);
+        m_download_thread = std::make_shared<DownloadThread>(*this, m_download_lock, m_download_cv);  //DownloadThread::create(*this); 
         m_download_thread->start_download_thread();
     }
 }
@@ -565,5 +579,13 @@ void ResourceDownloadRow::report_button_state_updated(){
     m_data->listeners.run_method(&DownloadListener::on_button_state_updated);
 }
 
+
+bool ResourceDownloadRow::is_download_ready_to_start(){
+    return m_parent_table.is_download_ready_to_start(m_index);
+}
+
+void ResourceDownloadRow::remove_self_from_download_queue(){
+    m_parent_table.remove_row_from_download_list(m_index);
+}
 
 }

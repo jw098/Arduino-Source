@@ -27,7 +27,7 @@ using std::endl;
 namespace PokemonAutomation{
 
 
-std::vector<std::unique_ptr<ResourceDownloadRow>> get_resource_download_rows(){
+std::vector<std::unique_ptr<ResourceDownloadRow>> ResourceDownloadTable::get_resource_download_rows(){
     std::vector<std::unique_ptr<ResourceDownloadRow>> resource_rows;
     std::vector<DownloadedResourceMetadata> resource_list; 
     try{
@@ -36,7 +36,8 @@ std::vector<std::unique_ptr<ResourceDownloadRow>> get_resource_download_rows(){
         return {};
     }
     
-    for (const DownloadedResourceMetadata& resource : resource_list){
+    for (uint16_t index = 0; index < resource_list.size(); index++){
+        DownloadedResourceMetadata resource = resource_list[index];
         std::string resource_name = resource.resource_name;
         uint16_t expected_version_num = resource.version_num.value();
         std::optional<uint16_t> current_version_num;  // default nullopt
@@ -49,7 +50,7 @@ std::vector<std::unique_ptr<ResourceDownloadRow>> get_resource_download_rows(){
 
         ResourceVersionStatus version_status = get_version_status(expected_version_num, current_version_num);
 
-        resource_rows.emplace_back(std::make_unique<ResourceDownloadRow>(resource, is_downloaded, current_version_num, version_status));
+        resource_rows.emplace_back(std::make_unique<ResourceDownloadRow>(*this, m_lock, m_cv, index, resource, is_downloaded, current_version_num, version_status));
     }
 
     return resource_rows;
@@ -59,7 +60,7 @@ std::vector<std::unique_ptr<ResourceDownloadRow>> get_resource_download_rows(){
 
 
 ResourceDownloadTable::~ResourceDownloadTable(){
-    m_worker.wait_and_ignore_exceptions();
+    // m_worker.wait_and_ignore_exceptions();
 }
 
 ResourceDownloadTable::ResourceDownloadTable()
@@ -94,12 +95,44 @@ std::vector<std::string> ResourceDownloadTable::make_header() const{
 //     return ConfigOptionImpl<StaticTableOption>::make_UiComponent(params);
 // }
 
+void ResourceDownloadTable::add_row_to_download_list(uint16_t row_index){
+    cout << "add_row_to_download_list" << endl;
+    std::lock_guard<Mutex> lg(m_lock);
+    m_download_queue.push_back(row_index);
+
+}
+
+void ResourceDownloadTable::remove_row_from_download_list(uint16_t row_index){
+    std::lock_guard<Mutex> lg(m_lock);
+
+    // this requires C++20
+    std::erase(m_download_queue, row_index);
+    m_cv.notify_all();
+}
+
 void ResourceDownloadTable::add_resource_download_rows(){
     for (std::unique_ptr<ResourceDownloadRow>& row_ptr : m_resource_rows){
         add_row(row_ptr.get());
     }
 }
 
+bool ResourceDownloadTable::is_download_ready_to_start(uint16_t row_index){
+    
+    uint16_t MAX_CONCURRENT_DOWNLOADS = 10;
+
+    // std::lock_guard<Mutex> lg(m_lock);
+    auto it = std::find(m_download_queue.begin(), m_download_queue.end(), row_index);
+    if (it == m_download_queue.end()){
+        throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "is_download_ready_to_start: row_index not found within m_download_queue.");
+    }
+
+    uint16_t download_position = std::distance(m_download_queue.begin(), it);
+
+    // cout << "download_position: " << std::to_string(download_position) << endl;
+
+    return download_position < MAX_CONCURRENT_DOWNLOADS;
+    
+}
 
 
 

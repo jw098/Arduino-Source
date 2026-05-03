@@ -7,7 +7,10 @@
 #ifndef PokemonAutomation_ResourceDownloadTable_H
 #define PokemonAutomation_ResourceDownloadTable_H
 
+#include <deque>
 #include "Common/Cpp/Concurrency/AsyncTask.h"
+#include "Common/Cpp/Concurrency/Mutex.h"
+#include "Common/Cpp/Concurrency/ConditionVariable.h"
 #include "Common/Cpp/Options/StaticTableOption.h"
 // #include "ResourceDownloadRow.h"
 
@@ -23,15 +26,27 @@ public:
     virtual std::vector<std::string> make_header() const override;
     // virtual UiWrapper make_UiComponent(void* params) override;
 
+    void add_row_to_download_list(uint16_t row_index);
+    void remove_row_from_download_list(uint16_t row_index);
+
+    // return true if given row_index's position in m_download_queue is less than MAX_CONCURRENT_DOWNLOADS
+    // ASSUMES: the calling thread holds the m_lock. therefore, this function doesn't lock the mutex when accessing m_download_queue.
+    bool is_download_ready_to_start(uint16_t row_index);
+
 private:  
+    std::vector<std::unique_ptr<ResourceDownloadRow>> get_resource_download_rows();
     void add_resource_download_rows();
 
 
 private:
     // we need to keep a handle on each Row, so that we can edit m_is_downloaded_label later on.
     std::vector<std::unique_ptr<ResourceDownloadRow>> m_resource_rows;
+    std::deque<uint16_t> m_download_queue;
 
-    AsyncTask m_worker;
+    Mutex m_lock;
+    ConditionVariable m_cv;
+
+    // AsyncTask m_worker;
 
 };
 
