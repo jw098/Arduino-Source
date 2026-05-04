@@ -89,6 +89,9 @@ DownloadButtonWidget::DownloadButtonWidget(QWidget& parent, ResourceDownloadButt
     connect(
         m_button, &QPushButton::clicked,
         this, [this](){
+            if (!m_row.is_given_action_state(ActionState::READY)){
+                return;
+            }
             m_row.update_action_state(ActionState::PRE_DOWNLOAD);
             m_row.ensure_remote_metadata_loaded();
         }
@@ -223,6 +226,9 @@ DeleteButtonWidget::DeleteButtonWidget(QWidget& parent, ResourceDeleteButton& va
     connect(
         m_button, &QPushButton::clicked,
         this, [&](bool){
+            if (!m_row.is_given_action_state(ActionState::READY)){
+                return;
+            }
             m_row.update_action_state(ActionState::PRE_DELETE);
             show_delete_confirm_box();
             cout << "Clicked Delete Button" << endl;
@@ -327,6 +333,9 @@ CancelButtonWidget::CancelButtonWidget(QWidget& parent, ResourceCancelButton& va
     connect(
         m_button, &QPushButton::clicked,
         this, [&](bool){
+            if (!m_row.is_given_action_state(ActionState::DOWNLOADING)){
+                return;
+            }
             m_row.update_action_state(ActionState::CANCEL);
             cout << "Clicked Cancel Button" << endl;
         }
