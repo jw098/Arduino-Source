@@ -440,9 +440,11 @@ std::string ResourceDownloadRow::predownload_warning_summary(RemoteMetadata& rem
 
 
 void ResourceDownloadRow::start_download(){
-    if (!is_given_action_state(ActionState::DOWNLOAD)){
+    if (!is_given_action_state(ActionState::PRE_DOWNLOAD)){
         return;
     }
+
+    update_action_state(ActionState::DOWNLOADING);
 
     if (m_download_thread){ // if thread already exists
         m_download_thread->cancel(); // stop the thread
@@ -459,9 +461,11 @@ void ResourceDownloadRow::start_delete(){
     m_worker2 = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
     [this]{ 
         try {
-            if (!is_given_action_state(ActionState::DELETE)){
+            if (!is_given_action_state(ActionState::PRE_DELETE)){
                 return;
             }
+            update_action_state(ActionState::DELETING);
+
             std::string resource_name = m_local_metadata.resource_name;
 
             std::string resource_directory = DOWNLOADED_RESOURCE_PATH() + resource_name;
@@ -493,8 +497,8 @@ void ResourceDownloadRow::update_action_state(ActionState state){
     std::unique_lock<Mutex> lock(m_action_state_lock);
     {
         switch (state){
-        case ActionState::DOWNLOAD:
-            // action state can only enter the DOWNLOAD state 
+        case ActionState::PRE_DOWNLOAD:
+            // action state can only enter the PRE_DOWNLOAD state 
             // if going from the READY state
             if (m_action_state == ActionState::READY){
                 m_download_button.set_enabled(false);
@@ -503,8 +507,16 @@ void ResourceDownloadRow::update_action_state(ActionState state){
                 m_action_state = state;
             }
             break;
-        case ActionState::DELETE:
-            // action state can only enter the DELETE state 
+        case ActionState::DOWNLOADING:
+            if (m_action_state == ActionState::PRE_DOWNLOAD){
+                m_download_button.set_enabled(false);
+                m_delete_button.set_enabled(false);
+                m_cancel_button.set_enabled(true);
+                m_action_state = state;
+            }
+            break;
+        case ActionState::PRE_DELETE:
+            // action state can only enter the PRE_DELETE state 
             // if going from the READY state
             if (m_action_state == ActionState::READY){
                 m_download_button.set_enabled(false);
@@ -513,10 +525,20 @@ void ResourceDownloadRow::update_action_state(ActionState state){
                 m_action_state = state;
             }
             break;
+        case ActionState::DELETING:
+            // action state can only enter the DELETING state 
+            // if going from the PRE_DELETE state
+            if (m_action_state == ActionState::PRE_DELETE){
+                m_download_button.set_enabled(false);
+                m_delete_button.set_enabled(false);
+                m_cancel_button.set_enabled(false);
+                m_action_state = state;
+            }
+            break;
         case ActionState::CANCEL:
-            // action state can only enter the CANCEL state 
-            // if going from the DOWNLOAD state
-            if (m_action_state == ActionState::DOWNLOAD){ 
+            // action state can only enter the PRE_CANCEL state 
+            // if going from the DOWNLOADING state
+            if (m_action_state == ActionState::DOWNLOADING){ 
                 m_download_button.set_enabled(false);
                 m_delete_button.set_enabled(false);
                 m_cancel_button.set_enabled(false);

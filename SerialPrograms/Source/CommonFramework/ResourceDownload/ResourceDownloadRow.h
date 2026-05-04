@@ -48,8 +48,10 @@ private:
 };
 
 enum class ActionState{
-    DOWNLOAD,
-    DELETE,
+    PRE_DOWNLOAD,
+    DOWNLOADING,
+    PRE_DELETE,
+    DELETING,
     CANCEL,
     READY,
 };

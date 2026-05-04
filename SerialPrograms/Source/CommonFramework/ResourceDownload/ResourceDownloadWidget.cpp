@@ -89,7 +89,7 @@ DownloadButtonWidget::DownloadButtonWidget(QWidget& parent, ResourceDownloadButt
     connect(
         m_button, &QPushButton::clicked,
         this, [this](){
-            m_row.update_action_state(ActionState::DOWNLOAD);
+            m_row.update_action_state(ActionState::PRE_DOWNLOAD);
             m_row.ensure_remote_metadata_loaded();
         }
     );
@@ -105,7 +105,7 @@ void DownloadButtonWidget::update_UI_state(){
         m_button->setText("Download");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_action_state() == ActionState::DOWNLOAD){
+        if (m_row.get_action_state() == ActionState::PRE_DOWNLOAD){
             m_button->setText("Downloading...");
         }
     }
@@ -223,7 +223,7 @@ DeleteButtonWidget::DeleteButtonWidget(QWidget& parent, ResourceDeleteButton& va
     connect(
         m_button, &QPushButton::clicked,
         this, [&](bool){
-            m_row.update_action_state(ActionState::DELETE);
+            m_row.update_action_state(ActionState::PRE_DELETE);
             show_delete_confirm_box();
             cout << "Clicked Delete Button" << endl;
         }
@@ -239,7 +239,7 @@ void DeleteButtonWidget::update_UI_state(){
         m_button->setText("Delete");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_action_state() == ActionState::DELETE){
+        if (m_row.get_action_state() == ActionState::PRE_DELETE){
             m_button->setText("Deleting...");
         }
     }
@@ -398,13 +398,15 @@ ProgressBarWidget::ProgressBarWidget(QWidget& parent, ResourceProgressBar& value
 void ProgressBarWidget::update_UI_state(){
     ActionState state = m_row.get_action_state();
     switch (state){
-    case ActionState::DOWNLOAD:
+    case ActionState::PRE_DOWNLOAD:
+    case ActionState::DOWNLOADING:
         m_status_label->setText("Downloading");
         if (m_progress_bar->isHidden()) {
             m_progress_bar->show();
         }
         break;
-    case ActionState::DELETE:
+    case ActionState::PRE_DELETE:
+    case ActionState::DELETING:
         // m_status_label->setText("");
         // m_progress_bar->hide();
         m_progress_bar->setValue(0);
