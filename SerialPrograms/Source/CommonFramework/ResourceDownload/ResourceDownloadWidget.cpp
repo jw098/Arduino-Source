@@ -84,12 +84,12 @@ DownloadButtonWidget::DownloadButtonWidget(QWidget& parent, ResourceDownloadButt
     // update the UI based on m_enabled, when the button is constructed
     update_UI_state();
 
-    // when the button is clicked, runs row.update_button_state(), which updates the button state
+    // when the button is clicked, runs row.update_action_state(), which updates the button state
     // also, fetch json
     connect(
         m_button, &QPushButton::clicked,
         this, [this](){
-            m_row.update_button_state(ButtonState::DOWNLOAD);
+            m_row.update_action_state(ActionState::DOWNLOAD);
             m_row.ensure_remote_metadata_loaded();
         }
     );
@@ -105,7 +105,7 @@ void DownloadButtonWidget::update_UI_state(){
         m_button->setText("Download");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_button_state() == ButtonState::DOWNLOAD){
+        if (m_row.get_action_state() == ActionState::DOWNLOAD){
             m_button->setText("Downloading...");
         }
     }
@@ -145,7 +145,7 @@ void DownloadButtonWidget::show_download_confirm_box(
         return;
     }
     if (clicked == cancel){
-        m_row.update_button_state(ButtonState::READY);
+        m_row.update_action_state(ActionState::READY);
         return;
     }
 }
@@ -175,7 +175,7 @@ void DownloadButtonWidget::on_download_failed(){
     }, Qt::QueuedConnection);
 }
 
-void DownloadButtonWidget::on_button_state_updated(){
+void DownloadButtonWidget::on_action_state_updated(){
     QMetaObject::invokeMethod(this, [this]{
         update_UI_state();
     }, Qt::QueuedConnection);
@@ -218,12 +218,12 @@ DeleteButtonWidget::DeleteButtonWidget(QWidget& parent, ResourceDeleteButton& va
     // update the UI based on m_enabled, when the button is constructed
     update_UI_state();
 
-    // when the button is clicked, runs row.update_button_state(), which updates the button state
+    // when the button is clicked, runs row.update_action_state(), which updates the button state
     // also, show the delete confirm box
     connect(
         m_button, &QPushButton::clicked,
         this, [&](bool){
-            m_row.update_button_state(ButtonState::DELETE);
+            m_row.update_action_state(ActionState::DELETE);
             show_delete_confirm_box();
             cout << "Clicked Delete Button" << endl;
         }
@@ -239,7 +239,7 @@ void DeleteButtonWidget::update_UI_state(){
         m_button->setText("Delete");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_button_state() == ButtonState::DELETE){
+        if (m_row.get_action_state() == ActionState::DELETE){
             m_button->setText("Deleting...");
         }
     }
@@ -274,13 +274,13 @@ void DeleteButtonWidget::show_delete_confirm_box(){
         return;
     }
     if (clicked == cancel){
-        m_row.update_button_state(ButtonState::READY);
+        m_row.update_action_state(ActionState::READY);
         return;
     }
 }
 
-// when button_state_updated, update the UI state to match
-void DeleteButtonWidget::on_button_state_updated(){
+// when action_state_updated, update the UI state to match
+void DeleteButtonWidget::on_action_state_updated(){
     QMetaObject::invokeMethod(this, [this]{
         update_UI_state();
     }, Qt::QueuedConnection);
@@ -322,12 +322,12 @@ CancelButtonWidget::CancelButtonWidget(QWidget& parent, ResourceCancelButton& va
     // update the UI based on m_enabled, when the button is constructed
     update_UI_state();
 
-    // when the button is clicked, runs row.update_button_state(), which updates the button state
+    // when the button is clicked, runs row.update_action_state(), which updates the button state
     // also, set cancel state to true
     connect(
         m_button, &QPushButton::clicked,
         this, [&](bool){
-            m_row.update_button_state(ButtonState::CANCEL);
+            m_row.update_action_state(ActionState::CANCEL);
             cout << "Clicked Cancel Button" << endl;
         }
     );
@@ -342,14 +342,14 @@ void CancelButtonWidget::update_UI_state(){
         m_button->setText("Cancel");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_button_state() == ButtonState::CANCEL){
+        if (m_row.get_action_state() == ActionState::CANCEL){
             m_button->setText("Cancelling...");
         }
     }
 }
 
-// when button_state_updated, update the UI state to match
-void CancelButtonWidget::on_button_state_updated(){
+// when action_state_updated, update the UI state to match
+void CancelButtonWidget::on_action_state_updated(){
     QMetaObject::invokeMethod(this, [this]{
         update_UI_state();
     }, Qt::QueuedConnection);
@@ -396,25 +396,25 @@ ProgressBarWidget::ProgressBarWidget(QWidget& parent, ResourceProgressBar& value
 
 
 void ProgressBarWidget::update_UI_state(){
-    ButtonState state = m_row.get_button_state();
+    ActionState state = m_row.get_action_state();
     switch (state){
-    case ButtonState::DOWNLOAD:
+    case ActionState::DOWNLOAD:
         m_status_label->setText("Downloading");
         if (m_progress_bar->isHidden()) {
             m_progress_bar->show();
         }
         break;
-    case ButtonState::DELETE:
+    case ActionState::DELETE:
         // m_status_label->setText("");
         // m_progress_bar->hide();
         m_progress_bar->setValue(0);
         break;
-    case ButtonState::CANCEL:
+    case ActionState::CANCEL:
         // m_status_label->setText("");
         // m_progress_bar->hide();
         m_progress_bar->setValue(0);
         break;
-    case ButtonState::READY:
+    case ActionState::READY:
         m_status_label->setText("");
         m_progress_bar->hide();
         m_progress_bar->setValue(0);
@@ -458,8 +458,8 @@ void ProgressBarWidget::on_hash_progress(uint64_t bytes_done, uint64_t total_byt
         update_progress_bar(bytes_done, total_bytes, "Verifying");
     }, Qt::QueuedConnection);
 }
-// when button_state_updated, update the UI state to match
-void ProgressBarWidget::on_button_state_updated(){
+// when action_state_updated, update the UI state to match
+void ProgressBarWidget::on_action_state_updated(){
     QMetaObject::invokeMethod(this, [this]{
         update_UI_state();
     }, Qt::QueuedConnection);

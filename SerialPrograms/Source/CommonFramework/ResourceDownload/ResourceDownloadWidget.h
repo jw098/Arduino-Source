@@ -30,7 +30,7 @@ public:
     virtual void on_metadata_fetch_finished(const std::string& popup_message) override;
     virtual void on_exception_caught(const std::string& function_name) override;
     virtual void on_download_failed() override;
-    virtual void on_button_state_updated() override;
+    virtual void on_action_state_updated() override;
 
 private:
     void update_UI_state();
@@ -57,7 +57,7 @@ public:
     ~DeleteButtonWidget();
     DeleteButtonWidget(QWidget& parent, ResourceDeleteButton& value);
 
-    virtual void on_button_state_updated() override;
+    virtual void on_action_state_updated() override;
 
 private:
     void update_UI_state();
@@ -77,7 +77,7 @@ public:
     ~CancelButtonWidget();
     CancelButtonWidget(QWidget& parent, ResourceCancelButton& value);
 
-    virtual void on_button_state_updated() override;
+    virtual void on_action_state_updated() override;
 
 private:
     void update_UI_state();
@@ -100,7 +100,7 @@ public:
     virtual void on_unzip_progress(uint64_t bytes_done, uint64_t total_bytes) override;
     virtual void on_hash_progress(uint64_t bytes_done, uint64_t total_bytes) override;
 
-    virtual void on_button_state_updated() override;
+    virtual void on_action_state_updated() override;
 
 private:    
     void update_UI_state();

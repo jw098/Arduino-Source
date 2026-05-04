@@ -17,7 +17,7 @@
 #include "ResourceDownloadHelpers.h"
 #include "ResourceDownloadOptions.h"
 #include "ResourceDownloadTable.h"
-#include <mutex>
+// #include <mutex>
 
 namespace PokemonAutomation{
 
@@ -47,7 +47,7 @@ private:
     ConditionVariable& m_download_cv;
 };
 
-enum class ButtonState{
+enum class ActionState{
     DOWNLOAD,
     DELETE,
     CANCEL,
@@ -77,7 +77,7 @@ public:
         virtual void on_exception_caught(const std::string& function_name){}
         virtual void on_download_failed(){}
 
-        virtual void on_button_state_updated(){}
+        virtual void on_action_state_updated(){}
     };
 
     void add_listener(DownloadListener& listener);
@@ -91,7 +91,7 @@ public:
     void report_exception_caught(const std::string& function_name);
     void report_download_failed();
 
-    void report_button_state_updated();
+    void report_action_state_updated();
 
 
 public:
@@ -112,12 +112,14 @@ public:
 
     void start_delete();
 
-    void update_button_state(ButtonState state);
+    void update_action_state(ActionState state);
 
-    inline ButtonState get_button_state(){ return m_button_state; }
+    ActionState get_action_state();
 
     bool is_download_ready_to_start();
     void remove_self_from_download_queue();    
+
+    bool is_given_action_state(ActionState state);
 
 private:
     std::once_flag init_flag;
@@ -127,7 +129,7 @@ private:
     Mutex& m_download_lock;
     ConditionVariable& m_download_cv;
 
-    ButtonState m_button_state;
+    ActionState m_action_state;
     uint16_t m_index;
     DownloadedResourceMetadata m_local_metadata;
     struct Data;
@@ -141,9 +143,9 @@ private:
     AsyncTask m_worker1;
     AsyncTask m_worker2;
 
-    std::shared_ptr<DownloadThread> m_download_thread;
+    std::unique_ptr<DownloadThread> m_download_thread;
 
-    std::mutex m_thread_mutex;
+    Mutex m_action_state_lock;
 
     LifetimeSanitizer m_lifetime_sanitizer;
 

@@ -62,11 +62,10 @@ void DownloadThread::start_download_thread(){
         }
         
         // runs when lambda is finished
-        // updates button state, removes self from download queue
+        // updates action state, removes self from download queue
         struct ScopeGuard {
             DownloadThread* thread_ptr;
             ~ScopeGuard() {
-                thread_ptr->m_row.remove_self_from_download_queue();
                 thread_ptr->m_stopping = true;
                 thread_ptr->m_row.on_download_finished();
             }
@@ -291,7 +290,7 @@ ResourceDownloadRow::ResourceDownloadRow(
     , m_parent_table(parent_table)
     , m_download_lock(lock)
     , m_download_cv(cv)
-    , m_button_state(ButtonState::READY)
+    , m_action_state(ActionState::READY)
     , m_index(index)
     , m_local_metadata(local_metadata)
     , m_data(CONSTRUCT_TOKEN, local_metadata.resource_name, local_metadata.size_decompressed_bytes, is_downloaded, version_num, version_status)
@@ -374,18 +373,18 @@ void ResourceDownloadRow::ensure_remote_metadata_loaded(){
 
             predownload_warning = predownload_warning_summary(remote_handle);
 
-            // update_button_state(ButtonState::READY);
+            // update_action_state(ActionState::READY);
             report_metadata_fetch_finished(predownload_warning);
 
         }catch(OperationFailedException&){
             // cout << "failed" << endl;
             // update_table_label(false);
-            update_button_state(ButtonState::READY);
+            update_action_state(ActionState::READY);
             report_download_failed();
             return;
         }catch(...){
             // update_table_label(false);
-            update_button_state(ButtonState::READY);
+            update_action_state(ActionState::READY);
             // cout << "Exception thrown in thread" << endl;
             report_exception_caught("ResourceDownloadButton::ensure_remote_metadata_loaded");
             return;
@@ -441,12 +440,18 @@ std::string ResourceDownloadRow::predownload_warning_summary(RemoteMetadata& rem
 
 
 void ResourceDownloadRow::start_download(){
-
-    if (m_download_thread == nullptr){
-        m_parent_table.add_row_to_download_list(m_index);
-        m_download_thread = std::make_shared<DownloadThread>(*this, m_download_lock, m_download_cv);  //DownloadThread::create(*this); 
-        m_download_thread->start_download_thread();
+    if (!is_given_action_state(ActionState::DOWNLOAD)){
+        return;
     }
+
+    if (m_download_thread){ // if thread already exists
+        m_download_thread->cancel(); // stop the thread
+        // The assignment below will then delete the old object safely
+    }
+
+    m_parent_table.add_row_to_download_list(m_index);
+    m_download_thread = std::make_unique<DownloadThread>(*this, m_download_lock, m_download_cv);
+    m_download_thread->start_download_thread();
 }
 
 
@@ -454,6 +459,9 @@ void ResourceDownloadRow::start_delete(){
     m_worker2 = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
     [this]{ 
         try {
+            if (!is_given_action_state(ActionState::DELETE)){
+                return;
+            }
             std::string resource_name = m_local_metadata.resource_name;
 
             std::string resource_directory = DOWNLOADED_RESOURCE_PATH() + resource_name;
@@ -464,9 +472,9 @@ void ResourceDownloadRow::start_delete(){
             set_is_downloaded(false);
             set_version_status(ResourceVersionStatus::NOT_APPLICABLE);
             
-            update_button_state(ButtonState::READY);
+            update_action_state(ActionState::READY);
         }catch(...){
-            update_button_state(ButtonState::READY);
+            update_action_state(ActionState::READY);
             report_exception_caught("ResourceDownloadButton::start_delete");
             return;
         }
@@ -477,66 +485,64 @@ void ResourceDownloadRow::start_delete(){
 
 void ResourceDownloadRow::on_download_finished(){
     
-    update_button_state(ButtonState::READY);
-    {
-        std::lock_guard<std::mutex> lock(m_thread_mutex);
-        if (m_download_thread){
-            // cout << "reset m_download_thread" << endl;
-
-            // This releases the Row's ownership. 
-            // The object will actually delete itself once the lambda 
-            // in start_download_thread() finishes (releasing 'self').
-            m_download_thread.reset();
-        }
-    }
+    update_action_state(ActionState::READY);
+    remove_self_from_download_queue();
 }
 
-void ResourceDownloadRow::update_button_state(ButtonState state){
-    switch (state){
-    case ButtonState::DOWNLOAD:
-        // button state can only enter the DOWNLOAD state 
-        // if going from the READY state
-        if (m_button_state == ButtonState::READY){
-            m_download_button.set_enabled(false);
-            m_delete_button.set_enabled(false);
-            m_cancel_button.set_enabled(true);
-            m_button_state = state;
-        }
-        break;
-    case ButtonState::DELETE:
-        // button state can only enter the DELETE state 
-        // if going from the READY state
-        if (m_button_state == ButtonState::READY){
-            m_download_button.set_enabled(false);
-            m_delete_button.set_enabled(false);
-            m_cancel_button.set_enabled(false);
-            m_button_state = state;
-        }
-        break;
-    case ButtonState::CANCEL:
-        // button state can only enter the CANCEL state 
-        // if going from the DOWNLOAD state
-        if (m_button_state == ButtonState::DOWNLOAD){ 
-            m_download_button.set_enabled(false);
-            m_delete_button.set_enabled(false);
-            m_cancel_button.set_enabled(false);
-            if (m_download_thread){
-                m_download_thread->cancel();  // cancel the download thread
+void ResourceDownloadRow::update_action_state(ActionState state){
+    std::unique_lock<Mutex> lock(m_action_state_lock);
+    {
+        switch (state){
+        case ActionState::DOWNLOAD:
+            // action state can only enter the DOWNLOAD state 
+            // if going from the READY state
+            if (m_action_state == ActionState::READY){
+                m_download_button.set_enabled(false);
+                m_delete_button.set_enabled(false);
+                m_cancel_button.set_enabled(true);
+                m_action_state = state;
             }
-            m_button_state = state;
+            break;
+        case ActionState::DELETE:
+            // action state can only enter the DELETE state 
+            // if going from the READY state
+            if (m_action_state == ActionState::READY){
+                m_download_button.set_enabled(false);
+                m_delete_button.set_enabled(false);
+                m_cancel_button.set_enabled(false);
+                m_action_state = state;
+            }
+            break;
+        case ActionState::CANCEL:
+            // action state can only enter the CANCEL state 
+            // if going from the DOWNLOAD state
+            if (m_action_state == ActionState::DOWNLOAD){ 
+                m_download_button.set_enabled(false);
+                m_delete_button.set_enabled(false);
+                m_cancel_button.set_enabled(false);
+                if (m_download_thread){
+                    m_download_thread->cancel();  // cancel the download thread
+                }
+                m_action_state = state;
+            }
+            break;
+        case ActionState::READY:
+            m_download_button.set_enabled(true);
+            m_delete_button.set_enabled(true);
+            m_cancel_button.set_enabled(true);
+            m_action_state = state;
+            break;
+        default:
+            throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "update_action_state: Unknown enum.");  
         }
-        break;
-    case ButtonState::READY:
-        m_download_button.set_enabled(true);
-        m_delete_button.set_enabled(true);
-        m_cancel_button.set_enabled(true);
-        m_button_state = state;
-        break;
-    default:
-        throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "update_button_state: Unknown enum.");  
     }
 
-    report_button_state_updated();
+    report_action_state_updated();
+}
+
+ActionState ResourceDownloadRow::get_action_state(){
+    std::unique_lock<Mutex> lock(m_action_state_lock);
+    return m_action_state;
 }
 
 void ResourceDownloadRow::add_listener(DownloadListener& listener){
@@ -574,9 +580,9 @@ void ResourceDownloadRow::report_download_failed(){
     m_data->listeners.run_method(&DownloadListener::on_download_failed);
 }
 
-void ResourceDownloadRow::report_button_state_updated(){
+void ResourceDownloadRow::report_action_state_updated(){
     auto scope = m_lifetime_sanitizer.check_scope();
-    m_data->listeners.run_method(&DownloadListener::on_button_state_updated);
+    m_data->listeners.run_method(&DownloadListener::on_action_state_updated);
 }
 
 
@@ -586,6 +592,11 @@ bool ResourceDownloadRow::is_download_ready_to_start(){
 
 void ResourceDownloadRow::remove_self_from_download_queue(){
     m_parent_table.remove_row_from_download_list(m_index);
+}
+
+bool ResourceDownloadRow::is_given_action_state(ActionState state){
+    std::unique_lock<Mutex> lock(m_action_state_lock);
+    return m_action_state == state;
 }
 
 }
