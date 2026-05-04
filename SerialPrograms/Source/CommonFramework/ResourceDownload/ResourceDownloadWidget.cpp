@@ -108,7 +108,9 @@ void DownloadButtonWidget::update_UI_state(){
         m_button->setText("Download");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_action_state() == ActionState::PRE_DOWNLOAD){
+        if (m_row.is_given_action_state(ActionState::PRE_DOWNLOAD) 
+            || m_row.is_given_action_state(ActionState::DOWNLOADING))
+        {
             m_button->setText("Downloading...");
         }
     }
@@ -245,7 +247,9 @@ void DeleteButtonWidget::update_UI_state(){
         m_button->setText("Delete");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_action_state() == ActionState::PRE_DELETE){
+        if (m_row.is_given_action_state(ActionState::PRE_DELETE) 
+            || m_row.is_given_action_state(ActionState::DELETING)
+        ){
             m_button->setText("Deleting...");
         }
     }
@@ -351,7 +355,7 @@ void CancelButtonWidget::update_UI_state(){
         m_button->setText("Cancel");
     }else{
         m_button->setEnabled(false);
-        if (m_row.get_action_state() == ActionState::CANCEL){
+        if (m_row.is_given_action_state(ActionState::CANCEL)){
             m_button->setText("Cancelling...");
         }
     }
