@@ -44,8 +44,7 @@ DownloadThread::~DownloadThread(){
     m_worker.wait_and_ignore_exceptions();
 }
 DownloadThread::DownloadThread(ResourceDownloadRow& row, Mutex& lock, ConditionVariable& cv)
-    : CancellableScope()
-    , m_row(row)
+    : m_row(row)
     , m_download_lock(lock)
     , m_download_cv(cv)
 {}
@@ -273,8 +272,8 @@ void ResourceDownloadRow::update_table_label(bool success){
 
 ResourceDownloadRow::~ResourceDownloadRow(){
     // cout << "~ResourceDownloadRow" << endl;
-    m_worker1.wait_and_ignore_exceptions();
-    m_worker2.wait_and_ignore_exceptions();
+    m_pre_download_thread.wait_and_ignore_exceptions();
+    m_delete_thread.wait_and_ignore_exceptions();
 }
 ResourceDownloadRow::ResourceDownloadRow(
     ResourceDownloadTable& parent_table,
@@ -362,7 +361,7 @@ RemoteMetadata& ResourceDownloadRow::fetch_remote_metadata(){
 
 
 void ResourceDownloadRow::ensure_remote_metadata_loaded(){
-    m_worker1 = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
+    m_pre_download_thread = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
     [this]{ 
         try {
             if (!is_given_action_state(ActionState::PRE_DOWNLOAD)){
@@ -462,7 +461,7 @@ void ResourceDownloadRow::start_download(){
 
 
 void ResourceDownloadRow::start_delete(){
-    m_worker2 = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
+    m_delete_thread = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
     [this]{ 
         try {
             if (!is_given_action_state(ActionState::PRE_DELETE)){
@@ -498,7 +497,7 @@ void ResourceDownloadRow::on_download_finished(){
 }
 
 void ResourceDownloadRow::update_action_state(ActionState state){
-    std::unique_lock<Mutex> lock(m_action_state_lock);
+    std::lock_guard<Mutex> lock(m_action_state_lock);
     {
         switch (state){
         case ActionState::PRE_DOWNLOAD:
@@ -567,7 +566,7 @@ void ResourceDownloadRow::update_action_state(ActionState state){
 }
 
 ActionState ResourceDownloadRow::get_action_state(){
-    std::unique_lock<Mutex> lock(m_action_state_lock);
+    std::lock_guard<Mutex> lock(m_action_state_lock);
     return m_action_state;
 }
 
@@ -621,7 +620,7 @@ void ResourceDownloadRow::remove_self_from_download_queue(){
 }
 
 bool ResourceDownloadRow::is_given_action_state(ActionState state){
-    std::unique_lock<Mutex> lock(m_action_state_lock);
+    std::lock_guard<Mutex> lock(m_action_state_lock);
     return m_action_state == state;
 }
 

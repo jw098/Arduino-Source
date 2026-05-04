@@ -142,8 +142,8 @@ private:
     ResourceCancelButton m_cancel_button;
     ResourceProgressBar m_progress_bar;
 
-    AsyncTask m_worker1;
-    AsyncTask m_worker2;
+    AsyncTask m_pre_download_thread;
+    AsyncTask m_delete_thread;
 
     std::unique_ptr<DownloadThread> m_download_thread;
 
