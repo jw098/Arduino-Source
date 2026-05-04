@@ -52,7 +52,8 @@ enum class ActionState{
     DOWNLOADING,
     PRE_DELETE,
     DELETING,
-    CANCEL,
+    PRE_CANCEL,
+    CANCELLING,
     READY,
 };
 class ResourceDownloadRow : public StaticTableRow{
@@ -114,6 +115,10 @@ public:
 
     void start_delete();
 
+    // READY: can come from any state
+    // PRE_DOWNLOAD, PRE_DELETE, PRE_CANCEL: can only come from READY
+    // DELETING, CANCELLING: can only come from their respective PRE state
+    // DOWNLOADING: can come from either PRE_DOWNLOAD or PRE_CANCEL
     void update_action_state(ActionState state);
 
     ActionState get_action_state();
@@ -122,6 +127,8 @@ public:
     void remove_self_from_download_queue();    
 
     bool is_given_action_state(ActionState state);
+
+    void cancel_download_thread();
 
 private:
     std::once_flag init_flag;

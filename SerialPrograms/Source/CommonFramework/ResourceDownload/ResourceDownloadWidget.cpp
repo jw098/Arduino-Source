@@ -233,7 +233,7 @@ DeleteButtonWidget::DeleteButtonWidget(QWidget& parent, ResourceDeleteButton& va
             }
             m_row.update_action_state(ActionState::PRE_DELETE);
             show_delete_confirm_box();
-            cout << "Clicked Delete Button" << endl;
+            // cout << "Clicked Delete Button" << endl;
         }
     );
 
@@ -340,7 +340,8 @@ CancelButtonWidget::CancelButtonWidget(QWidget& parent, ResourceCancelButton& va
             if (!m_row.is_given_action_state(ActionState::DOWNLOADING)){
                 return;
             }
-            m_row.update_action_state(ActionState::CANCEL);
+            m_row.update_action_state(ActionState::PRE_CANCEL);
+            show_cancel_confirm_box();
             cout << "Clicked Cancel Button" << endl;
         }
     );
@@ -349,13 +350,62 @@ CancelButtonWidget::CancelButtonWidget(QWidget& parent, ResourceCancelButton& va
 
 }
 
+void CancelButtonWidget::show_cancel_confirm_box(){
+    QMessageBox box;
+    QPushButton* yes = box.addButton(QMessageBox::Yes);
+    QPushButton* cancel = box.addButton("Cancel", QMessageBox::NoRole);
+    box.setEscapeButton(cancel);
+//    cout << "ok = " << ok << endl;
+//    cout << "skip = " << skip << endl;
+
+    box.setTextFormat(Qt::RichText);
+    std::string title = "Cancel Download";
+    std::string message_body = "Are you sure you want to cancel this download?";
+
+    box.setWindowTitle(QString::fromStdString(title));
+    box.setText(QString::fromStdString(message_body));
+
+//    box.open();
+
+    box.exec();
+
+    QAbstractButton* clicked = box.clickedButton();
+//    cout << "clicked = " << clicked << endl;
+    if (clicked == yes){
+        cout << "Clicked Yes to Cancel" << endl;
+
+        if (!m_row.is_given_action_state(ActionState::PRE_CANCEL)){ 
+            // if the download finishes and goes back to READY state before the user clicks Yes to cancel
+            // then nothing happens
+            return;
+        }
+
+        m_row.update_action_state(ActionState::CANCELLING);
+
+        m_row.cancel_download_thread();
+
+        return;
+    }
+    if (clicked == cancel){
+        if (!m_row.is_given_action_state(ActionState::PRE_CANCEL)){
+            return;
+        }
+
+        m_row.update_action_state(ActionState::DOWNLOADING);
+        return;
+    }
+}
+
+
 void CancelButtonWidget::update_UI_state(){
     if (m_value.get_enabled()){
         m_button->setEnabled(true);
         m_button->setText("Cancel");
     }else{
         m_button->setEnabled(false);
-        if (m_row.is_given_action_state(ActionState::CANCEL)){
+        if (m_row.is_given_action_state(ActionState::PRE_CANCEL) 
+            || m_row.is_given_action_state(ActionState::CANCELLING)
+    ){
             m_button->setText("Cancelling...");
         }
     }
@@ -424,7 +474,8 @@ void ProgressBarWidget::update_UI_state(){
         // m_progress_bar->hide();
         m_progress_bar->setValue(0);
         break;
-    case ActionState::CANCEL:
+    case ActionState::PRE_CANCEL:
+    case ActionState::CANCELLING:
         // m_status_label->setText("");
         // m_progress_bar->hide();
         m_progress_bar->setValue(0);

@@ -81,6 +81,7 @@ public:
 
 private:
     void update_UI_state();
+    void show_cancel_confirm_box();
 
 private:
     ResourceCancelButton& m_value;

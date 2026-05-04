@@ -449,10 +449,7 @@ void ResourceDownloadRow::start_download(){
 
     update_action_state(ActionState::DOWNLOADING);
 
-    if (m_download_thread){ // if thread already exists
-        m_download_thread->cancel(); // stop the thread
-        // The assignment below will then delete the old object safely
-    }
+    cancel_download_thread(); // cancels old download thread
 
     m_parent_table.add_row_to_download_list(m_index);
     m_download_thread = std::make_unique<DownloadThread>(*this, m_download_lock, m_download_cv);
@@ -508,14 +505,16 @@ void ResourceDownloadRow::update_action_state(ActionState state){
                 m_delete_button.set_enabled(false);
                 m_cancel_button.set_enabled(true);
                 m_action_state = state;
+                cout << "ActionState::PRE_DOWNLOAD" << endl;
             }
             break;
         case ActionState::DOWNLOADING:
-            if (m_action_state == ActionState::PRE_DOWNLOAD){
+            if (m_action_state == ActionState::PRE_DOWNLOAD || m_action_state == ActionState::PRE_CANCEL){
                 m_download_button.set_enabled(false);
                 m_delete_button.set_enabled(false);
                 m_cancel_button.set_enabled(true);
                 m_action_state = state;
+                cout << "ActionState::DOWNLOADING" << endl;
             }
             break;
         case ActionState::PRE_DELETE:
@@ -526,6 +525,7 @@ void ResourceDownloadRow::update_action_state(ActionState state){
                 m_delete_button.set_enabled(false);
                 m_cancel_button.set_enabled(false);
                 m_action_state = state;
+                cout << "ActionState::PRE_DELETE" << endl;
             }
             break;
         case ActionState::DELETING:
@@ -536,19 +536,29 @@ void ResourceDownloadRow::update_action_state(ActionState state){
                 m_delete_button.set_enabled(false);
                 m_cancel_button.set_enabled(false);
                 m_action_state = state;
+                cout << "ActionState::DELETING" << endl;
             }
             break;
-        case ActionState::CANCEL:
+        case ActionState::PRE_CANCEL:
             // action state can only enter the PRE_CANCEL state 
             // if going from the DOWNLOADING state
             if (m_action_state == ActionState::DOWNLOADING){ 
                 m_download_button.set_enabled(false);
                 m_delete_button.set_enabled(false);
                 m_cancel_button.set_enabled(false);
-                if (m_download_thread){
-                    m_download_thread->cancel();  // cancel the download thread
-                }
                 m_action_state = state;
+                cout << "ActionState::PRE_CANCEL" << endl;
+            }
+            break;
+        case ActionState::CANCELLING:
+            // action state can only enter the CANCELLING state 
+            // if going from the PRE_CANCEL state
+            if (m_action_state == ActionState::PRE_CANCEL){ 
+                m_download_button.set_enabled(false);
+                m_delete_button.set_enabled(false);
+                m_cancel_button.set_enabled(false);
+                m_action_state = state;
+                cout << "ActionState::CANCELLING" << endl;
             }
             break;
         case ActionState::READY:
@@ -556,6 +566,7 @@ void ResourceDownloadRow::update_action_state(ActionState state){
             m_delete_button.set_enabled(true);
             m_cancel_button.set_enabled(true);
             m_action_state = state;
+            cout << "ActionState::READY" << endl;
             break;
         default:
             throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "update_action_state: Unknown enum.");  
@@ -622,6 +633,12 @@ void ResourceDownloadRow::remove_self_from_download_queue(){
 bool ResourceDownloadRow::is_given_action_state(ActionState state){
     std::lock_guard<Mutex> lock(m_action_state_lock);
     return m_action_state == state;
+}
+
+void ResourceDownloadRow::cancel_download_thread(){
+    if (m_download_thread){ // if thread already exists
+        m_download_thread->cancel(); // stop the thread
+    }
 }
 
 }
