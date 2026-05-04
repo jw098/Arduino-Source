@@ -365,6 +365,10 @@ void ResourceDownloadRow::ensure_remote_metadata_loaded(){
     m_worker1 = GlobalThreadPools::unlimited_normal().dispatch_now_blocking(
     [this]{ 
         try {
+            if (!is_given_action_state(ActionState::PRE_DOWNLOAD)){
+                return;
+            }
+            
             // std::this_thread::sleep_for(std::chrono::seconds(1));
             std::string predownload_warning;
             RemoteMetadata& remote_handle = fetch_remote_metadata();
