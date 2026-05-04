@@ -22,8 +22,6 @@
 namespace PokemonAutomation{
 
 
-// must be initialized as shared_ptr, so that `shared_from_this` can work
-// so you're forced to use the factory method `create`
 class DownloadThread : public CancellableScope{
 
 public:
