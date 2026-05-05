@@ -131,7 +131,7 @@ ConsoleSettings::ConsoleSettings()
     , DATE_MENU_CLOSE_SWITCH2(
         "<b>Close Date Menu (Switch 2):</b>",
         LockMode::LOCK_WHILE_RUNNING,
-        "280 ms"
+        "288 ms"
     )
     , CODEBOARD_ENTRY_SWITCH1_WIRED(
         "Fast Code Entry Timings (Switch 1 Wired Controller)",
