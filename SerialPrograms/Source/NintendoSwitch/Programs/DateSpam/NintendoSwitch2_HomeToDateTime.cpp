@@ -94,13 +94,13 @@ void home_to_settings_Switch2_procon_blind(
 
     ssf_issue_scroll(context, SSF_SCROLL_RIGHT, unit1);
     ssf_issue_scroll(context, SSF_SCROLL_RIGHT, unit1);
-    ssf_issue_scroll(context, SSF_SCROLL_RIGHT, unit1);
 
     //  Down twice in case we drop one.
     ssf_issue_scroll(context, SSF_SCROLL_DOWN, unit1);
     ssf_issue_scroll(context, SSF_SCROLL_DOWN, unit1);
 
-    ssf_issue_scroll(context, SSF_SCROLL_LEFT, unit1);
+    ssf_issue_scroll(context, SSF_SCROLL_RIGHT, unit1);
+    ssf_issue_scroll(context, SSF_SCROLL_RIGHT, unit1);
 
     //  Two A presses in case we drop the 1st one.
     ssf_press_button(context, BUTTON_A, unit0);
@@ -111,9 +111,6 @@ void home_to_settings_Switch2_procon_blind(
     }
     ssf_issue_scroll(context, SSF_SCROLL_DOWN, 1000ms, 1000ms, unit0);
 
-    //  Scroll left and press A to exit the sleep menu if we happened to
-    //  land there.
-    ssf_issue_scroll(context, SSF_SCROLL_LEFT, unit0);
     ssf_press_button(context, BUTTON_A, unit0);
 
     for (size_t c = 0; c < 2; c++){
@@ -134,13 +131,13 @@ void home_to_settings_Switch2_joycon_blind(
 
     pbf_move_joystick(context, {+1, 0}, 2*unit1, unit1);
     pbf_move_joystick(context, {+1, 0}, 2*unit1, unit1);
-    pbf_move_joystick(context, {+1, 0}, 2*unit1, unit1);
 
     //  Down twice in case we drop one.
     pbf_move_joystick(context, {0, -1}, 2*unit1, unit1);
     pbf_move_joystick(context, {0, -1}, 2*unit1, unit1);
 
-    pbf_move_joystick(context, {-1, 0}, 2*unit1, unit1);
+    pbf_move_joystick(context, {+1, 0}, 2*unit1, unit1);
+    pbf_move_joystick(context, {+1, 0}, 2*unit1, unit1);
 
     //  Press A multiple times to make sure one goes through.
     pbf_press_button(context, BUTTON_A, 2*unit0, unit0);
@@ -149,9 +146,6 @@ void home_to_settings_Switch2_joycon_blind(
 
     pbf_move_joystick(context, {0, -1}, 2000ms, 0ms);
 
-    //  Scroll left and press A to exit the sleep menu if we happened to
-    //  land there.
-    pbf_move_joystick(context, {-1, 0}, 2*unit0, unit0);
     pbf_press_button(context, BUTTON_A, 2*unit0, unit0);
 
     for (size_t c = 0; c < 2; c++){
