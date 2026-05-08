@@ -427,7 +427,13 @@ void start_game_from_home_with_inference(
         int ret = run_until<ProControllerContext>(
             console, context,
             [](ProControllerContext& context){
-                pbf_mash_button(context, BUTTON_B, 10000ms);
+                if (context.controller().performance_class() == ControllerPerformanceClass::SerialPABotBase_Wired){
+                    pbf_mash_button(context, BUTTON_B, 10000ms);
+                }else{
+                    for (int c = 0; c < 10; c++){
+                        pbf_press_button(context, BUTTON_B, 200ms, 800ms);
+                    }
+                }
             },
             { detector }
         );
@@ -537,7 +543,13 @@ void start_game_from_home_with_inference(
         int ret = run_until<JoyconContext>(
             console, context,
             [](JoyconContext& context){
-                pbf_mash_button(context, BUTTON_B, 10000ms);
+                if (context.controller().performance_class() == ControllerPerformanceClass::SerialPABotBase_Wired){
+                    pbf_mash_button(context, BUTTON_B, 10000ms);
+                }else{
+                    for (int c = 0; c < 10; c++){
+                        pbf_press_button(context, BUTTON_B, 200ms, 800ms);
+                    }
+                }
             },
             { detector }
         );
