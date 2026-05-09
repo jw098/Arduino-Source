@@ -59,6 +59,14 @@ void require_player(
             logger.log("Controller player matches required (" + *current_str + "). Continuing...", COLOR_BLUE);
             return;
         }
+
+        if (connect_button == Button::BUTTON_NONE){
+            throw UserSetupError(
+                logger,
+                "Please connect your controller to the console."
+            );
+        }
+
         if (current != ControllerPlayerNumber::DISCONNECTED){
             if (required == ControllerPlayerNumber::PLAYER1){
                 throw UserSetupError(
