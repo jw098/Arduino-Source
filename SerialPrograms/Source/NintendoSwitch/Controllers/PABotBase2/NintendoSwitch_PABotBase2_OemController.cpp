@@ -549,56 +549,55 @@ void PABotBase2_OemController::update_status(Cancellable& cancellable){
     std::string str;
     str += m_color_html + " - ";
 
-    uint32_t status;
-    {
-        MessageHeader request;
-        request.message_bytes = sizeof(request);
-        request.opcode = PABB2_MESSAGE_OPCODE_REQUEST_STATUS;
-        uint8_t id = m_connection.device().send_request_with_response(request);
-        Message_u32 response;
-        m_connection.device().wait_for_request_response<Message_u32, PABB2_MESSAGE_OPCODE_RET_U32>(
-            response, id
+
+    PABotBase2::MessageHeader request;
+    request.message_bytes = sizeof(request);
+    request.opcode = PABB2_MESSAGE_OPCODE_REQUEST_STATUS;
+    uint8_t id = m_connection.device().send_request_with_response(request);
+    std::string response = m_connection.device().wait_for_request_response_min_size<
+        PABotBase2::Message_u32, PABB2_MESSAGE_OPCODE_RET_U32_DATA
+    >(id);
+
+    const PABotBase2::Message_u32* header = (const PABotBase2::Message_u32*)response.data();
+
+    switch (header->data){
+    case PABB_CID_NintendoSwitch_WiredProController:
+    case PABB_CID_NintendoSwitch_WiredLeftJoycon:
+    case PABB_CID_NintendoSwitch_WiredRightJoycon:
+    case PABB_CID_NintendoSwitch_WirelessProController:
+    case PABB_CID_NintendoSwitch_WirelessLeftJoycon:
+    case PABB_CID_NintendoSwitch_WirelessRightJoycon:
+        break;
+    default:
+        m_connection.set_status_line1("");
+        return;
+    }
+
+    constexpr size_t EXPECTED_SIZE = sizeof(PABotBase2::Message_u32) + sizeof(pabb_NintendoSwitch_OemController_Status);
+    if (response.size() != EXPECTED_SIZE){
+        throw SerialProtocolException(
+            m_logger, PA_CURRENT_FUNCTION,
+            "Received Incorrect Response Size: Expected = " + std::to_string(EXPECTED_SIZE) +
+            ", Actual = " + std::to_string(response.size())
         );
-        status = response.data;
     }
 
-    uint8_t mac_address[6] = {};
-    {
-        Message_u32 request;
-        request.message_bytes = sizeof(request);
-        request.opcode = PABB2_MESSAGE_OPCODE_PAIRED_MAC_ADDRESS;
-        request.data = SerialPABotBase::controller_type_to_id(m_controller_type);
-        uint8_t id = m_connection.device().send_request_with_response(request);
-        std::string response = m_connection.device().wait_for_request_response(id);
-        if (response.size() == sizeof(MessageHeader) + sizeof(mac_address)){
-            memcpy(
-                mac_address,
-                response.data() + sizeof(MessageHeader),
-                sizeof(mac_address)
-            );
-        }else{
-            m_logger.log(
-                "Invalid response size to PABB2_MESSAGE_OPCODE_PAIRED_MAC_ADDRESS: body = " + std::to_string(response.size()),
-                COLOR_RED
-            );
-        }
-
-    }
+    const pabb_NintendoSwitch_OemController_Status& status = *(const pabb_NintendoSwitch_OemController_Status*)(header + 1);
 
     str += "Paired: ";
-    if (std::all_of(mac_address, mac_address + 6, [](uint8_t x){ return x == 0; })){
-        str += html_color_text("No", COLOR_RED);
-    }else{
+    if (status.status & 4){
         str += html_color_text(
-            tostr_hex(mac_address[4]) + ":" +
-            tostr_hex(mac_address[5]),
+            tostr_hex(status.paired_mac_address[4]) + ":" +
+            tostr_hex(status.paired_mac_address[5]),
             theme_friendly_darkblue()
         );
+    }else{
+        str += html_color_text("No", COLOR_RED);
     }
 
-    bool status_ready = status & 2;
+    bool status_ready = status.status & 2;
     if (status_ready){
-        uint8_t byte = (uint8_t)(status >> 24);
+        uint8_t byte = status.player_lights;
         byte = (byte | (byte >> 4)) & 0x0f;
         str += " - Connected: ";
         for (int c = 0; c < 4; c++){
