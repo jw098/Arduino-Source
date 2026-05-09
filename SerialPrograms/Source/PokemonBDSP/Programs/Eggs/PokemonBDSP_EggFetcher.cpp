@@ -7,6 +7,7 @@
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/ProgramStats/StatsTracking.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
+#include "NintendoSwitch/Programs/NintendoSwitch_GameEntry.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonBDSP_EggRoutines.h"
 #include "PokemonBDSP_EggFetcher.h"
@@ -76,7 +77,7 @@ void EggFetcher::program(SingleSwitchProgramEnvironment& env, ProControllerConte
     env.update_stats();
 
     //  Connect the controller.
-    pbf_move_right_joystick(context, {-1, -1}, 80ms, 0ms);
+    require_player(env.console, context, BUTTON_L);
 
     //  Move to corner.
     pbf_move_left_joystick(context, {-1, -1}, 1000ms, 0ms);
