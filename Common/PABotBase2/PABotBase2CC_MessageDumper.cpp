@@ -604,6 +604,7 @@ void MessageLogger::log_recv(
                 "[MLC]: Receive: (0x" + tostr_hex(message->opcode) + ") Unknown Opcode",
                 COLOR_RED
             );
+            return;
         }
         if (always_log || iter->second.should_log(message)){
             logger.log(
