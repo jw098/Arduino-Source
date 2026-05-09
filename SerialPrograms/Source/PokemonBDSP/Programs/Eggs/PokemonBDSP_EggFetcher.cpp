@@ -85,7 +85,7 @@ void EggFetcher::program(SingleSwitchProgramEnvironment& env, ProControllerConte
         env.update_stats();
         send_program_status_notification(env, NOTIFICATION_STATUS_UPDATE);
 
-        egg_spin_with_A(context, TRAVEL_TIME_PER_FETCH0);
+        egg_spin(context, true, TRAVEL_TIME_PER_FETCH0);
         SHORTCUT.run(context, 800ms);
 
         //  Move to man.

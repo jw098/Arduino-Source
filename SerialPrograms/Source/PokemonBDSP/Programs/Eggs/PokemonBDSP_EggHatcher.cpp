@@ -126,7 +126,7 @@ void EggHatcher::program(SingleSwitchProgramEnvironment& env, ProControllerConte
         }
 
         pbf_move_left_joystick(context, {-1, -1}, 1000ms, 0ms);
-        egg_spin_with_A(context, TOTAL_DELAY);
+        egg_spin(context, true, TOTAL_DELAY);
 
         stats.m_batches++;
     }
