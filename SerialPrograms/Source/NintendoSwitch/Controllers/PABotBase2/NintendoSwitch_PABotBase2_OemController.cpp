@@ -30,6 +30,7 @@ PABotBase2_OemController::PABotBase2_OemController(
     : PABotBase2_Controller(logger, connection)
     , m_controller_type(controller_type)
     , m_on_rumble(std::move(on_rumble))
+    , m_player_number(ControllerPlayerNumber::UNKNOWN)
 {
     using namespace PABotBase2;
 
@@ -323,6 +324,12 @@ void PABotBase2_OemController::run_preconnect_configure(
 
 
 
+ControllerPlayerNumber PABotBase2_OemController::get_player_number(Cancellable& cancellable){
+    update_status(cancellable);
+    return m_player_number.load(std::memory_order_relaxed);
+}
+
+
 
 Button PABotBase2_OemController::populate_report_buttons(
     pabb_NintendoSwitch_OemController_State0x30_Buttons& buttons,
@@ -603,6 +610,19 @@ void PABotBase2_OemController::update_status(Cancellable& cancellable){
         for (int c = 0; c < 4; c++){
             str += html_color_text("\u258d", byte & (1 << c) ? COLOR_GREEN : COLOR_BLACK);
         }
+        ControllerPlayerNumber player = ControllerPlayerNumber::UNKNOWN;
+        switch (byte){
+        case 0b0000: player = ControllerPlayerNumber::DISCONNECTED; break;
+        case 0b0001: player = ControllerPlayerNumber::PLAYER1; break;
+        case 0b0011: player = ControllerPlayerNumber::PLAYER2; break;
+        case 0b0111: player = ControllerPlayerNumber::PLAYER3; break;
+        case 0b1111: player = ControllerPlayerNumber::PLAYER4; break;
+        case 0b1001: player = ControllerPlayerNumber::PLAYER5; break;
+        case 0b0101: player = ControllerPlayerNumber::PLAYER6; break;
+        case 0b1101: player = ControllerPlayerNumber::PLAYER7; break;
+        case 0b0110: player = ControllerPlayerNumber::PLAYER8; break;
+        }
+        m_player_number.store(player, std::memory_order_relaxed);
     }else{
         str += " - Connected: " + (status_ready
             ? html_color_text("Yes", theme_friendly_darkblue())
