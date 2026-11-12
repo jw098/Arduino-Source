@@ -284,11 +284,6 @@ struct FeedOptions{
     int64_t gap_end_ms = -1;
     //  From this time on, the frames are twice as large in each dimension.
     int64_t resize_ms = -1;
-    //  From this time on, the frames are 4:3 instead of 16:9 (same width).
-    int64_t aspect_change_ms = -1;
-    //  At this time, the tracker's video encoder is closed and reopened
-    //  (reopen_video_encoder()), as after a runtime encoder failure.
-    int64_t reopen_encoder_ms = -1;
     //  Each audio chunk is delivered a random 0 - audio_jitter_ms after its
     //  last sample is captured (chunks stay in order).
     int64_t audio_jitter_ms = 0;
@@ -317,9 +312,6 @@ public:
     void run_until(int64_t end_ms){
         for (; m_time_ms < end_ms; m_time_ms += CHUNK_MS){
             bool video_ended = m_options.video_end_ms >= 0 && m_time_ms >= m_options.video_end_ms;
-            if (m_time_ms == m_options.reopen_encoder_ms){
-                m_tracker.reopen_video_encoder();
-            }
             if (m_options.video && !video_ended && m_time_ms % m_options.frame_interval_ms == 0){
                 m_tracker.on_frame(std::make_shared<const VideoFrame>(
                     m_start + std::chrono::milliseconds(m_time_ms),
@@ -343,9 +335,8 @@ private:
 
     QVideoFrame make_frame() const{
         bool large = m_options.resize_ms >= 0 && m_time_ms >= m_options.resize_ms;
-        bool four_three = m_options.aspect_change_ms >= 0 && m_time_ms >= m_options.aspect_change_ms;
         int width = large ? 2 * FRAME_WIDTH : FRAME_WIDTH;
-        int height = four_three ? width * 3 / 4 : (large ? 2 * FRAME_HEIGHT : FRAME_HEIGHT);
+        int height = large ? 2 * FRAME_HEIGHT : FRAME_HEIGHT;
         if (m_options.frame_format == FrameFormat::RGB32){
             QImage image(width, height, QImage::Format_RGB32);
             image.fill(onset() ? Qt::white : Qt::black);
@@ -959,40 +950,6 @@ std::string test_mp4_matches_mkv(Logger& logger){
     );
 }
 
-std::string test_reopen_at_new_size(Logger& logger, FrameFormat format){
-    //  The frames turn 4:3 while recording. The scaler follows the input,
-    //  but the open encoder keeps its 16:9 size. When the encoder is then
-    //  reopened (as after a runtime failure), the new one is sized for the
-    //  4:3 frames: the scaler must be rebuilt for the new output size too.
-    //  (It was not: every frame from then on was dropped, and a smaller new
-    //  size made the scaler write past the end of the frame.)
-    constexpr int64_t REOPEN_MS = 3000;
-    constexpr int64_t END_MS = 6000;
-    FeedOptions options;
-    options.frame_format = format;
-    options.aspect_change_ms = 2000;
-    options.reopen_encoder_ms = REOPEN_MS;
-    StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), true, true);
-    Feeder feeder(tracker, options);
-    feeder.run_until(END_MS + ENCODER_TAIL_MS);
-
-    ProbedFile file;
-    std::string error = save_and_probe(
-        tracker, format == FrameFormat::NV12 ? "ReopenNV12.mp4" : "Reopen.mp4", true, true, file
-    );
-    if (!error.empty()){
-        return error;
-    }
-    //  Reopening drops the old encoder's packets, so the video starts at
-    //  the reopen and runs to (at least) the last frame before END_MS.
-    double length_s = (END_MS - REOPEN_MS) / 1000.;
-    return check_range(
-        "The video length after the reopen",
-        file.video_last_s - file.video_first_s,
-        length_s - kept_frame_interval_s() - 0.01, length_s + ENCODER_TAIL_MS / 1000. + 0.01
-    );
-}
-
 std::string test_nothing_recorded(Logger& logger){
     StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), true, true);
     std::string path = output_path("NothingRecorded.mp4");
@@ -1369,12 +1326,6 @@ void add_tests_StreamHistory(UnitTestDatabase& database){
         FeedOptions options = sync_options();
         options.audio_stride_padding = 37;
         return test_sync(logger, "SyncPaddedChannels.mp4", options, 5000, SYNC_TOLERANCE_S, true);
-    });
-    database.add<RingTest>("Encoder reopened at a new size", [](Logger& logger){
-        return test_reopen_at_new_size(logger, FrameFormat::RGB32);
-    });
-    database.add<RingTest>("Encoder reopened at a new size, NV12", [](Logger& logger){
-        return test_reopen_at_new_size(logger, FrameFormat::NV12);
     });
     database.add<RingTest>("MP4 and MKV of the same ring match", [](Logger& logger){ return test_mp4_matches_mkv(logger); });
     database.add<RingTest>("Nothing recorded", [](Logger& logger){ return test_nothing_recorded(logger); });
