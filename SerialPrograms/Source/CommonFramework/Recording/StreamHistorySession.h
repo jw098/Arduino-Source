@@ -61,16 +61,6 @@ public:
     virtual void post_resolution_change(Resolution resolution) override;
 
 private:
-    //  Drop the current tracker / build a new one for the current settings.
-    //  Must be called without the lock: building and destroying a tracker
-    //  opens encoders and starts or joins threads, and the audio and video
-    //  threads spin on the lock (push_samples(), on_frame()) meanwhile.
-    //  "generation" is the value the caller bumped m_generation to, under
-    //  the lock, along with the settings change: the new tracker is only
-    //  installed if nothing else (a clear() or another change) came after.
-    void clear();
-    void initialize(uint64_t generation);
-
     //  Attaches this session to the audio session's working stream
     //  (removing any prior attach first): at a fixed 48 kHz stereo for the
     //  ffmpeg ring, at the active preset's physical shape otherwise.
