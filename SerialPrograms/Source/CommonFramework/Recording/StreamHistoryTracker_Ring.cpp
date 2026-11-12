@@ -1774,6 +1774,18 @@ struct StreamHistoryTracker_Ring::Data{
                 break;
             }
         }
+        if (!video_snapshot.empty() && !audio_snapshot.empty()){
+            //  The frames the video encoder still holds are not in the file;
+            //  the audio is not delayed this way. Logged to measure how much
+            //  video a save loses this way.
+            int64_t lag_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                audio_snapshot.back()->timestamp - video_snapshot.back()->timestamp
+            ).count();
+            m_logger.log(
+                "Stream history: the newest video trails the newest audio by "
+                + std::to_string(lag_ms) + " ms."
+            );
+        }
         if (!video_snapshot.empty() && !found_keyframe){
             //  Should not happen (see evict()). The file is still written,
             //  but its video cannot be decoded until the next keyframe,
