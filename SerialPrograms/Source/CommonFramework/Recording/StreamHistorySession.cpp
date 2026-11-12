@@ -135,15 +135,32 @@ bool StreamHistorySession::save(const std::string& filename) const{
 }
 void StreamHistorySession::push_samples(size_t samples, size_t stride, const float* data){
     Data& state = *m_data;
+#if defined(PA_STREAM_HISTORY_FFMPEG)
+    //  The ring tracker consumes the planar working stream directly at its
+    //  fixed 48 kHz / stereo attach shape; nothing to convert here.
+    //  It encodes AAC inline, so it is called with an owning reference
+    //  rather than under the lock, which the video thread (on_frame()) and
+    //  the UI (save(), clear(), initialize()) spin on. This thread is the
+    //  only caller of the tracker's push_samples(): the working-stream
+    //  listener is removed (quiescing this call) before it is re-attached.
+    //  If the tracker is cleared meanwhile, it is destroyed when this
+    //  reference is released.
+    if (samples == 0){
+        return;
+    }
+    std::shared_ptr<StreamHistoryTracker> tracker;
+    {
+        WriteSpinLock lg(state.m_lock);
+        tracker = state.m_current;
+    }
+    if (tracker){
+        tracker->push_samples(samples, stride, data);
+    }
+#else
     WriteSpinLock lg(state.m_lock);
     if (!state.m_current || samples == 0){
         return;
     }
-#if defined(PA_STREAM_HISTORY_FFMPEG)
-    //  The ring tracker consumes the planar working stream directly at its
-    //  fixed 48 kHz / stereo attach shape; nothing to convert here.
-    state.m_current->push_samples(samples, stride, data);
-#else
     //  The working stream is split (planar) channels: channel "c" starts at
     //  "data[c * stride]" and runs for "samples" samples. (stride may be 0
     //  for the single-channel pass-through.) Re-interleave for the tracker.

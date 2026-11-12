@@ -115,14 +115,50 @@ const Bytes SEI{0x06, 0x05, 0xff};
 const Bytes AUD{0x09, 0xf0};
 const Bytes IDR{0x65, 0x88, 0x84};
 
+//  The avcC High profile extension for SPS (ISO/IEC 14496-15): 4:2:0
+//  chroma (0xfc | 1), 8-bit luma and chroma (0xf8 | 0), no SPS extensions.
+const Bytes SPS_AVCC_EXTENSION{0xfd, 0xf8, 0xf8, 0x00};
+
 //  The avcC record for SPS + PPS: version 1, profile/compatibility/level
-//  from SPS bytes 1-3, 4-byte NAL lengths, one SPS, one PPS.
+//  from SPS bytes 1-3, 4-byte NAL lengths, one SPS, one PPS, and the High
+//  profile extension.
 const Bytes SPS_PPS_AVCC = concat({
     {0x01, 0x64, 0x00, 0x1f, 0xff, 0xe1, 0x00, 0x07},
     SPS,
     {0x01, 0x00, 0x06},
     PPS,
+    SPS_AVCC_EXTENSION,
 });
+
+//  Main profile (77) parameter set: the avcC record has no extension.
+const Bytes SPS_MAIN{0x67, 0x4d, 0x40, 0x1f, 0x96, 0x54};
+
+//  High 4:2:2 profile (122), seq_parameter_set_id 0, chroma_format_idc 2,
+//  10-bit luma and chroma (bit_depth_*_minus8 = 2).
+const Bytes SPS_HIGH_422_10BIT{0x67, 0x7a, 0x00, 0x1f, 0xb6, 0xc8};
+
+//  High 4:4:4 Predictive profile (244), chroma_format_idc 3 (followed by
+//  separate_colour_plane_flag 0), 8-bit luma, 9-bit chroma.
+const Bytes SPS_HIGH_444{0x67, 0xf4, 0x00, 0x1f, 0x91, 0x50};
+
+//  SPS with level_idc 0: the 00 00 in front of the exp-Golomb fields takes
+//  an emulation prevention byte (03), which the parser must skip. The avcC
+//  record keeps the SPS as is.
+const Bytes SPS_EMULATION_PREVENTION{0x67, 0x64, 0x00, 0x00, 0x03, 0xac, 0xd9, 0x40};
+
+//  The SPS and PPS that libx264 writes for a 320x240 High profile stream,
+//  and the avcC record that ffmpeg's own MP4 muxer builds from them.
+const Bytes X264_SPS{
+    0x67, 0x64, 0x00, 0x0c, 0xac, 0xd9, 0x41, 0x41, 0xfb, 0x01, 0x10, 0x00, 0x00,
+    0x03, 0x00, 0x10, 0x00, 0x00, 0x03, 0x01, 0x40, 0xf1, 0x42, 0x99, 0x60,
+};
+const Bytes X264_PPS{0x68, 0xeb, 0xe3, 0xcb, 0x22, 0xc0};
+const Bytes X264_FFMPEG_AVCC{
+    0x01, 0x64, 0x00, 0x0c, 0xff, 0xe1, 0x00, 0x19, 0x67, 0x64, 0x00, 0x0c, 0xac,
+    0xd9, 0x41, 0x41, 0xfb, 0x01, 0x10, 0x00, 0x00, 0x03, 0x00, 0x10, 0x00, 0x00,
+    0x03, 0x01, 0x40, 0xf1, 0x42, 0x99, 0x60, 0x01, 0x00, 0x06, 0x68, 0xeb, 0xe3,
+    0xcb, 0x22, 0xc0, 0xfd, 0xf8, 0xf8, 0x00,
+};
 
 
 
@@ -269,6 +305,11 @@ struct FeedOptions{
     double audio_clock_scale = 1.0;
     //  Wait for the encoder after each frame (otherwise frames just queue).
     bool wait_for_encoder = true;
+    //  Each channel's buffer is this many samples longer than the samples
+    //  delivered (stride = samples + padding), as when the pipeline reuses
+    //  a larger buffer. The padding is full scale, so audio read from it
+    //  shows up as a tone.
+    size_t audio_stride_padding = 0;
 };
 
 class Feeder{
@@ -343,15 +384,16 @@ private:
         int64_t first_sample = device_samples(m_time_ms);
         size_t samples = (size_t)(device_samples(m_time_ms + CHUNK_MS) - first_sample);
         int64_t onset_sample = device_samples(m_options.onset_ms);
-        m_audio.resize(2 * samples);
+        size_t stride = samples + m_options.audio_stride_padding;
+        m_audio.assign(2 * stride, 1.0f);
         for (size_t i = 0; i < samples; i++){
             int64_t sample = first_sample + (int64_t)i;
             float value = 0;
             if (m_options.onset_ms >= 0 && sample >= onset_sample){
                 value = (float)(0.5 * std::sin(2 * 3.14159265358979 * 1000 * (double)sample / AUDIO_RATE));
             }
-            m_audio[i] = value;              //  Left.
-            m_audio[samples + i] = value;    //  Right.
+            m_audio[i] = value;             //  Left.
+            m_audio[stride + i] = value;    //  Right.
         }
 
         WallClock delivery = m_start + std::chrono::milliseconds(m_time_ms + CHUNK_MS);
@@ -360,7 +402,7 @@ private:
             delivery += std::chrono::milliseconds(latency(m_random));
         }
         m_last_delivery = std::max(m_last_delivery, delivery);
-        m_tracker.push_samples(samples, samples, m_audio.data(), m_last_delivery);
+        m_tracker.push_samples(samples, stride, m_audio.data(), m_last_delivery);
     }
 
 private:
@@ -386,6 +428,10 @@ struct ProbedFile{
     double video_first_s = 0;
     double video_last_s = 0;
     size_t video_packets = 0;
+    //  The duration of the video stream as the container states it (-1 if
+    //  it states none). For MP4 this ends with the last sample's duration,
+    //  which the file only has if the muxer was given it.
+    double video_stream_duration_s = -1;
     size_t video_frames = 0;
     //  Largest distance between consecutive keyframes (0 with fewer than two).
     double video_max_keyframe_gap_s = 0;
@@ -398,6 +444,7 @@ struct ProbedFile{
     double audio_max_spacing_error_s = 0;
     //  Smallest spacing between consecutive audio packets.
     double audio_min_spacing_s = 1e9;
+    size_t audio_packets = 0;
     size_t audio_frames = 0;
     double audio_onset_s = -1;      //  First decoded sample of the tone.
 };
@@ -475,6 +522,9 @@ std::string probe_file(const std::string& path, ProbedFile& file){
     if (file.has_video){
         const AVStream& stream = *context.format->streams[video_index];
         video_time_base = stream.time_base;
+        if (stream.duration != AV_NOPTS_VALUE){
+            file.video_stream_duration_s = stream.duration * av_q2d(video_time_base);
+        }
         error = open_decoder(stream, context.video);
         if (!error.empty()){
             return error;
@@ -580,6 +630,7 @@ std::string probe_file(const std::string& path, ProbedFile& file){
                 error = receive_video();
             }
         }else if (packet.stream_index == audio_index){
+            file.audio_packets++;
             if (ts <= last_audio_ts){
                 file.audio_timestamps_increasing = false;
             }
@@ -863,6 +914,45 @@ FeedOptions sync_options(){
     return options;
 }
 
+std::string test_mp4_matches_mkv(Logger& logger){
+    //  The same ring saved twice holds the same packets in both containers.
+    //  An MP4 sample's duration is the gap to the next sample, so the last
+    //  one's duration comes from the muxer's packet duration alone: without
+    //  it the newest frame is stored 0 long, the video stream ends a frame
+    //  early, and some readers drop that frame. The recording is stopped
+    //  before saving, so both saves see the same ring.
+    constexpr int64_t END_MS = 5000;
+    StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), true, true);
+    Feeder feeder(tracker, FeedOptions());
+    feeder.run_until(END_MS + ENCODER_TAIL_MS);
+
+    ProbedFile mp4;
+    std::string error = save_and_probe(tracker, "SameRing.mp4", true, true, mp4);
+    if (!error.empty()){
+        return "MP4: " + error;
+    }
+    ProbedFile mkv;
+    error = save_and_probe(tracker, "SameRing.mkv", true, true, mkv);
+    if (!error.empty()){
+        return "MKV: " + error;
+    }
+    if (mp4.video_packets != mkv.video_packets){
+        return "The MP4 has " + std::to_string(mp4.video_packets) + " video packets, the MKV "
+            + std::to_string(mkv.video_packets) + ".";
+    }
+    if (mp4.audio_packets != mkv.audio_packets){
+        return "The MP4 has " + std::to_string(mp4.audio_packets) + " audio packets, the MKV "
+            + std::to_string(mkv.audio_packets) + ".";
+    }
+    //  The stream runs from the first frame to the end of the last one.
+    double interval = kept_frame_interval_s();
+    double frames_s = mp4.video_last_s - mp4.video_first_s;
+    return check_range(
+        "The MP4 video stream duration",
+        mp4.video_stream_duration_s, frames_s + 0.95 * interval, frames_s + 1.05 * interval
+    );
+}
+
 std::string test_nothing_recorded(Logger& logger){
     StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), true, true);
     std::string path = output_path("NothingRecorded.mp4");
@@ -1003,6 +1093,29 @@ void add_tests_StreamHistory(UnitTestDatabase& database){
         START4,
         false, Bytes{}
     );
+    //  An empty NAL unit (two start codes in a row) is skipped; the NAL
+    //  units after it are still converted.
+    database.add<AnnexBToAvccTest>(
+        "Empty NAL between 3-byte start codes",
+        concat({START3, START3, AUD, START3, IDR}),
+        true, concat({
+            {0x00, 0x00, 0x00, 0x02}, AUD,
+            {0x00, 0x00, 0x00, 0x03}, IDR,
+        })
+    );
+    database.add<AnnexBToAvccTest>(
+        "3-byte start code right before a 4-byte one",
+        concat({START3, START4, AUD, START4, IDR}),
+        true, concat({
+            {0x00, 0x00, 0x00, 0x02}, AUD,
+            {0x00, 0x00, 0x00, 0x03}, IDR,
+        })
+    );
+    database.add<AnnexBToAvccTest>(
+        "Trailing zero padding",
+        concat({START4, IDR, {0x00, 0x00}}),
+        true, concat({{0x00, 0x00, 0x00, 0x03}, IDR})
+    );
 
     //  avcC configuration record from Annex B extradata.
     database.add<AvccFromExtradataTest>(
@@ -1033,7 +1146,66 @@ void add_tests_StreamHistory(UnitTestDatabase& database){
             {0x01, 0x64, 0x00, 0x1f, 0xff, 0xe1, 0x00, 0x07},
             SPS,
             {0x00},     //  No picture parameter sets.
+            SPS_AVCC_EXTENSION,
         })
+    );
+    database.add<AvccFromExtradataTest>(
+        "Empty NAL before the SPS",
+        concat({START3, START4, SPS, START4, PPS}),
+        true, SPS_PPS_AVCC
+    );
+    database.add<AvccFromExtradataTest>(
+        "Main profile has no extension",
+        concat({START4, SPS_MAIN, START4, PPS}),
+        true, concat({
+            {0x01, 0x4d, 0x40, 0x1f, 0xff, 0xe1, 0x00, 0x06},
+            SPS_MAIN,
+            {0x01, 0x00, 0x06},
+            PPS,
+        })
+    );
+    database.add<AvccFromExtradataTest>(
+        "High 4:2:2 10-bit extension",
+        concat({START4, SPS_HIGH_422_10BIT, START4, PPS}),
+        true, concat({
+            {0x01, 0x7a, 0x00, 0x1f, 0xff, 0xe1, 0x00, 0x06},
+            SPS_HIGH_422_10BIT,
+            {0x01, 0x00, 0x06},
+            PPS,
+            {0xfe, 0xfa, 0xfa, 0x00},
+        })
+    );
+    database.add<AvccFromExtradataTest>(
+        "High 4:4:4 extension skips separate_colour_plane_flag",
+        concat({START4, SPS_HIGH_444, START4, PPS}),
+        true, concat({
+            {0x01, 0xf4, 0x00, 0x1f, 0xff, 0xe1, 0x00, 0x06},
+            SPS_HIGH_444,
+            {0x01, 0x00, 0x06},
+            PPS,
+            {0xff, 0xf8, 0xf9, 0x00},
+        })
+    );
+    database.add<AvccFromExtradataTest>(
+        "Emulation prevention byte in the SPS",
+        concat({START4, SPS_EMULATION_PREVENTION, START4, PPS}),
+        true, concat({
+            {0x01, 0x64, 0x00, 0x00, 0xff, 0xe1, 0x00, 0x08},
+            SPS_EMULATION_PREVENTION,
+            {0x01, 0x00, 0x06},
+            PPS,
+            SPS_AVCC_EXTENSION,
+        })
+    );
+    database.add<AvccFromExtradataTest>(
+        "libx264 High profile, same as ffmpeg's avcC",
+        concat({START4, X264_SPS, START4, X264_PPS}),
+        true, X264_FFMPEG_AVCC
+    );
+    database.add<AvccFromExtradataTest>(
+        "High profile SPS without the chroma format",
+        concat({START4, Bytes{0x67, 0x64, 0x00, 0x1f}, START4, PPS}),
+        false, Bytes{}
     );
     database.add<AvccFromExtradataTest>(
         "No SPS",
@@ -1150,6 +1322,15 @@ void add_tests_StreamHistory(UnitTestDatabase& database){
             AUDIO_RESYNC_THRESHOLD_S + SYNC_TOLERANCE_S, false
         );
     });
+    database.add<RingTest>("Sync with padded channel buffers", [](Logger& logger){
+        //  The audio pipeline may hand over channel buffers longer than the
+        //  samples delivered. Reading past the samples would put the
+        //  full-scale padding into the audio long before the onset.
+        FeedOptions options = sync_options();
+        options.audio_stride_padding = 37;
+        return test_sync(logger, "SyncPaddedChannels.mp4", options, 5000, SYNC_TOLERANCE_S, true);
+    });
+    database.add<RingTest>("MP4 and MKV of the same ring match", [](Logger& logger){ return test_mp4_matches_mkv(logger); });
     database.add<RingTest>("Nothing recorded", [](Logger& logger){ return test_nothing_recorded(logger); });
     database.add<RingTest>("Unwritable path", [](Logger& logger){ return test_unwritable_path(logger); });
     database.add<RingTest>("Shutdown with queued frames", [](Logger& logger){ return test_shutdown(logger); });

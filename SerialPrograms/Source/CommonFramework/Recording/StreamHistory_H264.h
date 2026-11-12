@@ -19,7 +19,8 @@ namespace PokemonAutomation{
 
 
 // Converts H.264 video data from Annex B format to AVCC format.
-// Returns false if no NAL unit is found.
+// Returns false if no NAL unit is found. Empty NAL units (two start codes in
+// a row) are skipped.
 //
 // In H.264 video streaming, individual packets of video data are called NAL
 // (Network Abstraction Layer) units.
@@ -36,7 +37,10 @@ namespace PokemonAutomation{
 bool h264_annexb_to_avcc(const uint8_t* in, size_t in_size, std::vector<uint8_t>& out);
 
 //  Builds the MP4 avcC configuration record from an Annex B H.264 extradata
-//  (SPS/PPS NAL units with start codes). Returns false if no SPS is found.
+//  (SPS/PPS NAL units with start codes), including the chroma format and bit
+//  depth extension that every profile but Baseline, Main and Extended needs
+//  (ISO/IEC 14496-15). Returns false if no SPS is found, or if the SPS is cut
+//  short before those fields.
 bool h264_avcc_from_annexb_extradata(const uint8_t* in, size_t in_size, std::vector<uint8_t>& out);
 
 
