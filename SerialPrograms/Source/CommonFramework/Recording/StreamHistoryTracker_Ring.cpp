@@ -26,7 +26,9 @@
 #include <deque>
 #include <mutex>
 #include <set>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -162,20 +164,6 @@ static bool init_channel_layout(AVChannelLayout& layout, int channels){
 }
 
 
-//  The configured target FPS (falls back to 10 for unknown settings).
-size_t get_target_fps(){
-    const StreamHistoryOption& settings = GlobalSettings::instance().STREAM_HISTORY;
-    switch (settings.VIDEO_FPS){
-    case StreamHistoryOption::VideoFPS::FPS_30:  return 30;
-    case StreamHistoryOption::VideoFPS::FPS_15:  return 15;
-    case StreamHistoryOption::VideoFPS::FPS_10:  return 10;
-    case StreamHistoryOption::VideoFPS::FPS_05:  return 5;
-    case StreamHistoryOption::VideoFPS::FPS_01:  return 1;
-    }
-    return 10;
-}
-
-
 //  The target video bitrate in kbps: the configured fixed value (clamped to
 //  100-8000) or the quality preset's value.
 size_t get_target_bitrate_kbps(){
@@ -260,8 +248,16 @@ const char* const VIDEO_ENCODER_CANDIDATES[] = {
 //  "poisoned" for the rest of the process: the failed context is
 //  deliberately leaked (at most one per encoder) and the encoder is never
 //  initialized again, not even by later trackers.
-Mutex poisoned_encoder_mutex;
+//
+//  Encoders that failed to open are remembered too, by name and output size,
+//  so that later trackers (one is built on every input, resolution, startup
+//  and shutdown change) skip them instead of initializing their device again
+//  and logging the failure again. By size, because an encoder can reject one
+//  size and accept another. (An encoder that failed to open only because its
+//  device was busy stays skipped at that size for the rest of the process.)
+Mutex poisoned_encoder_mutex;    //  Guards both sets.
 std::set<std::string> poisoned_encoders;
+std::set<std::tuple<std::string, int, int>> unopenable_encoders;
 
 //  Abandons 'ctx' after a runtime encoder failure (see above). The CPU
 //  fallback (mpeg4) has no device behind it and is released normally; every
@@ -332,7 +328,7 @@ private:
 
 //  Threads:
 //  - The encoder thread (worker_loop()) owns the video encoder and its state:
-//    m_video_context, m_sws and the m_sws_* fields, m_video_width, m_video_height,
+//    m_video_context, m_sws, m_video_width, m_video_height,
 //    m_video_start, m_last_keyframe_us, m_last_pts_us,
 //    m_logged_frame_skip and m_video_encoder_index. Nothing else touches
 //    them.
@@ -348,8 +344,8 @@ private:
 //    m_audio_params, m_video_time_base), m_window, m_next_frame_time, and
 //    m_video_enabled (written by the encoder thread, read by on_frame()).
 //  - m_queue_lock guards the frame queue (m_pending_frames), the encoder
-//    thread's flags (m_stopping, m_encoding) and the dropped-frame report
-//    (m_dropped_frames, m_last_drop_report).
+//    thread's flags (m_stopping, m_encoding, m_reopen_requested) and the
+//    dropped-frame report (m_dropped_frames, m_last_drop_report).
 //  - Fields set in the constructor and never changed afterwards (m_logger,
 //    m_has_video, m_audio_channels, m_target_fps, m_frame_interval) need
 //    no lock.
@@ -386,10 +382,6 @@ struct StreamHistoryTracker_Ring::Data{
     FramePtr m_video_frame;
     PacketPtr m_video_packet;
     SwsContextPtr m_sws; // libswscale context: converts and scales the captured frame into the encoder’s pixel format and output size.
-    int m_sws_in_format = AV_PIX_FMT_NONE; // source pixel format
-    int m_sws_width = 0; // source pixel width
-    int m_sws_height = 0; // source pixel height
-    int m_sws_out_format = AV_PIX_FMT_NONE; // encoder’s pixel format (m_video_context->pix_fmt) at build time
     int m_video_width = 0;
     int m_video_height = 0;
     int64_t m_last_keyframe_us = -VIDEO_KEYFRAME_INTERVAL_US;
@@ -438,6 +430,7 @@ struct StreamHistoryTracker_Ring::Data{
     Mutex m_queue_lock;
     bool m_stopping = false;    //  Guarded by m_queue_lock.
     bool m_encoding = false;    //  Guarded by m_queue_lock. A popped frame is being encoded.
+    bool m_reopen_requested = false;    //  Guarded by m_queue_lock. See reopen_video_encoder().
     ConditionVariable m_cv;
     ConditionVariable m_idle_cv;    //  Notified after each frame is encoded (wait_until_idle()).
     std::deque<std::shared_ptr<const VideoFrame>> m_pending_frames;
@@ -457,7 +450,7 @@ struct StreamHistoryTracker_Ring::Data{
         , m_window(p_window)
         , m_has_video(p_has_video)
         , m_have_audio(p_has_audio)
-        , m_target_fps(get_target_fps())
+        , m_target_fps(GlobalSettings::instance().STREAM_HISTORY->target_fps())
         , m_frame_interval(std::chrono::microseconds(1000000 / m_target_fps))
         , m_video_enabled(p_has_video)
         , m_audio_planes(m_audio_channels)
@@ -594,6 +587,11 @@ struct StreamHistoryTracker_Ring::Data{
             const char* name = VIDEO_ENCODER_CANDIDATES[i];
             {
                 std::lock_guard<Mutex> lg(poisoned_encoder_mutex);
+                if (unopenable_encoders.count({name, target_width, target_height}) != 0){
+                    //  Failed to open at this size before; that was logged.
+                    m_video_encoder_index = i + 1;
+                    continue;
+                }
                 if (poisoned_encoders.count(name) != 0){
                     m_logger.log(
                         "Stream history: skipping video encoder '"
@@ -732,9 +730,14 @@ struct StreamHistoryTracker_Ring::Data{
                 return;
             }
             m_video_encoder_index = i + 1;
+            {
+                std::lock_guard<Mutex> lg(poisoned_encoder_mutex);
+                unopenable_encoders.emplace(name, target_width, target_height);
+            }
             m_logger.log(
-                "Stream history: Video encoder '" + std::string(name) + "' failed to open: "
-                + ffmpeg_error(err),
+                "Stream history: Video encoder '" + std::string(name) + "' failed to open at "
+                + std::to_string(target_width) + "x" + std::to_string(target_height) + ": "
+                + ffmpeg_error(err) + ". It will not be tried again at this size.",
                 COLOR_YELLOW
             );
             //  'ctx' is released at the end of this iteration. The encoder
@@ -847,6 +850,7 @@ struct StreamHistoryTracker_Ring::Data{
     void worker_loop(){
         while (true){
             std::shared_ptr<const VideoFrame> frame;
+            bool reopen;
             {
                 std::unique_lock<Mutex> queue_guard(m_queue_lock);
                 m_cv.wait(queue_guard, [this]{ return m_stopping || !m_pending_frames.empty(); });
@@ -858,6 +862,13 @@ struct StreamHistoryTracker_Ring::Data{
                 frame = std::move(m_pending_frames.front());
                 m_pending_frames.pop_front();
                 m_encoding = true;
+                reopen = std::exchange(m_reopen_requested, false);
+            }
+            if (reopen && m_video_context != nullptr){
+                //  For tests: close the working encoder and reopen the same
+                //  candidate for this frame, with the current settings.
+                m_video_context.reset();
+                m_video_encoder_index--;
             }
             encode_video_frame(frame);
             {
@@ -993,31 +1004,26 @@ struct StreamHistoryTracker_Ring::Data{
             src_strides[0] = (int)rgb_image.bytesPerLine();
         }
 
-        //  (Re)build the scaler if the input changed, or if the encoder's
-        //  preferred pixel format changed (e.g. after an encoder fallback).
-        if (src_format != m_sws_in_format || src_width != m_sws_width || src_height != m_sws_height
-            || m_video_context->pix_fmt != m_sws_out_format){
-            m_sws.reset();
-            m_sws.reset(sws_getContext(
-                src_width, src_height, (AVPixelFormat)src_format,
-                m_video_width, m_video_height, m_video_context->pix_fmt,
-                SWS_BILINEAR, nullptr, nullptr, nullptr
-            ));
-            if (m_sws == nullptr){
-                //  sws_getContext() is deterministic for a given input/output
-                //  shape, so retrying on the next frame would fail the same
-                //  way (and log at the frame rate).
-                m_logger.log("Stream history: Failed to create video scaler. Disabling video.", COLOR_RED);
-                {
-                    WriteSpinLock lg(m_lock, PA_CURRENT_FUNCTION);
-                    m_video_enabled = false;
-                }
-                return;
+        //  sws_getCachedContext() keeps the scaler while the input and the
+        //  output (the encoder's size and pixel format, which an encoder
+        //  fallback can change) stay the same, and replaces it otherwise.
+        //  It frees the old scaler if it builds a new one, or if it fails.
+        m_sws.reset(sws_getCachedContext(
+            m_sws.release(),
+            src_width, src_height, (AVPixelFormat)src_format,
+            m_video_width, m_video_height, m_video_context->pix_fmt,
+            SWS_BILINEAR, nullptr, nullptr, nullptr
+        ));
+        if (m_sws == nullptr){
+            //  Building a scaler is deterministic for a given input/output
+            //  shape, so retrying on the next frame would fail the same way
+            //  (and log at the frame rate).
+            m_logger.log("Stream history: Failed to create video scaler. Disabling video.", COLOR_RED);
+            {
+                WriteSpinLock lg(m_lock, PA_CURRENT_FUNCTION);
+                m_video_enabled = false;
             }
-            m_sws_in_format = src_format;
-            m_sws_width = src_width;
-            m_sws_height = src_height;
-            m_sws_out_format = m_video_context->pix_fmt;
+            return;
         }
 
         //  The frame sent to the encoder, reused while the encoder's format
@@ -1922,6 +1928,10 @@ void StreamHistoryTracker_Ring::push_samples(size_t samples, size_t stride, cons
 }
 void StreamHistoryTracker_Ring::wait_until_idle(){
     m_data->wait_until_idle();
+}
+void StreamHistoryTracker_Ring::reopen_video_encoder(){
+    std::lock_guard<Mutex> queue_guard(m_data->m_queue_lock);
+    m_data->m_reopen_requested = true;
 }
 
 void StreamHistoryTracker_Ring::on_frame(std::shared_ptr<const VideoFrame> frame){

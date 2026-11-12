@@ -76,6 +76,12 @@ public:
     //  oldest beyond a small backlog), so tests wait on this between frames.
     void wait_until_idle();
 
+    //  Closes the video encoder and reopens the same one, with the current
+    //  settings, for the next frame the encoder thread takes: what happens
+    //  after a runtime encoder failure, when the next candidate is opened.
+    //  (A runtime failure cannot be provoked with the encoders a test has.)
+    void reopen_video_encoder();
+
 private:
     struct Data;
     Pimpl<Data> m_data;

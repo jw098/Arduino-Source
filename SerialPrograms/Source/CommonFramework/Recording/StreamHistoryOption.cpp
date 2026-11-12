@@ -4,6 +4,7 @@
  *
  */
 
+#include "Common/Cpp/Exceptions.h"
 #include "CommonFramework/Globals.h"
 #include "StreamHistoryOption.h"
 
@@ -138,6 +139,22 @@ void StreamHistoryOption::on_config_value_changed(void* object){
         VIDEO_BITRATE.set_visibility(ConfigOptionState::ENABLED);
         break;
     }
+}
+
+size_t StreamHistoryOption::target_fps() const{
+    switch (VIDEO_FPS){
+    case VideoFPS::FPS_30:
+        return 30;
+    case VideoFPS::FPS_15:
+        return 15;
+    case VideoFPS::FPS_10:
+        return 10;
+    case VideoFPS::FPS_05:
+        return 5;
+    case VideoFPS::FPS_01:
+        return 1;
+    }
+    throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "VideoFPS: Unknown enum.");
 }
 
 
