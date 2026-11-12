@@ -42,11 +42,6 @@ extern "C" {
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/VideoPipeline/Backends/VideoFrameQt.h"
 #include "StreamHistoryTracker_Ring.h"
-
-//  MSVC's <cerrno> may not define EAGAIN (see StreamHistoryTracker_Ring.cpp).
-#ifndef EAGAIN
-#define EAGAIN 11
-#endif
 #endif
 
 namespace PokemonAutomation{
@@ -435,6 +430,7 @@ struct ProbedFile{
     size_t video_frames = 0;
     //  Largest distance between consecutive keyframes (0 with fewer than two).
     double video_max_keyframe_gap_s = 0;
+    size_t video_keyframes = 0;
     double video_onset_s = -1;      //  First decoded frame that is no longer black.
 
     bool audio_timestamps_increasing = true;
@@ -613,6 +609,7 @@ std::string probe_file(const std::string& path, ProbedFile& file){
             file.video_last_s = packet.pts * av_q2d(video_time_base);
             file.video_packets++;
             if (packet.flags & AV_PKT_FLAG_KEY){
+                file.video_keyframes++;
                 if (last_keyframe_s >= 0){
                     file.video_max_keyframe_gap_s = std::max(
                         file.video_max_keyframe_gap_s, file.video_last_s - last_keyframe_s
@@ -696,6 +693,14 @@ std::string check_file(const ProbedFile& file, bool video, bool audio){
         if (file.video_max_keyframe_gap_s > max_gap_s){
             return "Keyframes are up to " + std::to_string(file.video_max_keyframe_gap_s)
                 + " s apart, expected at most " + std::to_string(max_gap_s) + " s.";
+        }
+        //  Keyframes are forced every keyframe interval, not on every frame:
+        //  a frame must not stay marked as a keyframe once it was forced
+        //  (the tracker reuses its frames). Scene changes may add a few
+        //  more, so only a file that is mostly keyframes fails.
+        if (file.video_packets >= 10 && 2 * file.video_keyframes > file.video_packets){
+            return std::to_string(file.video_keyframes) + " of the "
+                + std::to_string(file.video_packets) + " video packets are keyframes.";
         }
     }
     if (audio){

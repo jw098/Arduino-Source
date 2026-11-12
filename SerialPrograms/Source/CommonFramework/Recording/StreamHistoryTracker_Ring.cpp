@@ -40,12 +40,6 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-//  MSVC's <cerrno> does not define EAGAIN; ffmpeg's send/receive API reports
-//  "no data" as AVERROR(EAGAIN), which needs it. POSIX defines it as 11.
-#ifndef EAGAIN
-#define EAGAIN 11
-#endif
-
 #include "Common/Cpp/Containers/Pimpl.tpp"
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Concurrency/AsyncTask.h"
@@ -343,7 +337,8 @@ private:
 //    m_logged_frame_skip and m_video_encoder_index. Nothing else touches
 //    them.
 //  - The audio thread (push_samples()) owns the AAC encoder, the sample
-//    accumulator and the audio clock: m_audio_context, m_audio_layout, m_have_audio,
+//    accumulator and the audio clock: m_audio_context, m_audio_frame,
+//    m_audio_packet, m_have_audio,
 //    m_audio_planes, m_audio_samples_total, m_audio_anchored,
 //    m_audio_anchor_sample and m_audio_anchor_time.
 //  - The video thread (on_frame()) throttles frames and queues them.
@@ -386,6 +381,10 @@ struct StreamHistoryTracker_Ring::Data{
     bool m_video_enabled;
     bool m_logged_frame_skip = false; // A skipped video frame was logged since the last frame reached the encoder; see log_frame_skip()
     CodecContextPtr m_video_context; // ffmpeg video encoder context
+    //  Reused for every frame sent to the encoder (reallocated when the
+    //  encoder's format or size changes) and every packet received.
+    FramePtr m_video_frame;
+    PacketPtr m_video_packet;
     SwsContextPtr m_sws; // libswscale context: converts and scales the captured frame into the encoder’s pixel format and output size.
     int m_sws_in_format = AV_PIX_FMT_NONE; // source pixel format
     int m_sws_width = 0; // source pixel width
@@ -421,7 +420,9 @@ struct StreamHistoryTracker_Ring::Data{
 
     //  Audio encoder (used by push_samples).
     CodecContextPtr m_audio_context;  // audio encoder context
-    AVChannelLayout m_audio_layout = {};
+    //  Reused for every AAC frame and packet (allocated with the encoder).
+    FramePtr m_audio_frame;
+    PacketPtr m_audio_packet;
     int64_t m_audio_samples_total = 0;    //  Samples (per channel) sent to the encoder.
     //  The audio sample clock: sample m_audio_anchor_sample was captured at
     //  m_audio_anchor_time. Re-anchored on gaps; see push_samples().
@@ -533,9 +534,28 @@ struct StreamHistoryTracker_Ring::Data{
             m_have_audio = false;
             return;
         }
-        //  The encoded frames use the same layout as the encoder (which
-        //  just opened successfully with this channel count).
-        init_channel_layout(m_audio_layout, (int)m_audio_channels);
+        //  The frame sent to the encoder: planar float, one AAC frame long,
+        //  in the encoder's channel layout. Reused (av_frame_make_writable())
+        //  for every frame, like the packet.
+        m_audio_frame.reset(av_frame_alloc());
+        m_audio_packet.reset(av_packet_alloc());
+        if (m_audio_frame == nullptr || m_audio_packet == nullptr){
+            m_logger.log("Stream history: Failed to allocate the audio frame. Disabling audio.", COLOR_RED);
+            m_audio_context.reset();
+            m_have_audio = false;
+            return;
+        }
+        m_audio_frame->format = AV_SAMPLE_FMT_FLTP;
+        m_audio_frame->sample_rate = AUDIO_OUTPUT_RATE;
+        m_audio_frame->nb_samples = AUDIO_FRAME_SAMPLES;
+        if (av_channel_layout_copy(&m_audio_frame->ch_layout, &m_audio_context->ch_layout) < 0
+            || av_frame_get_buffer(m_audio_frame.get(), 0) < 0
+        ){
+            m_logger.log("Stream history: Failed to allocate the audio frame buffer. Disabling audio.", COLOR_RED);
+            m_audio_context.reset();
+            m_have_audio = false;
+            return;
+        }
         m_logger.log(
             "Stream history: audio = AAC " + std::to_string(m_audio_channels) + "ch @ 48 kHz ("
             + std::to_string(m_audio_context->bit_rate / 1000) + " kbps)."
@@ -737,12 +757,15 @@ struct StreamHistoryTracker_Ring::Data{
 
     //  Receive and store a single encoded video packet.
     DrainResult drain_one_video_packet(int& error){
-        PacketPtr packet(av_packet_alloc());
-        if (packet == nullptr){
-            m_logger.log("Stream history: Failed to allocate video packet.", COLOR_RED);
-            return DrainResult::NO_MEMORY;
+        if (m_video_packet == nullptr){
+            m_video_packet.reset(av_packet_alloc());
+            if (m_video_packet == nullptr){
+                m_logger.log("Stream history: Failed to allocate video packet.", COLOR_RED);
+                return DrainResult::NO_MEMORY;
+            }
         }
-        int err = avcodec_receive_packet(m_video_context.get(), packet.get());
+        AVPacket* packet = m_video_packet.get();
+        int err = avcodec_receive_packet(m_video_context.get(), packet);
         if (err == AVERROR(EAGAIN) || err == AVERROR_EOF){
             return DrainResult::EMPTY;
         }
@@ -761,7 +784,7 @@ struct StreamHistoryTracker_Ring::Data{
         );
         ring_packet->flags = (packet->flags & AV_PKT_FLAG_KEY) ? AV_PKT_FLAG_KEY : 0;
         ring_packet->data.assign(packet->data, packet->data + packet->size);
-        packet.reset();
+        av_packet_unref(packet);
 
         store_packet(m_video, std::move(ring_packet), m_video_params, *m_video_context, &m_video_time_base, "video");
         return DrainResult::STORED;
@@ -915,6 +938,22 @@ struct StreamHistoryTracker_Ring::Data{
             }
         }
 
+        //  Timestamps. The encoders need strictly increasing pts (mpeg4
+        //  rejects a repeat as a hard error, which would trigger an encoder
+        //  fallback), and the pts is in milliseconds. on_frame()'s throttling
+        //  already keeps the sent frames a frame interval apart; drop any
+        //  frame that would still not advance the pts (e.g. a capture
+        //  timestamp going backwards) before paying for its conversion.
+        if (m_video_start == WallClock::min()){
+            m_video_start = vf->timestamp;
+        }
+        int64_t pts_us = std::chrono::duration_cast<std::chrono::microseconds>(
+            vf->timestamp - m_video_start
+        ).count();
+        if (m_last_pts_us >= 0 && pts_us / 1000 <= m_last_pts_us / 1000){
+            return;
+        }
+
         //  Unmapped early once the source pixels are no longer needed (after
         //  the RGB conversion or the scale), and on every other return.
         ReadOnlyFrameMap mapping(qframe);
@@ -981,18 +1020,33 @@ struct StreamHistoryTracker_Ring::Data{
             m_sws_out_format = m_video_context->pix_fmt;
         }
 
-        FramePtr frame(av_frame_alloc()); // An AVFrame filled with default values
-        if (frame == nullptr){
-            log_frame_skip("Failed to allocate a video frame");
-            return;
-        }
-        frame->format = m_video_context->pix_fmt;
-        frame->width = m_video_width;
-        frame->height = m_video_height;
-        if (av_frame_get_buffer(frame.get(), 0) < 0){
+        //  The frame sent to the encoder, reused while the encoder's format
+        //  and size stay the same. An encoder may still hold a reference to
+        //  the previous frame's buffer; av_frame_make_writable() then gives
+        //  this frame a new one.
+        if (m_video_frame == nullptr
+            || m_video_frame->format != m_video_context->pix_fmt
+            || m_video_frame->width != m_video_width
+            || m_video_frame->height != m_video_height
+        ){
+            m_video_frame.reset(av_frame_alloc());
+            if (m_video_frame == nullptr){
+                log_frame_skip("Failed to allocate a video frame");
+                return;
+            }
+            m_video_frame->format = m_video_context->pix_fmt;
+            m_video_frame->width = m_video_width;
+            m_video_frame->height = m_video_height;
+            if (av_frame_get_buffer(m_video_frame.get(), 0) < 0){
+                m_video_frame.reset();
+                log_frame_skip("Failed to allocate a video frame buffer");
+                return;
+            }
+        }else if (av_frame_make_writable(m_video_frame.get()) < 0){
             log_frame_skip("Failed to allocate a video frame buffer");
             return;
         }
+        AVFrame* frame = m_video_frame.get();
 
         int scaled = sws_scale(
             m_sws.get(),
@@ -1006,21 +1060,8 @@ struct StreamHistoryTracker_Ring::Data{
             return;
         }
 
-        //  Timestamps + keyframe control.
-        if (m_video_start == WallClock::min()){
-            m_video_start = vf->timestamp;
-        }
-        int64_t pts_us = std::chrono::duration_cast<std::chrono::microseconds>(
-            vf->timestamp - m_video_start
-        ).count();
-        //  The encoders need strictly increasing pts (mpeg4 rejects a repeat
-        //  as a hard error, which would trigger an encoder fallback), and the
-        //  pts is in milliseconds. on_frame()'s throttling already keeps the
-        //  sent frames a frame interval apart; drop any frame that would still
-        //  not advance the pts (e.g. a capture timestamp going backwards).
-        if (m_last_pts_us >= 0 && pts_us / 1000 <= m_last_pts_us / 1000){
-            return;
-        }
+        //  Keyframe control. (Only now that the frame is ready to send, so
+        //  that a frame skipped above does not take a forced keyframe with it.)
         m_last_pts_us = pts_us;
         bool force_keyframe = (pts_us - m_last_keyframe_us) >= VIDEO_KEYFRAME_INTERVAL_US;
         if (force_keyframe){
@@ -1028,16 +1069,16 @@ struct StreamHistoryTracker_Ring::Data{
         }
         //  The video timebase is 1/1000 (milliseconds); see init_video_encoder.
         frame->pts = pts_us / 1000;
-        if (force_keyframe){
-            frame->pict_type = AV_PICTURE_TYPE_I;
-        }
+        //  Set on every frame: the frame is reused, and a stale I would make
+        //  every later frame a keyframe.
+        frame->pict_type = force_keyframe ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
 
         //  Send the frame to the encoder.
         //  Some encoders (notably hardware ones) buffer input,
         //  so a send can fail with EAGAIN while output packets are pending:
         //  drain one packet and retry instead of giving up.
         while (true){
-            int err = avcodec_send_frame(m_video_context.get(), frame.get()); // attempts to put a frame into the encoder
+            int err = avcodec_send_frame(m_video_context.get(), frame); // attempts to put a frame into the encoder
             if (err == AVERROR(EAGAIN)){  // encoder is full
                 DrainResult drained = drain_one_video_packet(err);  // attempts to drain a packet from the encoder and store it in the ring
                 if (drained == DrainResult::STORED){
@@ -1226,10 +1267,15 @@ struct StreamHistoryTracker_Ring::Data{
 
     //  The capture time of audio sample 'sample' (per-channel count) on the
     //  current sample clock.
+    //  Whole seconds and the remainder are converted separately: scaling
+    //  the whole sample count to nanoseconds would overflow int64 about
+    //  53 hours after the last re-anchor.
     WallClock audio_sample_time(int64_t sample) const{
-        return m_audio_anchor_time + std::chrono::duration_cast<WallClock::duration>(
-            std::chrono::nanoseconds((sample - m_audio_anchor_sample) * 1000000000 / AUDIO_OUTPUT_RATE)
-        );
+        int64_t samples = sample - m_audio_anchor_sample;
+        std::chrono::nanoseconds offset =
+            std::chrono::seconds(samples / AUDIO_OUTPUT_RATE)
+            + std::chrono::nanoseconds(samples % AUDIO_OUTPUT_RATE * 1000000000 / AUDIO_OUTPUT_RATE);
+        return m_audio_anchor_time + std::chrono::duration_cast<WallClock::duration>(offset);
     }
 
 
@@ -1285,22 +1331,10 @@ struct StreamHistoryTracker_Ring::Data{
         //  after which the buffers are never read again.)
         size_t consumed = 0;
         while (m_audio_planes[0].size() - consumed >= (size_t)AUDIO_FRAME_SAMPLES){
-            FramePtr frame(av_frame_alloc());
-            if (frame == nullptr){
-                m_logger.log("Stream history: Failed to allocate audio frame. Disabling audio.", COLOR_RED);
-                m_have_audio = false;
-                return;
-            }
-            frame->format = AV_SAMPLE_FMT_FLTP;
-            frame->sample_rate = AUDIO_OUTPUT_RATE;
-            frame->nb_samples = AUDIO_FRAME_SAMPLES;
-            int ret = av_channel_layout_copy(&frame->ch_layout, &m_audio_layout);
-            if (ret < 0){
-                m_logger.log("Stream history: Failed to copy audio channel layout. Disabling audio.", COLOR_RED);
-                m_have_audio = false;
-                return;
-            }
-            if (av_frame_get_buffer(frame.get(), 0) < 0){
+            //  The encoder may still hold a reference to the previous
+            //  frame's buffer; this then gives the frame a new one.
+            AVFrame* frame = m_audio_frame.get();
+            if (av_frame_make_writable(frame) < 0){
                 m_logger.log("Stream history: Failed to allocate audio frame buffer. Disabling audio.", COLOR_RED);
                 m_have_audio = false;
                 return;
@@ -1316,23 +1350,15 @@ struct StreamHistoryTracker_Ring::Data{
             frame->pts = m_audio_samples_total;
             m_audio_samples_total += AUDIO_FRAME_SAMPLES;
 
-            int err = avcodec_send_frame(m_audio_context.get(), frame.get());
-            frame.reset();
+            int err = avcodec_send_frame(m_audio_context.get(), frame);
             if (err < 0){
                 m_logger.log("Stream history: Audio encode failed: " + ffmpeg_error(err), COLOR_RED);
                 m_have_audio = false;
                 return;
             }
+            AVPacket* packet = m_audio_packet.get();
             while (true){
-                PacketPtr packet(av_packet_alloc());
-                if (packet == nullptr){
-                    //  The encoder still holds the undrained packet, so the
-                    //  next send would fail with EAGAIN anyway.
-                    m_logger.log("Stream history: Failed to allocate audio packet. Disabling audio.", COLOR_RED);
-                    m_have_audio = false;
-                    return;
-                }
-                err = avcodec_receive_packet(m_audio_context.get(), packet.get());
+                err = avcodec_receive_packet(m_audio_context.get(), packet);
                 if (err == AVERROR(EAGAIN)){
                     break;
                 }
@@ -1355,7 +1381,7 @@ struct StreamHistoryTracker_Ring::Data{
                         : m_audio_samples_total - AUDIO_FRAME_SAMPLES
                 );
                 ring_packet->data.assign(packet->data, packet->data + packet->size);
-                packet.reset();
+                av_packet_unref(packet);
 
                 store_packet(m_audio, std::move(ring_packet), m_audio_params, *m_audio_context, nullptr, "audio");
             }
@@ -1397,14 +1423,15 @@ struct StreamHistoryTracker_Ring::Data{
                 c = (char)std::tolower((unsigned char)c);
             }
         }
-        const char* muxer = (extension == "mkv") ? "matroska" : "mp4";
+        const bool is_mkv = extension == "mkv";
+        const char* muxer = is_mkv ? "matroska" : "mp4";
 
         //  For MP4, put the moov atom (the file index) at the front so the
         //  file can start playing and seeking immediately instead of waiting
         //  for the reader to scan the whole file. The muxer does one fast
         //  rewrite pass at av_write_trailer() time; fine for local files.
         FfmpegDictionary muxer_options;
-        if (extension != "mkv"){
+        if (!is_mkv){
             av_dict_set(muxer_options.address(), "movflags", "+faststart", 0);
         }
 
@@ -1473,7 +1500,7 @@ struct StreamHistoryTracker_Ring::Data{
                 //  Part 2 extradata also starts with a 00 00 01 start code.
                 const uint8_t* extradata = vpar->extradata;
                 int extradata_size = vpar->extradata_size;
-                video_annexb = std::string(muxer) == "mp4"
+                video_annexb = !is_mkv
                     && vpar->codec_id == AV_CODEC_ID_H264 && (
                     (extradata_size >= 4
                         && extradata[0] == 0 && extradata[1] == 0
@@ -1523,7 +1550,7 @@ struct StreamHistoryTracker_Ring::Data{
             //  timestamps submitted by the caller untouched, so .mkv packets must
             //  be stamped in milliseconds. The MP4 muxer rescales from the stream
             //  timebase itself, so the encoder's own timebase is kept there.
-            video_stream->time_base = (std::string(muxer) == "matroska")
+            video_stream->time_base = is_mkv
                 ? av_make_q(1, 1000)
                 : vtb;
         }
@@ -1537,7 +1564,7 @@ struct StreamHistoryTracker_Ring::Data{
             }
             //  Same as above: Matroska needs millisecond timestamps, while MP4
             //  handles the native 1/48000 (sample count) timebase just fine.
-            audio_stream->time_base = (std::string(muxer) == "matroska")
+            audio_stream->time_base = is_mkv
                 ? av_make_q(1, 1000)
                 : av_make_q(1, AUDIO_OUTPUT_RATE);
         }
@@ -1550,7 +1577,7 @@ struct StreamHistoryTracker_Ring::Data{
         //  header; the output context's deleter closes it. avio_open2() leaves the
         //  non-AVIO options (like movflags) in muxer_options for
         //  avformat_write_header().
-        if (format->pb == nullptr && (format->flags & AVFMT_NOFILE) == 0){
+        if (format->pb == nullptr && (format->oformat->flags & AVFMT_NOFILE) == 0){
             if (avio_open2(
                 &format->pb,
                 filename.c_str(),

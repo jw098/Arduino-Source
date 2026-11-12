@@ -9,6 +9,7 @@
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Containers/Pimpl.tpp"   //  Pimpl<QAudioFormat> (AudioFormat) instantiations
 #include "Common/Cpp/Concurrency/SpinLock.h"
+#include "Common/Cpp/Concurrency/Mutex.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/AudioPipeline/AudioFormat.h"
 #include "CommonFramework/AudioPipeline/AudioInputChoice.h"
@@ -58,16 +59,37 @@ struct StreamHistorySession::Data{
     AudioSession* m_audio_session = nullptr;
     std::shared_ptr<StreamHistoryTracker> m_current;
     //  Bumped whenever the tracker settings change or the tracker is
-    //  cleared. initialize() builds the tracker outside the lock and only
-    //  installs it if no such change happened meanwhile, so a tracker built
-    //  from stale settings never replaces a newer one.
+    //  cleared. Whoever bumps it passes the new value to initialize(), which
+    //  builds the tracker outside the lock and only installs it if no other
+    //  change happened since that bump, so a tracker built from stale
+    //  settings never replaces a newer one or undoes a clear().
     uint64_t m_generation = 0;
+#if defined(PA_STREAM_HISTORY_FFMPEG)
+    //  Held by push_samples() while it pushes into the tracker outside
+    //  m_lock (it only contends with retire()).
+    Mutex m_push_lock;
+#endif
 
     Data(Logger& logger)
         : m_logger(logger)
         , m_window(GlobalSettings::instance().STREAM_HISTORY->HISTORY_SECONDS)
         , m_has_video(false)
     {}
+
+    //  Destroys a tracker already taken out of m_current (call without
+    //  m_lock). With the ffmpeg ring, first waits for an in-flight
+    //  push_samples(), which may still be using it: the audio thread must
+    //  never be left holding the last reference, because destroying the
+    //  tracker waits for its video encoder thread, and the audio pipeline
+    //  would stall meanwhile.
+    void retire(std::shared_ptr<StreamHistoryTracker>& tracker){
+#if defined(PA_STREAM_HISTORY_FFMPEG)
+        if (tracker){
+            std::lock_guard<Mutex> push_guard(m_push_lock);
+        }
+#endif
+        tracker.reset();
+    }
 };
 
 
@@ -86,17 +108,18 @@ void StreamHistorySession::start(
 ){
     Data& data = *m_data;
     bool needs_tracker;
+    uint64_t generation = 0;
     {
         WriteSpinLock lg(data.m_lock);
         needs_tracker = !data.m_current;
         if (needs_tracker){
             data.m_audio_choice = choice;
             data.m_has_video = has_video;
-            data.m_generation++;
+            generation = ++data.m_generation;
         }
     }
     if (needs_tracker){
-        initialize();
+        initialize(generation);
     }
     attach_working_listener();
 }
@@ -143,11 +166,12 @@ void StreamHistorySession::push_samples(size_t samples, size_t stride, const flo
     //  the UI (save(), clear(), initialize()) spin on. This thread is the
     //  only caller of the tracker's push_samples(): the working-stream
     //  listener is removed (quiescing this call) before it is re-attached.
-    //  If the tracker is cleared meanwhile, it is destroyed when this
-    //  reference is released.
+    //  The reference is released before m_push_lock (declared first), so
+    //  a tracker cleared meanwhile is destroyed by retire(), not here.
     if (samples == 0){
         return;
     }
+    std::lock_guard<Mutex> push_guard(state.m_push_lock);
     std::shared_ptr<StreamHistoryTracker> tracker;
     {
         WriteSpinLock lg(state.m_lock);
@@ -194,15 +218,15 @@ void StreamHistorySession::clear(){
     Data& data = *m_data;
     data.m_logger.log("Clearing stream history...", COLOR_ORANGE);
 
-    //  Destroyed at the end of this function, after the lock is released.
     std::shared_ptr<StreamHistoryTracker> old_tracker;
     {
         WriteSpinLock lg(data.m_lock);
         old_tracker = std::move(data.m_current);
         data.m_generation++;
     }
+    data.retire(old_tracker);
 }
-void StreamHistorySession::initialize(){
+void StreamHistorySession::initialize(uint64_t generation){
     if (!GlobalSettings::instance().STREAM_HISTORY->enabled()){
         return;
     }
@@ -213,13 +237,14 @@ void StreamHistorySession::initialize(){
     AudioInputChoice choice;
     bool has_video;
     std::chrono::seconds window;
-    uint64_t generation;
     {
         WriteSpinLock lg(data.m_lock);
+        if (generation != data.m_generation){
+            return;    //  Already superseded (or cleared): don't build it.
+        }
         choice = data.m_audio_choice;
         has_video = data.m_has_video;
         window = data.m_window;
-        generation = data.m_generation;
     }
 
 //    cout << "video = " << has_video << endl;
@@ -248,7 +273,7 @@ void StreamHistorySession::initialize(){
     //  Install it, unless the settings changed while it was being built
     //  (then the newer initialize() installs its own, or the history was
     //  cleared). Whichever tracker loses is destroyed after the lock is
-    //  released, at the end of this function.
+    //  released.
     std::shared_ptr<StreamHistoryTracker> old_tracker;
     {
         WriteSpinLock lg(data.m_lock);
@@ -263,6 +288,7 @@ void StreamHistorySession::initialize(){
 #endif
         }
     }
+    data.retire(old_tracker);
 }
 void StreamHistorySession::pre_input_change(){
 //    cout << "pre_input_change()" << endl;
@@ -285,12 +311,13 @@ void StreamHistorySession::post_input_change(
     if (audio_session){
         audio_session->remove_working_stream_listener(*this);
     }
+    uint64_t generation;
     {
         WriteSpinLock lg(data.m_lock);
         data.m_audio_choice = choice;
-        data.m_generation++;
+        generation = ++data.m_generation;
     }
-    initialize();
+    initialize(generation);
     attach_working_listener();
 }
 void StreamHistorySession::attach_working_listener(){
@@ -333,21 +360,23 @@ void StreamHistorySession::pre_shutdown(){
 void StreamHistorySession::post_shutdown(){
 //    cout << "post_shutdown()" << endl;
     Data& data = *m_data;
+    uint64_t generation;
     {
         WriteSpinLock lg(data.m_lock);
         data.m_has_video = false;
-        data.m_generation++;
+        generation = ++data.m_generation;
     }
-    initialize();
+    initialize(generation);
 }
 void StreamHistorySession::post_startup(VideoSource* source){
     Data& data = *m_data;
+    uint64_t generation;
     {
         WriteSpinLock lg(data.m_lock);
         data.m_has_video = source != nullptr;
-        data.m_generation++;
+        generation = ++data.m_generation;
     }
-    initialize();
+    initialize(generation);
 }
 void StreamHistorySession::pre_resolution_change(Resolution resolution){
 //    cout << "pre_resolution_change()" << endl;
@@ -355,7 +384,13 @@ void StreamHistorySession::pre_resolution_change(Resolution resolution){
 }
 void StreamHistorySession::post_resolution_change(Resolution resolution){
 //    cout << "post_resolution_change()" << endl;
-    initialize();
+    Data& data = *m_data;
+    uint64_t generation;
+    {
+        WriteSpinLock lg(data.m_lock);
+        generation = ++data.m_generation;
+    }
+    initialize(generation);
 }
 
 
