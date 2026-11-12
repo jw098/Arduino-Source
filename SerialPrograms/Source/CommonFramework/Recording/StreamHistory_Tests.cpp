@@ -196,6 +196,14 @@ constexpr double AUDIO_SPACING_TOLERANCE_S = 0.0011;
 //  (AUDIO_RESYNC_THRESHOLD_US in StreamHistoryTracker_Ring.cpp).
 constexpr double AUDIO_RESYNC_THRESHOLD_S = 0.1;
 
+//  The tracker forces a keyframe on the first frame at least this long
+//  after the previous one (VIDEO_KEYFRAME_INTERVAL_US).
+constexpr double VIDEO_KEYFRAME_INTERVAL_S = 2.0;
+
+//  Video trailing the audio by more than this has stopped, and is evicted
+//  by the audio's clock (MAX_VIDEO_LAG_US).
+constexpr int64_t MAX_VIDEO_LAG_MS = 5000;
+
 //  Frames fed after the point a test checks, so that the encoder emits the
 //  frames before it. The encoder holds the newest frames for a while: the
 //  hardware encoders pipeline several, more when many tests share the GPU
@@ -205,8 +213,8 @@ constexpr int64_t ENCODER_TAIL_MS = 3000;
 
 
 //  The interval between the frames the tracker keeps: every fed frame
-//  (FRAME_INTERVAL_MS) unless the configured FPS throttles below that.
-double kept_frame_interval_s(){
+//  (frame_interval_ms) unless the configured FPS throttles below that.
+double kept_frame_interval_s(int64_t frame_interval_ms = FRAME_INTERVAL_MS){
     const StreamHistoryOption& settings = GlobalSettings::instance().STREAM_HISTORY;
     double fps = 10;
     switch (settings.VIDEO_FPS){
@@ -216,7 +224,7 @@ double kept_frame_interval_s(){
     case StreamHistoryOption::VideoFPS::FPS_05: fps = 5; break;
     case StreamHistoryOption::VideoFPS::FPS_01: fps = 1; break;
     }
-    return std::max(FRAME_INTERVAL_MS / 1000., 1 / fps);
+    return std::max(frame_interval_ms / 1000., 1 / fps);
 }
 
 std::string output_path(const std::string& name){
@@ -227,8 +235,8 @@ std::string output_path(const std::string& name){
 
 
 
-//  Feeds a tracker in 10 ms steps of simulated time: a frame every 100 ms
-//  and a 10 ms chunk of 48 kHz stereo audio per step. By default each chunk
+//  Feeds a tracker in 10 ms steps of simulated time: by default a frame
+//  every 100 ms and a 10 ms chunk of 48 kHz stereo audio per step. Each chunk
 //  is 480 samples, delivered at the time of its last sample; with
 //  audio_clock_scale a chunk is a sample longer or shorter now and then,
 //  and with audio_jitter_ms it is delivered later. From "onset_ms" on, the
@@ -243,6 +251,10 @@ struct FeedOptions{
     bool video = true;
     bool audio = true;
     FrameFormat frame_format = FrameFormat::RGB32;
+    //  The time between frames. A multiple of CHUNK_MS.
+    int64_t frame_interval_ms = FRAME_INTERVAL_MS;
+    //  No frames are delivered from this time on.
+    int64_t video_end_ms = -1;
     int64_t onset_ms = -1;
     //  No audio is delivered in [gap_begin_ms, gap_end_ms).
     int64_t gap_begin_ms = -1;
@@ -271,7 +283,8 @@ public:
 
     void run_until(int64_t end_ms){
         for (; m_time_ms < end_ms; m_time_ms += CHUNK_MS){
-            if (m_options.video && m_time_ms % FRAME_INTERVAL_MS == 0){
+            bool video_ended = m_options.video_end_ms >= 0 && m_time_ms >= m_options.video_end_ms;
+            if (m_options.video && !video_ended && m_time_ms % m_options.frame_interval_ms == 0){
                 m_tracker.on_frame(std::make_shared<const VideoFrame>(
                     m_start + std::chrono::milliseconds(m_time_ms),
                     make_frame()
@@ -372,10 +385,14 @@ struct ProbedFile{
     bool video_timestamps_increasing = true;
     double video_first_s = 0;
     double video_last_s = 0;
+    size_t video_packets = 0;
     size_t video_frames = 0;
+    //  Largest distance between consecutive keyframes (0 with fewer than two).
+    double video_max_keyframe_gap_s = 0;
     double video_onset_s = -1;      //  First decoded frame that is no longer black.
 
     bool audio_timestamps_increasing = true;
+    double audio_first_s = 0;
     //  Largest deviation of the spacing between consecutive audio packets
     //  from one AAC frame.
     double audio_max_spacing_error_s = 0;
@@ -531,6 +548,7 @@ std::string probe_file(const std::string& path, ProbedFile& file){
     };
 
     bool first_video_packet = true;
+    double last_keyframe_s = -1;
     int64_t last_video_ts = INT64_MIN;
     int64_t last_audio_ts = INT64_MIN;
     while (av_read_frame(context.format, context.packet) >= 0){
@@ -543,6 +561,15 @@ std::string probe_file(const std::string& path, ProbedFile& file){
                 first_video_packet = false;
             }
             file.video_last_s = packet.pts * av_q2d(video_time_base);
+            file.video_packets++;
+            if (packet.flags & AV_PKT_FLAG_KEY){
+                if (last_keyframe_s >= 0){
+                    file.video_max_keyframe_gap_s = std::max(
+                        file.video_max_keyframe_gap_s, file.video_last_s - last_keyframe_s
+                    );
+                }
+                last_keyframe_s = file.video_last_s;
+            }
             if (ts <= last_video_ts){
                 file.video_timestamps_increasing = false;
             }
@@ -556,7 +583,9 @@ std::string probe_file(const std::string& path, ProbedFile& file){
             if (ts <= last_audio_ts){
                 file.audio_timestamps_increasing = false;
             }
-            if (last_audio_ts != INT64_MIN){
+            if (last_audio_ts == INT64_MIN){
+                file.audio_first_s = ts * av_q2d(audio_time_base);
+            }else{
                 double spacing_s = (double)(ts - last_audio_ts) * av_q2d(audio_time_base);
                 file.audio_max_spacing_error_s = std::max(
                     file.audio_max_spacing_error_s,
@@ -608,6 +637,14 @@ std::string check_file(const ProbedFile& file, bool video, bool audio){
         }
         if (file.video_frames == 0){
             return "No video frame decoded.";
+        }
+        //  A keyframe at least every keyframe interval, give or take a frame:
+        //  save() can only start the file at one. (The hardware encoders
+        //  need forced_idr for this.)
+        double max_gap_s = VIDEO_KEYFRAME_INTERVAL_S + kept_frame_interval_s() + 0.01;
+        if (file.video_max_keyframe_gap_s > max_gap_s){
+            return "Keyframes are up to " + std::to_string(file.video_max_keyframe_gap_s)
+                + " s apart, expected at most " + std::to_string(max_gap_s) + " s.";
         }
     }
     if (audio){
@@ -674,6 +711,31 @@ std::string test_save(Logger& logger, const std::string& filename, FeedOptions o
     );
 }
 
+//  Checks a file saved from a ring that evicted to "window_s" seconds.
+std::string check_evicted_file(const ProbedFile& file, int64_t window_s){
+    //  The window is measured back from the newest video packet in the ring,
+    //  however far the encoder trails. The file starts at a keyframe at most
+    //  one keyframe interval (2 s) plus one frame before the window (the
+    //  upper bound), and covers the window up to the rounding of the
+    //  keyframe spacing to whole frames (the lower bound).
+    double interval = kept_frame_interval_s();
+    std::string error = check_range(
+        "The video length",
+        file.video_last_s - file.video_first_s,
+        (double)window_s - 2 * interval, (double)window_s + VIDEO_KEYFRAME_INTERVAL_S + interval + 0.01
+    );
+    if (!error.empty()){
+        return error;
+    }
+    //  save() drops the audio from before the first keyframe, and the audio
+    //  is continuous, so it starts within one AAC frame after the video.
+    return check_range(
+        "The audio start minus the video start",
+        file.audio_first_s - file.video_first_s,
+        -AUDIO_SPACING_TOLERANCE_S, 1024. / AUDIO_RATE + AUDIO_SPACING_TOLERANCE_S
+    );
+}
+
 std::string test_eviction(Logger& logger){
     constexpr int64_t WINDOW_S = 3;
     StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(WINDOW_S), true, true);
@@ -685,17 +747,67 @@ std::string test_eviction(Logger& logger){
     if (!error.empty()){
         return error;
     }
-    //  The window is measured back from the newest video packet in the ring,
-    //  however far the encoder trails. The file starts at a keyframe at most
-    //  one keyframe interval (2 s) plus one frame before the window (the
-    //  upper bound), and covers the window up to the rounding of the
-    //  keyframe spacing to whole frames (the lower bound).
-    double interval = kept_frame_interval_s();
-    return check_range(
-        "The video length",
-        file.video_last_s - file.video_first_s,
-        WINDOW_S - 2 * interval, WINDOW_S + 2.0 + interval + 0.01
+    return check_evicted_file(file, WINDOW_S);
+}
+
+std::string test_shrink_window(Logger& logger){
+    //  Shrinking the history length evicts down to the new window at once,
+    //  before any more packets arrive.
+    constexpr int64_t WINDOW_S = 3;
+    StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), true, true);
+    Feeder feeder(tracker, FeedOptions());
+    feeder.run_until(12000);
+    tracker.set_window(std::chrono::seconds(WINDOW_S));
+
+    ProbedFile file;
+    std::string error = save_and_probe(tracker, "ShrinkWindow.mp4", true, true, file);
+    if (!error.empty()){
+        return error;
+    }
+    return check_evicted_file(file, WINDOW_S);
+}
+
+std::string test_video_stops(Logger& logger){
+    //  The video stops (e.g. the capture card is unplugged) while the audio
+    //  continues. The old video must still be evicted: once the audio is
+    //  more than MAX_VIDEO_LAG_MS plus the window and the keyframe headroom
+    //  past the last frame, the file is audio only.
+    constexpr int64_t WINDOW_S = 3;
+    constexpr int64_t VIDEO_END_MS = 2000;
+    FeedOptions options;
+    options.video_end_ms = VIDEO_END_MS;
+    StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(WINDOW_S), true, true);
+    Feeder feeder(tracker, options);
+    feeder.run_until(
+        VIDEO_END_MS + MAX_VIDEO_LAG_MS + WINDOW_S * 1000
+        + (int64_t)(VIDEO_KEYFRAME_INTERVAL_S * 1000) + 2000
     );
+
+    ProbedFile file;
+    return save_and_probe(tracker, "VideoStops.mp4", false, true, file);
+}
+
+std::string test_throttle(Logger& logger){
+    //  Frames arrive at 50 fps, faster than any FPS setting: the tracker
+    //  keeps one per target frame interval.
+    constexpr int64_t END_MS = 5000;
+    FeedOptions options;
+    options.frame_interval_ms = 20;
+    StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), true, true);
+    Feeder feeder(tracker, options);
+    feeder.run_until(END_MS + ENCODER_TAIL_MS);
+
+    ProbedFile file;
+    std::string error = save_and_probe(tracker, "Throttle.mp4", true, true, file);
+    if (!error.empty()){
+        return error;
+    }
+    if (file.video_packets < 2){
+        return "Fewer than two video packets in the file.";
+    }
+    double interval = kept_frame_interval_s(options.frame_interval_ms);
+    double spacing = (file.video_last_s - file.video_first_s) / (double)(file.video_packets - 1);
+    return check_range("The average frame spacing", spacing, 0.95 * interval, 1.05 * interval);
 }
 
 //  Records until "end_ms" with the onset at "options.onset_ms", then checks
@@ -976,6 +1088,9 @@ void add_tests_StreamHistory(UnitTestDatabase& database){
         return test_save(logger, "ResolutionChangeNV12.mp4", options);
     });
     database.add<RingTest>("Eviction", [](Logger& logger){ return test_eviction(logger); });
+    database.add<RingTest>("Shrink the window while recording", [](Logger& logger){ return test_shrink_window(logger); });
+    database.add<RingTest>("Video stops while the audio continues", [](Logger& logger){ return test_video_stops(logger); });
+    database.add<RingTest>("Frames faster than the target FPS", [](Logger& logger){ return test_throttle(logger); });
     database.add<RingTest>("Sync MP4", [](Logger& logger){
         return test_sync(logger, "Sync.mp4", sync_options(), 5000, SYNC_TOLERANCE_S, true);
     });

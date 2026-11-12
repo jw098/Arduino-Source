@@ -1090,6 +1090,8 @@ struct StreamHistoryTracker_Ring::Data{
         //  MAX_VIDEO_LAG_US), and measuring from the audio would evict the
         //  video early by that lag, eating into the headroom. With a lag
         //  above the headroom, the ring could hold no keyframe at all.
+        //  The audio is kept back to the same point, so that it covers the
+        //  saved video from its first keyframe.
         WallClock threshold =
             latest - m_window - std::chrono::microseconds(VIDEO_KEYFRAME_INTERVAL_US);
         WallClock video_reference = latest_video;
@@ -1100,14 +1102,15 @@ struct StreamHistoryTracker_Ring::Data{
         }
         WallClock video_threshold =
             video_reference - m_window - std::chrono::microseconds(VIDEO_KEYFRAME_INTERVAL_US);
+        WallClock audio_threshold = m_video.empty() ? threshold : std::min(threshold, video_threshold);
         bool capped = false;
         while (!m_video.empty() && (m_video.front()->timestamp < video_threshold || m_ring_bytes > MAX_RING_BYTES)){
             capped |= m_video.front()->timestamp >= video_threshold;
             m_ring_bytes -= (int64_t)m_video.front()->data.size();
             m_video.pop_front();
         }
-        while (!m_audio.empty() && (m_audio.front()->timestamp < threshold || m_ring_bytes > MAX_RING_BYTES)){
-            capped |= m_audio.front()->timestamp >= threshold;
+        while (!m_audio.empty() && (m_audio.front()->timestamp < audio_threshold || m_ring_bytes > MAX_RING_BYTES)){
+            capped |= m_audio.front()->timestamp >= audio_threshold;
             m_ring_bytes -= (int64_t)m_audio.front()->data.size();
             m_audio.pop_front();
         }
