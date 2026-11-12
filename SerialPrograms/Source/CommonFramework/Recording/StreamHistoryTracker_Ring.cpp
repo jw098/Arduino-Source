@@ -33,6 +33,7 @@ extern "C" {
 #include <libavutil/error.h>
 #include <libavutil/version.h>
 #include <libavutil/log.h>
+#include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/rational.h>
 #include <libswscale/swscale.h>
@@ -601,6 +602,14 @@ struct StreamHistoryTracker_Ring::Data{
             ctx->gop_size = (int)(m_target_fps * 2);
             ctx->max_b_frames = 0;
             ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            //  Make the keyframes forced in encode_video_frame() IDR frames.
+            //  By default the hardware wrappers (h264_amf, h264_nvenc,
+            //  h264_qsv) force a plain I-frame instead, which is not marked
+            //  as a keyframe and which a decoder cannot start from, so save()
+            //  would find no start point once the encoder's first frame is
+            //  evicted. The encoders without this option ignore it (the call
+            //  then fails with AVERROR_OPTION_NOT_FOUND).
+            (void)av_opt_set(ctx.get(), "forced_idr", "1", AV_OPT_SEARCH_CHILDREN);
 
             //  Pick the input pixel format: prefer NV12 (supported by all the
             //  hardware encoders and cheap to scale to), otherwise take the
