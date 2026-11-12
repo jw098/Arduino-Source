@@ -196,9 +196,12 @@ constexpr double AUDIO_SPACING_TOLERANCE_S = 0.0011;
 //  (AUDIO_RESYNC_THRESHOLD_US in StreamHistoryTracker_Ring.cpp).
 constexpr double AUDIO_RESYNC_THRESHOLD_S = 0.1;
 
-//  Packets an encoder may still be holding when save() runs (the hardware
-//  encoders pipeline several frames); those are not in the file.
-constexpr double ENCODER_BACKLOG_S = 0.5;
+//  Frames fed after the point a test checks, so that the encoder emits the
+//  frames before it. The encoder holds the newest frames for a while: the
+//  hardware encoders pipeline several, more when many tests share the GPU
+//  (over a second has been seen with h264_amf). The frames still held at
+//  save() are not in the file.
+constexpr int64_t ENCODER_TAIL_MS = 3000;
 
 
 //  The interval between the frames the tracker keeps: every fed frame
@@ -650,22 +653,24 @@ std::string check_range(const char* what, double value, double low, double high)
 
 
 std::string test_save(Logger& logger, const std::string& filename, FeedOptions options){
+    constexpr int64_t END_MS = 5000;
     StreamHistoryTracker_Ring tracker(logger, std::chrono::seconds(30), options.audio, options.video);
     Feeder feeder(tracker, options);
-    feeder.run_until(5000);
+    feeder.run_until(END_MS + ENCODER_TAIL_MS);
 
     ProbedFile file;
     std::string error = save_and_probe(tracker, filename, options.video, options.audio, file);
     if (!error.empty() || !options.video){
         return error;
     }
-    //  Nothing is evicted: the file runs from the first frame (0 s) to the
-    //  last one kept (4.9 s, or earlier when the FPS setting throttles).
-    double last_frame_s = 4.9;
+    //  Nothing is evicted: the file starts at the first frame (0 s) and
+    //  reaches at least the last frame kept before END_MS (4.9 s, or earlier
+    //  when the FPS setting throttles). The tail may or may not be in it.
+    double end_s = END_MS / 1000.;
     return check_range(
         "The video length",
         file.video_last_s - file.video_first_s,
-        last_frame_s - kept_frame_interval_s() - ENCODER_BACKLOG_S, last_frame_s + 0.01
+        end_s - kept_frame_interval_s() - 0.01, end_s + ENCODER_TAIL_MS / 1000. + 0.01
     );
 }
 
@@ -680,15 +685,16 @@ std::string test_eviction(Logger& logger){
     if (!error.empty()){
         return error;
     }
-    //  The file starts at a keyframe at most one keyframe interval (2 s) plus
-    //  one frame before the window (the upper bound), and covers the window
-    //  up to the rounding of the keyframe spacing to whole frames, less the
-    //  packets the encoder may still be holding (the lower bound).
+    //  The window is measured back from the newest video packet in the ring,
+    //  however far the encoder trails. The file starts at a keyframe at most
+    //  one keyframe interval (2 s) plus one frame before the window (the
+    //  upper bound), and covers the window up to the rounding of the
+    //  keyframe spacing to whole frames (the lower bound).
     double interval = kept_frame_interval_s();
     return check_range(
         "The video length",
         file.video_last_s - file.video_first_s,
-        WINDOW_S - 2 * interval - ENCODER_BACKLOG_S, WINDOW_S + 2.0 + interval + 0.01
+        WINDOW_S - 2 * interval, WINDOW_S + 2.0 + interval + 0.01
     );
 }
 

@@ -18,6 +18,7 @@
  *
  */
 
+#include <algorithm>
 #include <atomic>
 #include <cerrno>
 #include <cctype>
@@ -83,6 +84,14 @@ constexpr int64_t AUDIO_RESYNC_THRESHOLD_US = 100000;
 
 //  Force a keyframe every 2 seconds so save() can rewind to a decodable point.
 constexpr int64_t VIDEO_KEYFRAME_INTERVAL_US = 2000000;
+
+//  How far the newest video packet may trail the newest audio packet and
+//  still set the video's eviction point (see evict()). The video encoder
+//  holds several frames before emitting them, the hardware encoders more so
+//  when the GPU is busy, so the video normally trails by up to a second or
+//  two. Video trailing by more than this has stopped (e.g. the video was
+//  disabled), and its old packets are evicted by the audio's clock instead.
+constexpr int64_t MAX_VIDEO_LAG_US = 5000000;
 
 //  Same bounded-queue / drop-oldest scheme as the JPEG-based tracker.
 constexpr size_t MAX_PENDING_FRAMES = 10;
@@ -1049,13 +1058,9 @@ struct StreamHistoryTracker_Ring::Data{
     //  cap). Returns true if the memory cap dropped packets the window would
     //  have kept. Must call under m_lock.
     bool evict(){
-        WallClock latest = WallClock::min();
-        if (!m_video.empty()){
-            latest = m_video.back()->timestamp;
-        }
-        if (!m_audio.empty() && m_audio.back()->timestamp > latest){
-            latest = m_audio.back()->timestamp;
-        }
+        WallClock latest_video = m_video.empty() ? WallClock::min() : m_video.back()->timestamp;
+        WallClock latest_audio = m_audio.empty() ? WallClock::min() : m_audio.back()->timestamp;
+        WallClock latest = std::max(latest_video, latest_audio);
         if (latest == WallClock::min()){
             return false;
         }
@@ -1070,11 +1075,25 @@ struct StreamHistoryTracker_Ring::Data{
         //  file covers the most recent "window" seconds give or take a frame,
         //  and may start up to one keyframe interval earlier. The memory cap
         //  (MAX_RING_BYTES) can still shorten it.
+        //
+        //  The video is measured back from its own newest packet, not from
+        //  the audio's: the encoder holds the newest frames for a while (see
+        //  MAX_VIDEO_LAG_US), and measuring from the audio would evict the
+        //  video early by that lag, eating into the headroom. With a lag
+        //  above the headroom, the ring could hold no keyframe at all.
         WallClock threshold =
             latest - m_window - std::chrono::microseconds(VIDEO_KEYFRAME_INTERVAL_US);
+        WallClock video_reference = latest_video;
+        if (latest_audio != WallClock::min()){
+            video_reference = std::max(
+                video_reference, latest_audio - std::chrono::microseconds(MAX_VIDEO_LAG_US)
+            );
+        }
+        WallClock video_threshold =
+            video_reference - m_window - std::chrono::microseconds(VIDEO_KEYFRAME_INTERVAL_US);
         bool capped = false;
-        while (!m_video.empty() && (m_video.front()->timestamp < threshold || m_ring_bytes > MAX_RING_BYTES)){
-            capped |= m_video.front()->timestamp >= threshold;
+        while (!m_video.empty() && (m_video.front()->timestamp < video_threshold || m_ring_bytes > MAX_RING_BYTES)){
+            capped |= m_video.front()->timestamp >= video_threshold;
             m_ring_bytes -= (int64_t)m_video.front()->data.size();
             m_video.pop_front();
         }
@@ -1735,11 +1754,22 @@ struct StreamHistoryTracker_Ring::Data{
         //  cap evicted more), and may start up to one keyframe interval
         //  (~2 s) earlier than that.
         size_t video_start_index = 0;
+        bool found_keyframe = false;
         for (size_t i = 0; i < video_snapshot.size(); i++){
             if (video_snapshot[i]->flags & AV_PKT_FLAG_KEY){
                 video_start_index = i;
+                found_keyframe = true;
                 break;
             }
+        }
+        if (!video_snapshot.empty() && !found_keyframe){
+            //  Should not happen (see evict()). The file is still written,
+            //  but its video cannot be decoded until the next keyframe,
+            //  which it does not contain.
+            m_logger.log(
+                "Stream history: no keyframe in the recorded video. The saved video will not play correctly.",
+                COLOR_RED
+            );
         }
 
         WallClock start_ts;
