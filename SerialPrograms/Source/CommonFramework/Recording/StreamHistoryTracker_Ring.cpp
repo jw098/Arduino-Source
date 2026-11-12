@@ -635,9 +635,12 @@ struct StreamHistoryTracker_Ring::Data{
             //  h264_qsv) force a plain I-frame instead, which is not marked
             //  as a keyframe and which a decoder cannot start from, so save()
             //  would find no start point once the encoder's first frame is
-            //  evicted. The encoders without this option ignore it (the call
-            //  then fails with AVERROR_OPTION_NOT_FOUND).
+            //  evicted. The option is spelled "forced_idr" in h264_qsv and
+            //  h264_amf but "forced-idr" in h264_nvenc, so both are set. An
+            //  encoder without the spelling ignores it (the call then fails
+            //  with AVERROR_OPTION_NOT_FOUND).
             (void)av_opt_set(ctx.get(), "forced_idr", "1", AV_OPT_SEARCH_CHILDREN);
+            (void)av_opt_set(ctx.get(), "forced-idr", "1", AV_OPT_SEARCH_CHILDREN);
 
             //  Pick the input pixel format: prefer NV12 (supported by all the
             //  hardware encoders and cheap to scale to), otherwise take the
