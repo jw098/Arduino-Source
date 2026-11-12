@@ -42,15 +42,13 @@ struct StreamHistorySession::Data{
     mutable SpinLock m_lock;
     std::chrono::seconds m_window;
     //  The resolved input choice for the active device input (invalid
-    //  when there is no device input). With the ffmpeg ring it only
-    //  decides whether audio is recorded; otherwise it drives both the
-    //  tracker's shape and the working-stream attach shape.
+    //  when there is no device input). Drives both the tracker's shape
+    //  and the working-stream attach shape.
     AudioInputChoice m_audio_choice;
     bool m_has_video;
     //  The active input's physical working-stream shape (what the tree
-    //  delivers through the working listener in the non-ffmpeg builds,
-    //  where the tracker records at the delivered shape; the ffmpeg ring
-    //  records a fixed 48 kHz stereo). Set in initialize().
+    //  delivers through the working listener, and what the tracker records
+    //  at). Set in initialize().
     size_t m_active_channels = 0;
     size_t m_active_rate = 0;
     std::vector<float> m_interleaved;
@@ -63,15 +61,6 @@ struct StreamHistorySession::Data{
         , m_window(GlobalSettings::instance().STREAM_HISTORY->HISTORY_SECONDS)
         , m_has_video(false)
     {}
-
-    //  clear() drops the current tracker; initialize() replaces it with one
-    //  built for the current settings. Both must be called under m_lock, and
-    //  return the tracker they replaced. The caller destroys it after
-    //  releasing the lock: destroying a tracker can wait on its encoder
-    //  thread (the ffmpeg ring), and the audio and video threads spin on the
-    //  lock (push_samples(), on_frame()) meanwhile.
-    std::shared_ptr<StreamHistoryTracker> clear();
-    std::shared_ptr<StreamHistoryTracker> initialize();
 };
 
 
@@ -90,12 +79,11 @@ void StreamHistorySession::start(
 ){
     Data& data = *m_data;
     {
-        std::shared_ptr<StreamHistoryTracker> old_tracker;
         WriteSpinLock lg(data.m_lock);
         if (!data.m_current){
             data.m_audio_choice = choice;
             data.m_has_video = has_video;
-            old_tracker = data.initialize();
+            initialize();
         }
     }
     attach_working_listener();
@@ -136,17 +124,14 @@ bool StreamHistorySession::save(const std::string& filename) const{
 void StreamHistorySession::push_samples(size_t samples, size_t stride, const float* data){
     Data& state = *m_data;
     WriteSpinLock lg(state.m_lock);
-    if (!state.m_current || samples == 0){
+    if (!state.m_current || samples == 0 || state.m_active_channels == 0){
         return;
     }
 #if defined(PA_STREAM_HISTORY_FFMPEG)
-    //  The ring tracker consumes the planar working stream directly at its
-    //  fixed 48 kHz / stereo attach shape; nothing to convert here.
+    //  The ring takes the planar stream as is, at its fixed 48 kHz stereo
+    //  attach shape.
     state.m_current->push_samples(samples, stride, data);
 #else
-    if (state.m_active_channels == 0){
-        return;
-    }
     //  The working stream is split (planar) channels: channel "c" starts at
     //  "data[c * stride]" and runs for "samples" samples. (stride may be 0
     //  for the single-channel pass-through.) Re-interleave for the tracker.
@@ -172,19 +157,24 @@ void StreamHistorySession::on_frame(std::shared_ptr<const VideoFrame> frame){
 }
 
 
-std::shared_ptr<StreamHistoryTracker> StreamHistorySession::Data::clear(){
+void StreamHistorySession::clear(){
 //    cout << "clear()" << endl;
-    m_logger.log("Clearing stream history...", COLOR_ORANGE);
-    return std::move(m_current);
+
+    //  Must call under lock.
+    Data& data = *m_data;
+    data.m_logger.log("Clearing stream history...", COLOR_ORANGE);
+    data.m_current.reset();
 }
-std::shared_ptr<StreamHistoryTracker> StreamHistorySession::Data::initialize(){
+void StreamHistorySession::initialize(){
     if (!GlobalSettings::instance().STREAM_HISTORY->enabled()){
-        return nullptr;
+        return;
     }
 
-    m_logger.log("Starting stream history...", COLOR_ORANGE);
+    //  Must call under lock.
+    Data& data = *m_data;
+    data.m_logger.log("Starting stream history...", COLOR_ORANGE);
 
-//    cout << "video = " << m_has_video << endl;
+//    cout << "video = " << data.m_has_video << endl;
 
     //  The tracker's audio shape is the input source's working-stream
     //  shape (what the tree delivers through the working listener), i.e.
@@ -192,30 +182,25 @@ std::shared_ptr<StreamHistoryTracker> StreamHistorySession::Data::initialize(){
     //  with the capture-card 96 kHz reinterpretation applied for the
     //  reinterpreted choices. No choice (file input or no input) records
     //  at no shape.
-    std::shared_ptr<StreamHistoryTracker> old_tracker = std::move(m_current);
-#if defined(PA_STREAM_HISTORY_FFMPEG)
-    //  The ring ignores the shape entirely: it records at a fixed 48 kHz /
-    //  stereo (see attach_working_listener()), so the choice only gates
-    //  whether audio is captured at all.
-    m_current = std::make_shared<StreamHistoryTracker>(
-        m_logger, m_window, static_cast<bool>(m_audio_choice), m_has_video
-    );
-#else
-    const AudioInputChoice& choice = m_audio_choice;
+    const AudioInputChoice& choice = data.m_audio_choice;
     const size_t channels = choice ? choice.format().channels() : 0;
     const size_t rate = choice ? choice.format().sample_rate() : 0;
-    m_active_channels = channels;
-    m_active_rate = rate;
-    m_current.reset(new StreamHistoryTracker(m_logger, m_window, channels, rate, m_has_video));
+    data.m_active_channels = channels;
+    data.m_active_rate = rate;
+#if defined(PA_STREAM_HISTORY_FFMPEG)
+    //  The ring records at a fixed 48 kHz stereo (see
+    //  attach_working_listener()); the choice only decides whether there is
+    //  audio at all.
+    data.m_current.reset(new StreamHistoryTracker(data.m_logger, data.m_window, channels != 0, data.m_has_video));
+#else
+    data.m_current.reset(new StreamHistoryTracker(data.m_logger, data.m_window, channels, rate, data.m_has_video));
 #endif
-    return old_tracker;
 }
 void StreamHistorySession::pre_input_change(){
 //    cout << "pre_input_change()" << endl;
     Data& data = *m_data;
-    std::shared_ptr<StreamHistoryTracker> old_tracker;
     WriteSpinLock lg(data.m_lock);
-    old_tracker = data.clear();
+    clear();
 }
 void StreamHistorySession::post_input_change(
     const std::shared_ptr<const AudioSourceDescriptor>& source,
@@ -235,10 +220,9 @@ void StreamHistorySession::post_input_change(
         audio_session->remove_working_stream_listener(*this);
     }
     {
-        std::shared_ptr<StreamHistoryTracker> old_tracker;
         WriteSpinLock lg(data.m_lock);
         data.m_audio_choice = choice;
-        old_tracker = data.initialize();
+        initialize();
     }
     attach_working_listener();
 }
@@ -258,17 +242,13 @@ void StreamHistorySession::attach_working_listener(){
     //  no-op if not attached yet); the node is then built for the new one.
     audio_session->remove_working_stream_listener(*this);
 #if defined(PA_STREAM_HISTORY_FFMPEG)
-    //  The ring tracker encodes AAC at 48 kHz stereo: request that fixed
-    //  shape and the pair's per-listener node mixes + resamples every input
-    //  preset into it (mono upmixes to dual-mono). The shape never changes
-    //  with the input, so on input changes this just rebuilds the same node
-    //  (this session remains the listener; it forwards to whichever tracker
-    //  is current).
-    QAudioFormat target_format;
-    target_format.setSampleRate(48000);
-    target_format.setChannelCount(2);
-    target_format.setChannelConfig(QAudioFormat::ChannelConfigStereo);
-    audio_session->add_working_stream_listener(AudioFormat(target_format), *this);
+    //  The ring encodes AAC at 48 kHz stereo; the per-listener node mixes and
+    //  resamples every input preset into that shape.
+    QAudioFormat ring_format;
+    ring_format.setSampleRate(48000);
+    ring_format.setChannelCount(2);
+    ring_format.setChannelConfig(QAudioFormat::ChannelConfigStereo);
+    audio_session->add_working_stream_listener(AudioFormat(ring_format), *this);
 #else
     audio_session->add_working_stream_listener(
         AudioFormat(target.format().native_format()), *this
@@ -278,38 +258,33 @@ void StreamHistorySession::attach_working_listener(){
 void StreamHistorySession::pre_shutdown(){
 //    cout << "pre_shutdown()" << endl;
     Data& data = *m_data;
-    std::shared_ptr<StreamHistoryTracker> old_tracker;
     WriteSpinLock lg(data.m_lock);
-    old_tracker = data.clear();
+    clear();
 }
 void StreamHistorySession::post_shutdown(){
 //    cout << "post_shutdown()" << endl;
     Data& data = *m_data;
-    std::shared_ptr<StreamHistoryTracker> old_tracker;
     WriteSpinLock lg(data.m_lock);
     data.m_has_video = false;
-    old_tracker = data.initialize();
+    initialize();
 }
 void StreamHistorySession::post_startup(VideoSource* source){
     Data& data = *m_data;
-    std::shared_ptr<StreamHistoryTracker> old_tracker;
     WriteSpinLock lg(data.m_lock);
     data.m_has_video = source != nullptr;
-    old_tracker = data.initialize();
+    initialize();
 }
 void StreamHistorySession::pre_resolution_change(Resolution resolution){
 //    cout << "pre_resolution_change()" << endl;
     Data& data = *m_data;
-    std::shared_ptr<StreamHistoryTracker> old_tracker;
     WriteSpinLock lg(data.m_lock);
-    old_tracker = data.clear();
+    clear();
 }
 void StreamHistorySession::post_resolution_change(Resolution resolution){
 //    cout << "post_resolution_change()" << endl;
     Data& data = *m_data;
-    std::shared_ptr<StreamHistoryTracker> old_tracker;
     WriteSpinLock lg(data.m_lock);
-    old_tracker = data.initialize();
+    initialize();
 }
 
 
